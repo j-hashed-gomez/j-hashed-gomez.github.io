@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+
+<style>
+body {
+  background-color: black;
+  background-image: radial-gradient(
+    rgba(0, 150, 0, 0.75), black 120%
+  );
+  height: 100vh;
+  margin: 0;
+  overflow-y: scroll;
+  padding: 2rem;
+  color: white;
+  font: 1rem Inconsolata, monospace;
+  text-shadow: 0 0 5px #C8C8C8;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(black, 0.15),
+      rgba(black, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+  }
+}
+::selection {
+  background: #0080FF;
+  text-shadow: none;
+}
+pre {
+  margin: 0;
+}
+
+.menu {
+  float:left;
+  width:20%;
+  height:80%;
+}
+.mainContent {
+  float:left;
+  width:75%;
+  height:80%;
+}
+
+.label {
+  color: white;
+  padding: 8px;
+}
+
+.label-keyword {background-color: #2196F3;} /* Blue */
+
+</style>
+
+
+<body>
+
+<div class="menu">
+
+ <p><img src='mifoto.png' class="center"></p>
+ <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
+ <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
+ <p><i class="material-icons">smartphone</i> +34 647721924</p>
+ <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
+ <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (B2)</p>
+ 
+<form action="CV_JoseLuisGomezMarin.pdf" method="post">
+    <input type="submit" value="Download PDF" />
+</form>
+
+
+</div> 
+
+  </div> 
+  <div class="mainContent" id="mainContent">
+  </div> 
+
+<script>
+var str = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me an Sinclair Spectrum 128k in 1986, when dinosaurs still walking the earth. From that wonderful day, until today, 40 years later,\
+ I can´t remember just one day I haven´t learned anything new, found anything exciting I liked to dig into.</p>\
+ <p>I think I´m in a sweet point of my professional career. With more than 20 years of experience I had the oportunity to learn this business from fundamentals, growing step by step, not rushing, savoring every new job, every new role.</p>\
+ <p>Now I can offer myself as a top IT professional with a solid background in key subjects: Team Leading, Cloud Services, Networking and System Administration. Results focused, long term commitment and Team Culture in DNA.</p>\
+ <p></p><p><b>.::WORK EXPERIENCE::.</b></p><p> \
+ <table> \
+  <tr> \
+    <td> <p>July 2021 - Present : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
+    <td><p>Making things possible at Support Team some my responsabilities includes :  <ul> \
+  <li>This is a very new Support Service, working together IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by IA</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
+   <tr> \   <tr> \
+    <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+    <td><p>Proud member of Infrastructure Engineering Team my responsabilities includes :  <ul> \
+  <li>Maintaining, improving and growing the Infrastructure we have deployed in Azure, Amazon Web Services, Google Platform and also on-prem.</li>\
+  <li>Keeping under control TCO and reducing it by automation</li>\
+  <li>Top Tier Technical Support</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+   <tr> \
+    <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+    <td><p>This was a project for the Cantabria Goverment I was honored to lead : <ul> \
+  <li>Top Tier and maximun authority on Networking and Perimetral Security stuff</li>\
+  <li>Maintain Networking Infrastructure and design for new requirements and improvings</li>\
+  <li>Responsible for all communications with customer</li>\
+  <li>Monitor team´s workflow and make sure we were compliant with customer´s SLAs.</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
+     <tr> \
+    <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+    <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
+  <li>From Networking Team we were responsible for maintaining all networking infrastructure. This contract also included a hardware renewal which means we had to replace everything there. Sometimes it was just hardware renewal in the same vendor, but we also dealed with migrations in other vendors</li>\
+  <li>From Housing Team we were responsible for maintaining alive and up to date some systems didn´t fit with customer´s standars. This also includes bringing to our datacenter in managed services mode some services.</li>\
+  <li>Responsible for all communications with customer</li>\
+  <li>Monitor team´s workflow and make sure we were compliant with customer´s SLAs.</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
+     <tr> \
+    <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+    <td><p>Providing 2nd Tier support to Cantabria Goverment<ul> \
+  <li>Deployed from scratch monitoring solution by  Zabbix</li>\
+  <li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
+     <tr> \
+    <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+    <td><p>Mainframe Operator<ul> \
+  <li>Team Coordinator</li>\
+  <li>Linux Trainer</li>\
+</ul></p>\
+  <p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
+</tr></table>\
+  <table> \
+    <tr> \
+    <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
+    <th><p><b>.::TRAININGS::.</b></p></th> \
+  </tr> \
+    <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+    <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+    <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+    <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+    <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+    <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+    <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+    <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
+	</table>",
+  
+    i = 0,
+    isTag,
+    text;
+
+(function type() {
+    text = str.slice(0, ++i);
+    if (text === str) return;
+    
+    document.getElementById('mainContent').innerHTML = text;
+
+    var char = text.slice(-1);
+    if( char === '<' ) isTag = true;
+    if( char === '>' ) isTag = false;
+
+    if (isTag) return type();
+    setTimeout(type, 1);
+}());
+</script>
+
+
+</body>
+</html>
