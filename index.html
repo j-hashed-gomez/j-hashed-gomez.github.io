@@ -79,12 +79,6 @@
       cursor: pointer;
       margin-left: 5px;
     }
-
-    #map {
-      width: 100%;
-      height: 300px; /* Ajusta la altura según sea necesario */
-      margin-top: 20px; /* Separación superior */
-    }
   </style>
 </head>
 
@@ -96,10 +90,7 @@
  <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
  <p><i class="material-icons">smartphone</i> +34 647721924</p>
  <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
- <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (B2)</p>
-
- <!-- Aquí se incluirá el mapa -->
- <div id="map"></div>
+ <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
 </div> 
 
 <div class="language-selector" id="language-selector">
@@ -183,16 +174,16 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
   <th><p><b>.::CERTIFICACIONES::.</b></p></th> \
   <th><p><b>.::FORMACIONES::.</b></p></th> \
 </tr> \
-  <tr><td><p>2008 - Fundamentos de ITIL V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2010 - Fundamentos de ITIL V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Técnico Certificado de Redes de Cisco (CCENT)</p></td><td><p>Implementación de Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2012 - Especialista Certificado de Enterasys - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Especialista Certificado de Enterasys - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2014 - Administrador Certificado de Seguridad de Red FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
   <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
-  <tr><td><p>2021 - Administrador de Sistemas Certificado de Red Hat (RHCSA)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2021 - Especialista Certificado de Red Hat en Contenedores y Kubernetes (EX180)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2</p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
@@ -262,16 +253,16 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
   <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
   <th><p><b>.::TRAININGS::.</b></p></th> \
 </tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
-  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
-  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
   <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
+  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2</p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var i = 0,
@@ -284,23 +275,18 @@ function typeWriter(content) {
     text = '';  // Reset the text
     function type() {
         text = content.slice(0, ++i);
-        if (text === content) return;
-        
         document.getElementById('mainContent').innerHTML = text;
 
         var char = text.slice(-1);
         if( char === '<' ) isTag = true;
         if( char === '>' ) isTag = false;
 
+        if (text === content) return;
+
         if (isTag) return type();
-        typingInterval = setTimeout(type, 1);
+        typingInterval = setTimeout(type, 50);
     }
     type();
-}
-
-function showFullText(content) {
-    clearTimeout(typingInterval);
-    document.getElementById('mainContent').innerHTML = content;
 }
 
 document.getElementById('flag-es').addEventListener('click', function() {
@@ -316,16 +302,6 @@ function startContent(content) {
     document.querySelector('.menu').classList.remove('hidden');
     document.getElementById('top-right-flags').classList.remove('hidden');
     typeWriter(content);
-
-    // Solo añadimos estos listeners después de seleccionar el idioma
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Space') {
-            showFullText(content);
-        }
-    });
-    document.addEventListener('click', function() {
-        showFullText(content);
-    });
 }
 
 // Listeners para las banderas en la parte superior derecha
@@ -343,47 +319,6 @@ function resetAndStart(content) {
     document.getElementById('mainContent').innerHTML = '';
     typeWriter(content);
 }
-
-// Inicializar el mapa de Google Maps
-function initMap() {
-    let map;
-    let zoomLevel = 3;  // Nivel de zoom inicial (desde el espacio)
-    const targetZoomLevel = 18; // Nivel de zoom de destino (vista de la calle)
-    const targetLocation = { lat: 43.3411, lng: -3.7391 }; // Coordenadas de Liérganes
-
-    // Crear un nuevo mapa centrado en una vista global (desde el espacio)
-    map = new google.maps.Map(document.getElementById("map"), {
-        zoom: zoomLevel,
-        center: { lat: 20.0, lng: 0.0 },  // Coordenadas centradas en la vista global
-        mapTypeId: 'satellite',  // Vista satelital
-    });
-
-    // Empezar la animación de zoom
-    animateZoom(map, zoomLevel, targetZoomLevel, targetLocation);
-}
-
-function animateZoom(map, zoomLevel, targetZoomLevel, targetLocation) {
-    const interval = setInterval(() => {
-        if (zoomLevel >= targetZoomLevel) {
-            clearInterval(interval);
-            return;
-        }
-        zoomLevel++;
-        map.setZoom(zoomLevel);
-        map.setCenter(targetLocation);
-    }, 1000); // Ajusta el tiempo para hacer la animación más rápida o más lenta
-}
-
-// Cargar el mapa después de que la página se haya cargado completamente
-window.addEventListener('load', () => {
-    initMap();
-});
-
-</script>
-
-<!-- Incluir la API de Google Maps -->
-<script async defer
-src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
 </script>
 
 </body>
