@@ -25,15 +25,52 @@
       margin: 0;
     }
 
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      text-align: center;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header .loading-text {
+      font-size: 1.2rem;
+    }
+
+    .header .top-right-flags {
+      position: relative;
+      right: 0;
+      margin-right: 10px;
+    }
+
+    .header .top-right-flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
     .menu {
       float:left;
       width:20%;
       height:80%;
+      padding-top: 60px; /* Ajuste para no estar debajo de la cabecera */
     }
     .mainContent {
       float:left;
       width:75%;
       height:80%;
+      padding-top: 60px; /* Ajuste para no estar debajo de la cabecera */
     }
 
     .label {
@@ -42,72 +79,18 @@
     }
 
     .label-keyword {background-color: #2196F3;} /* Blue */
-
-    .language-selector {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .language-selector img {
-      width: 60px;
-      height: 40px;
-      cursor: pointer;
-      margin: 10px;
-    }
-
-    .language-selector-text {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .top-right-flags {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-
-    .top-right-flags img {
-      width: 30px;
-      height: 20px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .loading-text {
-      position: absolute;
-      top: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-    }
-
-    .loading-animation {
-      margin-left: 10px;
-      border: 4px solid #fff;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
 
 <body>
+
+<div class="header">
+  <div class="loading-text" id="loading-text"></div>
+  <div class="top-right-flags">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
+  </div>
+</div>
 
 <div class="menu hidden">
  <p><img src='mifoto.png' class="center"></p>
@@ -117,22 +100,6 @@
  <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
  <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
 </div> 
-
-<div class="language-selector" id="language-selector">
-  <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
-</div>
-
-<div class="top-right-flags hidden" id="top-right-flags">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
-</div>
-
-<div class="loading-text hidden" id="loading-text">
-  <span id="loading-message">Cargando datos, por favor presiona space para mostrar todo el texto</span>
-  <div class="loading-animation"></div>
-</div>
 
 <div class="mainContent" id="mainContent"></div> 
 
@@ -167,7 +134,7 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
 <tr> \
-  <td>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></td> \
+  <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
   <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
 <li>Máxima autoridad en temas de Redes y Seguridad Perimetral</li>\
 <li>Mantenimiento de la Infraestructura de Redes y diseño para nuevos requisitos y mejoras</li>\
@@ -244,7 +211,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
 <li>Top Tier Technical Support</li>\
 </ul></p>\
-<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span></p></td> \
 <tr> \
   <td>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></td> \
   <td><p>This was a project for the Cantabria Government I was honored to lead: <ul> \
@@ -292,7 +259,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
   <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
   <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
   <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var i = 0,
@@ -318,7 +285,7 @@ function typeWriter(content) {
         if( char === '>' ) isTag = false;
 
         if (isTag) return type();
-        typingInterval = setTimeout(type, 1);  // Adjust this to control typing speed
+        typingInterval = setTimeout(type, 10);  // Adjust the speed as needed
     }
     type();
 }
@@ -330,46 +297,55 @@ function showFullText(content) {
 }
 
 document.getElementById('flag-es').addEventListener('click', function() {
-    startContent(str_es);
+    startContent(str_es, 'es');
 });
 
 document.getElementById('flag-uk').addEventListener('click', function() {
-    startContent(str_en);
+    startContent(str_en, 'en');
 });
 
-function startContent(content) {
+function startContent(content, lang) {
     document.getElementById('language-selector').classList.add('hidden');
     document.querySelector('.menu').classList.remove('hidden');
     document.getElementById('top-right-flags').classList.remove('hidden');
+
+    if (lang === 'es') {
+        document.getElementById('loading-text').innerHTML = 'Cargando datos, por favor presiona space para mostrar todo el texto <span class="material-icons loading">hourglass_empty</span>';
+    } else {
+        document.getElementById('loading-text').innerHTML = 'Loading, please press space to show all the text <span class="material-icons loading">hourglass_empty</span>';
+    }
+
     typeWriter(content);
 
-    document.removeEventListener('keydown', spaceHandler);
-    document.addEventListener('keydown', spaceHandler);
-
-    function spaceHandler(event) {
-        if (event.code === 'Space') {
-            showFullText(content);
-        }
-    }
+    document.addEventListener('keydown', function(event) {
+        showFullText(content);
+    });
 }
 
-// Listeners para las banderas en la parte superior derecha
 document.getElementById('flag-es-top').addEventListener('click', function() {
-    resetAndStart(str_es);
+    resetAndStart(str_es, 'es');
 });
 
 document.getElementById('flag-uk-top').addEventListener('click', function() {
-    resetAndStart(str_en);
+    resetAndStart(str_en, 'en');
 });
 
-function resetAndStart(content) {
+function resetAndStart(content, lang) {
     clearTimeout(typingInterval);
     document.getElementById('mainContent').innerHTML = '';
-    typeWriter(content);
-    document.removeEventListener('keydown', spaceHandler);
-    document.addEventListener('keydown', spaceHandler);
-}
 
+    if (lang === 'es') {
+        document.getElementById('loading-text').innerHTML = 'Cargando datos, por favor presiona space para mostrar todo el texto <span class="material-icons loading">hourglass_empty</span>';
+    } else {
+        document.getElementById('loading-text').innerHTML = 'Loading, please press space to show all the text <span class="material-icons loading">hourglass_empty</span>';
+    }
+
+    typeWriter(content);
+
+    document.addEventListener('keydown', function(event) {
+        showFullText(content);
+    });
+}
 </script>
 
 </body>
