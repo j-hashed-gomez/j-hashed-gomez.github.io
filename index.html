@@ -46,11 +46,18 @@
     }
 
     .label-keyword {
-    background-color: #2196F3; /* Blue */
-    padding: 8px;
-    border-radius: 8px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+  background-color: #2196F3; /* Azul de fondo */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px; /* Bordes redondeados */
+  box-shadow: 5px 5px 10px #1a70c2, -5px -5px 10px #27b6ff; /* Sombra con efecto de profundidad */
+  transition: box-shadow 0.3s ease;
 }
+
+    .label-keyword:hover {
+  box-shadow: inset 5px 5px 10px #1a70c2, inset -5px -5px 10px #27b6ff; /* Sombra invertida al hacer hover */
+}
+
 
 
     .language-selector {
