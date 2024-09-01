@@ -11,18 +11,10 @@
       );
       height: 100vh;
       margin: 0;
-      overflow-y: scroll;
-      padding: 2rem;
+      padding: 0;
       color: white;
       font: 1rem Inconsolata, monospace;
       text-shadow: 0 0 5px #C8C8C8;
-    }
-    ::selection {
-      background: #0080FF;
-      text-shadow: none;
-    }
-    pre {
-      margin: 0;
     }
 
     .header {
@@ -30,47 +22,49 @@
       top: 0;
       left: 0;
       width: 100%;
+      height: 50px;
       background-color: rgba(0, 0, 0, 0.8);
-      padding: 10px;
-      text-align: center;
       z-index: 1000;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
     }
 
-    .header .loading-text {
+    .header-text {
+      flex-grow: 1;
+      text-align: center;
       font-size: 1.2rem;
     }
 
-    .header .top-right-flags {
-      position: relative;
-      right: 0;
-      margin-right: 10px;
+    .flags {
+      position: absolute;
+      right: 10px;
+      top: 10px;
     }
 
-    .header .top-right-flags img {
+    .flags img {
       width: 30px;
       height: 20px;
       cursor: pointer;
       margin-left: 5px;
     }
 
-    .hidden {
-      display: none;
+    .content-container {
+      padding-top: 60px;
+      /* Ajustar para que el contenido no se oculte detrás de la cabecera fija */
+      display: flex;
     }
 
     .menu {
-      float:left;
-      width:20%;
-      height:80%;
-      padding-top: 60px; /* Ajuste para no estar debajo de la cabecera */
+      width: 20%;
+      padding: 20px;
     }
+
     .mainContent {
-      float:left;
-      width:75%;
-      height:80%;
-      padding-top: 60px; /* Ajuste para no estar debajo de la cabecera */
+      width: 80%;
+      padding: 20px;
     }
 
     .label {
@@ -78,30 +72,49 @@
       padding: 8px;
     }
 
-    .label-keyword {background-color: #2196F3;} /* Blue */
+    .label-keyword {
+      background-color: #2196F3;
+      /* Blue */
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
 <body>
 
 <div class="header">
-  <div class="loading-text" id="loading-text"></div>
-  <div class="top-right-flags">
+  <div class="header-text" id="loading-text"></div>
+  <div class="flags">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
     <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
   </div>
 </div>
 
-<div class="menu hidden">
- <p><img src='mifoto.png' class="center"></p>
- <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
- <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
- <p><i class="material-icons">smartphone</i> +34 647721924</p>
- <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
- <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
-</div> 
+<div class="content-container">
+  <div class="menu hidden">
+    <p><img src='mifoto.png' class="center"></p>
+    <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
+    <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
+    <p><i class="material-icons">smartphone</i> +34 647721924</p>
+    <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
+    <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
+  </div>
 
-<div class="mainContent" id="mainContent"></div> 
+  <div class="mainContent" id="mainContent"></div>
+</div>
 
 <script>
 var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desde que mis padres me regalaron un Sinclair Spectrum 128k en 1986, cuando los dinosaurios aún caminaban sobre la tierra. Desde ese maravilloso día, hasta hoy, 40 años después, no recuerdo un solo día en que no haya aprendido algo nuevo, encontrado algo emocionante en lo que me gustara profundizar.</p>\
@@ -110,31 +123,30 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <p></p><p><b>.::EXPERIENCIA LABORAL::.</b></p><p> \
 <table> \
 <tr> \
-  <td> <p>Enero 2022 - Presente : Líder Técnico del Equipo de Infraestructura/SRE en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td>Enero 2022 - Presente : Líder Técnico del Equipo de Infraestructura/SRE en <span style='color:red;'>Ingram Micro Cloud</span></td> \
   <td><p>En una plataforma de 50 mil millones de dólares estamos a cargo de :</p><ul> \
 <li>Garantizar Alta Disponibilidad</li>\
 <li>Garantizar Escalabilidad</li>\
 <li>Garantizar Observabilidad</li>\
 </ul></p>\
 <p>Trabajando junto a diferentes equipos, definimos estándares y procesos para alinear a las personas en objetivos clave. Nuestro territorio de caza es todo el CI/CD, básicamente estamos en línea en cada pipeline de todos asegurando que cumplimos con los estándares esperados.</p><ul> \
-<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automatización</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
-<tr> \   <tr> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automatización</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p></td> \
 <tr> \
-  <td> <p>Julio 2021 - Enero 2022 : Ingeniero de Soporte Senior - OpenShift en <span style='color:red;'>Red Hat</span></p></td> \
+  <td>Julio 2021 - Enero 2022 : Ingeniero de Soporte Senior - OpenShift en <span style='color:red;'>Red Hat</span></td> \
   <td><p>Haciendo las cosas posibles en el equipo de soporte, algunas de mis responsabilidades incluyen:  <ul> \
 <li>Este es un servicio de soporte muy nuevo, trabajando junto a IBM proporcionamos soporte avanzado de OpenShift en su servicio Cloud Pak, que mejora los servicios en la nube agregando muchas ventajas impulsadas por IA</li>\
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Cloud Híbrida</span></p></td> \
-<tr> \   <tr> \
-  <td> <p>Abril 2019 - Julio 2021 : Administrador de Sistemas en la Nube en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+<tr> \
+  <td>Abril 2019 - Julio 2021 : Administrador de Sistemas en la Nube en <span style='color:red;'>Ingram Micro Cloud</span></td> \
   <td><p>Aquí el desafío fue la migración de Odin Automation, una aplicación monolítica que se ejecutaba en centros de datos físicos en todo el mundo, a CloudBlue, un mercado de 5 mil millones de dólares que fue diseñado como un mercado de microservicios y desplegado en Azure AKS<ul> \
 <li>Diseñamos toda la nueva plataforma en proveedores de la nube como Azure, AWS y GCP</li>\
 <li>Actuamos como Arquitectos y Arquitectos de Soluciones alineando la estrategia comercial y técnica</li>\
 <li>Soporte Técnico de Primer Nivel</li>\
 </ul></p>\
-<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span></p></td> \
 <tr> \
-  <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></td> \
   <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
 <li>Máxima autoridad en temas de Redes y Seguridad Perimetral</li>\
 <li>Mantenimiento de la Infraestructura de Redes y diseño para nuevos requisitos y mejoras</li>\
@@ -171,16 +183,16 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
   <th><p><b>.::CERTIFICACIONES::.</b></p></th> \
   <th><p><b>.::FORMACIONES::.</b></p></th> \
 </tr> \
-  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
-  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
-  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
+  <tr><td>2021 - Red Hat Certified System Administrator (RHCSA)</td><td></td></tr> \
+  <tr><td>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</td><td></td></tr> \
+  <tr><td>2015 - Cisco CCNA Routing and Switching</td><td>Enterasys Certified Specialist - NAC (35h Enterasys) </td></tr> \
+  <tr><td>2015 - Fortigate Certified Networking Security Professional FCNSP v5</td><td></td></tr> \
+  <tr><td>2014 - Fortigate Certified Network Security Administrator FCNSA v5</td><td>Alcatel OXE Telephony (35h NextiraONE)</td></tr> \
+  <tr><td>2012 - Enterasys Certified Specialist - Routing</td><td>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </td></tr> \
+  <tr><td>2012 - Enterasys Certified Specialist - Switching</td><td>Management and Monitorization Insight Control (35h Hewlett Packard)</td></tr> \
+  <tr><td>2012 - Cisco Certified Entry Networking Technician (CCENT)</td><td>Implementing Cisco MPLS (35h Cisco Systems, Inc)</td></tr> \
+  <tr><td>2010 - ITIL Foundations V3</td><td>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</td></tr> \
+  <tr><td>2008 - ITIL Foundations V2</td><td>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</td></tr> \
 </table>";
 
 var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
@@ -196,15 +208,14 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Guarantee Observability</li>\
 </ul></p>\
 <p>Working together with different Teams we define standards and processes to align people on key objectives. Our hunting territory is the whole CI/CD, we are basically inline in everyone's pipeline ensuring we are in compliance with expected standards.</p><ul> \
-<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
-<tr> \   <tr> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p></td> \
 <tr> \
   <td>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></td> \
   <td><p>Making things possible at Support Team some of my responsibilities include:  <ul> \
 <li>This is a very new Support Service, working together with IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by AI</li>\
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
-<tr> \   <tr> \
+<tr> \
   <td>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></td> \
   <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 Billion $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
 <li>We designed all the new platform in Cloud Providers like Azure, AWS and GCP</li>\
@@ -250,16 +261,16 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
   <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
   <th><p><b>.::TRAININGS::.</b></p></th> \
 </tr> \
-  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
-  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
-  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+  <tr><td>2021 - Red Hat Certified System Administrator (RHCSA)</td><td></td></tr> \
+  <tr><td>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</td><td></td></tr> \
+  <tr><td>2015 - Cisco CCNA Routing and Switching</td><td>Enterasys Certified Specialist - NAC (35h Enterasys) </td></tr> \
+  <tr><td>2015 - Fortigate Certified Networking Security Professional FCNSP v5</td><td></td></tr> \
+  <tr><td>2014 - Fortigate Certified Network Security Administrator FCNSA v5</td><td>Alcatel OXE Telephony (35h NextiraONE)</td></tr> \
+  <tr><td>2012 - Enterasys Certified Specialist - Routing</td><td>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </td></tr> \
+  <tr><td>2012 - Enterasys Certified Specialist - Switching</td><td>Management and Monitorization Insight Control (35h Hewlett Packard)</td></tr> \
+  <tr><td>2012 - Cisco Certified Entry Networking Technician (CCENT)</td><td>Implementing Cisco MPLS (35h Cisco Systems, Inc)</td></tr> \
+  <tr><td>2010 - ITIL Foundations V3</td><td>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</td></tr> \
+  <tr><td>2008 - ITIL Foundations V2</td><td>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</td></tr> \
 </table>";
 
 var i = 0,
@@ -270,11 +281,11 @@ var i = 0,
 function typeWriter(content) {
     i = 0;  // Reset the counter
     text = '';  // Reset the text
-    document.getElementById('loading-text').classList.remove('hidden'); // Show the loading text
     function type() {
         text = content.slice(0, ++i);
         if (text === content) {
-            document.getElementById('loading-text').classList.add('hidden'); // Hide the loading text
+            // Hide the loading text once typing is complete
+            document.getElementById('loading-text').classList.add('hidden');
             return;
         }
         
@@ -308,11 +319,12 @@ function startContent(content, lang) {
     document.getElementById('language-selector').classList.add('hidden');
     document.querySelector('.menu').classList.remove('hidden');
     document.getElementById('top-right-flags').classList.remove('hidden');
+    document.getElementById('loading-text').classList.remove('hidden'); // Show the loading text
 
     if (lang === 'es') {
-        document.getElementById('loading-text').innerHTML = 'Cargando datos, por favor presiona space para mostrar todo el texto <span class="material-icons loading">hourglass_empty</span>';
-    } else {
-        document.getElementById('loading-text').innerHTML = 'Loading, please press space to show all the text <span class="material-icons loading">hourglass_empty</span>';
+        document.getElementById('loading-text').innerHTML = "Cargando datos, por favor presiona space para mostrar todo el texto <span class='loading'>⏳</span>";
+    } else if (lang === 'en') {
+        document.getElementById('loading-text').innerHTML = "Loading, please press space to show all the text <span class='loading'>⏳</span>";
     }
 
     typeWriter(content);
@@ -333,18 +345,7 @@ document.getElementById('flag-uk-top').addEventListener('click', function() {
 function resetAndStart(content, lang) {
     clearTimeout(typingInterval);
     document.getElementById('mainContent').innerHTML = '';
-
-    if (lang === 'es') {
-        document.getElementById('loading-text').innerHTML = 'Cargando datos, por favor presiona space para mostrar todo el texto <span class="material-icons loading">hourglass_empty</span>';
-    } else {
-        document.getElementById('loading-text').innerHTML = 'Loading, please press space to show all the text <span class="material-icons loading">hourglass_empty</span>';
-    }
-
-    typeWriter(content);
-
-    document.addEventListener('keydown', function(event) {
-        showFullText(content);
-    });
+    startContent(content, lang);
 }
 </script>
 
