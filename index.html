@@ -18,22 +18,6 @@ body {
   color: white;
   font: 1rem Inconsolata, monospace;
   text-shadow: 0 0 5px #C8C8C8;
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(black, 0.15),
-      rgba(black, 0.15) 1px,
-      transparent 1px,
-      transparent 2px
-    );
-    pointer-events: none;
-  }
 }
 ::selection {
   background: #0080FF;
@@ -61,124 +45,232 @@ pre {
 
 .label-keyword {background-color: #2196F3;} /* Blue */
 
-</style>
+.language-selector {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
 
+.language-selector img {
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+</style>
 
 <body>
 
 <div class="menu">
-
  <p><img src='mifoto.png' class="center"></p>
  <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
  <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
  <p><i class="material-icons">smartphone</i> +34 647721924</p>
  <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
  <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (B2)</p>
- 
 </div> 
 
-  </div> 
-  <div class="mainContent" id="mainContent">
-  </div> 
+<div class="language-selector">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_Kingdom.svg" id="flag-uk" alt="English">
+</div>
+
+<div class="mainContent" id="mainContent">
+</div> 
 
 <script>
-var str = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me an Sinclair Spectrum 128k in 1986, when dinosaurs still walking the earth. From that wonderful day, until today, 40 years later,\
- I can´t remember just one day I haven´t learned anything new, found anything exciting I liked to dig into.</p>\
- <p>I think I´m in a sweet point of my professional career. With more than 20 years of experience I had the oportunity to learn this business from fundamentals, growing step by step, not rushing, savoring every new job, every new role.</p>\
- <p>Now I can offer myself as a top IT professional with a solid background in key subjects: Team Leading, Cloud Services, Networking and System Administration. Results focused, long term commitment and Team Culture in DNA.</p>\
- <p></p><p><b>.::WORK EXPERIENCE::.</b></p><p> \
- <table> \
-  <tr> \
-    <td> <p>Jan 2022 - Present : Infrastructure/SRE Technical Team Lead at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
-    <td><p>In a 50 Billion $ platform we are in charge of :</p><ul> \
-  <li>Guanrantee High Availability</li>\
-  <li>Guarantee Escalability</li>\
-  <li>Guarantee Observability</li>\
-  </ul></p>\
-  <p>Working together different Teams we define standars and processes to align people on key objectives. Our hunting territory is the whole CI/CD, we are basically inline in everyones pipeline ensuring we are in compliance with expected standards.</p><ul> \
-  <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
-   <tr> \   <tr> \
-  <tr> \
-    <td> <p>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
-    <td><p>Making things possible at Support Team some my responsabilities includes :  <ul> \
-  <li>This is a very new Support Service, working together IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by IA</li>\
+var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desde que mis padres me regalaron un Sinclair Spectrum 128k en 1986, cuando los dinosaurios aún caminaban sobre la tierra. Desde ese maravilloso día, hasta hoy, 40 años después, no recuerdo un solo día en que no haya aprendido algo nuevo, encontrado algo emocionante en lo que me gustara profundizar.</p>\
+<p>Creo que estoy en un punto dulce de mi carrera profesional. Con más de 20 años de experiencia, he tenido la oportunidad de aprender este negocio desde los fundamentos, creciendo paso a paso, sin apresurarme, saboreando cada nuevo trabajo, cada nuevo rol.</p>\
+<p>Ahora puedo ofrecerme como un profesional de TI de alto nivel con una sólida experiencia en temas clave: Liderazgo de equipos, Servicios en la Nube, Redes y Administración de Sistemas. Enfocado en los resultados, compromiso a largo plazo y cultura de equipo en el ADN.</p>\
+<p></p><p><b>.::EXPERIENCIA LABORAL::.</b></p><p> \
+<table> \
+<tr> \
+  <td> <p>Enero 2022 - Presente : Líder Técnico del Equipo de Infraestructura/SRE en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>En una plataforma de 50 mil millones de dólares estamos a cargo de :</p><ul> \
+<li>Garantizar Alta Disponibilidad</li>\
+<li>Garantizar Escalabilidad</li>\
+<li>Garantizar Observabilidad</li>\
 </ul></p>\
-  <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
-   <tr> \   <tr> \
-    <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
-    <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 B $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
-  <li>We designed all the new platform in Cloud Providers like Azure, AWS and GCP</li>\
-  <li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
-  <li>Top Tier Technical Support</li>\
+<p>Trabajando junto a diferentes equipos, definimos estándares y procesos para alinear a las personas en objetivos clave. Nuestro territorio de caza es todo el CI/CD, básicamente estamos en línea en cada pipeline de todos asegurando que cumplimos con los estándares esperados.</p><ul> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automatización</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
+<tr> \   <tr> \
+<tr> \
+  <td> <p>Julio 2021 - Enero 2022 : Ingeniero de Soporte Senior - OpenShift en <span style='color:red;'>Red Hat</span></p></td> \
+  <td><p>Haciendo las cosas posibles en el equipo de soporte, algunas de mis responsabilidades incluyen:  <ul> \
+<li>Este es un servicio de soporte muy nuevo, trabajando junto a IBM proporcionamos soporte avanzado de OpenShift en su servicio Cloud Pak, que mejora los servicios en la nube agregando muchas ventajas impulsadas por IA</li>\
 </ul></p>\
-  <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">Cloud Híbrida</span></p></td> \
+<tr> \   <tr> \
+  <td> <p>Abril 2019 - Julio 2021 : Administrador de Sistemas en la Nube en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>Aquí el desafío fue la migración de Odin Automation, una aplicación monolítica que se ejecutaba en centros de datos físicos en todo el mundo, a CloudBlue, un mercado de 5 mil millones de dólares que fue diseñado como un mercado de microservicios y desplegado en Azure AKS<ul> \
+<li>Diseñamos toda la nueva plataforma en proveedores de la nube como Azure, AWS y GCP</li>\
+<li>Actuamos como Arquitectos y Arquitectos de Soluciones alineando la estrategia comercial y técnica</li>\
+<li>Soporte Técnico de Primer Nivel</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+<tr> \
+  <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
+<li>Máxima autoridad en temas de Redes y Seguridad Perimetral</li>\
+<li>Mantenimiento de la Infraestructura de Redes y diseño para nuevos requisitos y mejoras</li>\
+<li>Responsable de todas las comunicaciones con el cliente</li>\
+<li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
-    <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
-    <td><p>This was a project for the Cantabria Goverment I was honored to lead : <ul> \
-  <li>Top Tier and maximun authority on Networking and Perimetral Security stuff</li>\
-  <li>Maintain Networking Infrastructure and design for new requirements and improvings</li>\
-  <li>Responsible for all communications with customer</li>\
-  <li>Monitor team´s workflow and make sure we were compliant with customer´s SLAs.</li>\
+  <td> <p>Junio 2011 - Julio 2016 : Líder de Equipo: Jefe de Línea de Negocios Estratégicos en <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+  <td><p>Durante este período estuve liderando dos equipos: el equipo de Redes y Seguridad Perimetral, y el equipo de Housing: <ul> \
+<li>Desde el equipo de Redes éramos responsables de mantener toda la infraestructura de redes. Este contrato también incluyó una renovación de hardware, lo que significa que tuvimos que reemplazar todo. A veces fue solo una renovación de hardware en el mismo proveedor, pero también hicimos migraciones a otros proveedores</li>\
+<li>Desde el equipo de Housing éramos responsables de mantener vivos y actualizados algunos sistemas que no se ajustaban a los estándares del cliente. Esto también incluye llevar algunos servicios a nuestro centro de datos en modo de servicios gestionados.</li>\
+<li>Responsable de todas las comunicaciones con el cliente</li>\
+<li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
 </ul></p>\
-  <p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
-     <tr> \
-    <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
-    <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
-  <li>From Networking Team we were responsible for maintaining all networking infrastructure. This contract also included a hardware renewal which means we had to replace everything there. Sometimes it was just hardware renewal in the same vendor, but we also dealed with migrations in other vendors</li>\
-  <li>From Housing Team we were responsible for maintaining alive and up to date some systems didn´t fit with customer´s standars. This also includes bringing to our datacenter in managed services mode some services.</li>\
-  <li>Responsible for all communications with customer</li>\
-  <li>Monitor team´s workflow and make sure we were compliant with customer´s SLAs.</li>\
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>Enero 2008 - Junio 2011 : 2º Nivel Redes y Seguridad Perimetral en <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+  <td><p>Proporcionando soporte de segundo nivel al Gobierno de Cantabria<ul> \
+<li>Desplegado desde cero una solución de monitoreo con Zabbix</li>\
+<li>Gestioné servicios de Internet como DNS (bind), relés de correo electrónico (postfix y sendmail), solución antispam (greylist + spam assasin + clamav + controles RBL)</li>\
 </ul></p>\
-  <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
-     <tr> \
-    <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
-    <td><p>Providing 2nd Tier support to Cantabria Goverment<ul> \
-  <li>Deployed from scratch monitoring solution by  Zabbix</li>\
-  <li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
+   <tr> \
+  <td> <p>Enero 2006 - Enero 2008 : Operador de Host en <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td><p>Operador de Mainframe<ul> \
+<li>Coordinador de Equipo</li>\
+<li>Instructor de Linux</li>\
 </ul></p>\
-  <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
-     <tr> \
-    <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
-    <td><p>Mainframe Operator<ul> \
-  <li>Team Coordinator</li>\
-  <li>Linux Trainer</li>\
-</ul></p>\
-  <p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
+<p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
 </tr></table>\
-  <table> \
-    <tr> \
-    <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
-    <th><p><b>.::TRAININGS::.</b></p></th> \
-  </tr> \
-    <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
-    <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-    <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-    <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
-    <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-    <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-    <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
-    <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
-    <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
-    <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
-	</table>",
-  
-    i = 0,
+<table> \
+  <tr> \
+  <th><p><b>.::CERTIFICACIONES::.</b></p></th> \
+  <th><p><b>.::FORMACIONES::.</b></p></th> \
+</tr> \
+  <tr><td><p>2008 - Fundamentos de ITIL V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2010 - Fundamentos de ITIL V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Técnico Certificado de Redes de Cisco (CCENT)</p></td><td><p>Implementación de Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2012 - Especialista Certificado de Enterasys - Switching</p></td><td><p>Gestión y Monitorización Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Especialista Certificado de Enterasys - Routing</p></td><td><p>Sistemas de Seguridad Multiamenaza Fortigate I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2014 - Administrador Certificado de Seguridad de Red FCNSA v5</p></td><td><p>Telefonía Alcatel OXE (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2015 - Certificación CCNA de Cisco en Routing y Switching</p></td><td><p>Especialista Certificado de Enterasys - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - Certificación FCNSP de Fortigate en Seguridad de Redes FCNSP v5</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Administrador de Sistemas Certificado de Red Hat (RHCSA)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Especialista Certificado de Red Hat en Contenedores y Kubernetes (EX180)</p></td><td><p></p></td></tr> \
+</table>";
+
+var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
+<p>I think I'm in a sweet spot of my professional career. With more than 20 years of experience, I've had the opportunity to learn this business from the ground up, growing step by step, not rushing, savoring every new job, every new role.</p>\
+<p>Now I can offer myself as a top IT professional with a solid background in key subjects: Team Leading, Cloud Services, Networking and System Administration. Results focused, long term commitment and Team Culture in DNA.</p>\
+<p></p><p><b>.::WORK EXPERIENCE::.</b></p><p> \
+<table> \
+<tr> \
+  <td> <p>Jan 2022 - Present : Infrastructure/SRE Technical Team Lead at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>In a 50 Billion $ platform we are in charge of :</p><ul> \
+<li>Guarantee High Availability</li>\
+<li>Guarantee Scalability</li>\
+<li>Guarantee Observability</li>\
+</ul></p>\
+<p>Working together with different Teams we define standards and processes to align people on key objectives. Our hunting territory is the whole CI/CD, we are basically inline in everyone's pipeline ensuring we are in compliance with expected standards.</p><ul> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
+<tr> \   <tr> \
+<tr> \
+  <td> <p>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
+  <td><p>Making things possible at Support Team some of my responsibilities include:  <ul> \
+<li>This is a very new Support Service, working together with IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by AI</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
+<tr> \   <tr> \
+  <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 Billion $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
+<li>We designed all the new platform in Cloud Providers like Azure, AWS and GCP</li>\
+<li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
+<li>Top Tier Technical Support</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
+<tr> \
+  <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td><p>This was a project for the Cantabria Government I was honored to lead: <ul> \
+<li>Top Tier and maximum authority on Networking and Perimetral Security stuff</li>\
+<li>Maintain Networking Infrastructure and design for new requirements and improvements</li>\
+<li>Responsible for all communications with customer</li>\
+<li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+  <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
+<li>From Networking Team we were responsible for maintaining all networking infrastructure. This contract also included a hardware renewal which means we had to replace everything there. Sometimes it was just hardware renewal in the same vendor, but we also dealt with migrations in other vendors</li>\
+<li>From Housing Team we were responsible for maintaining alive and up to date some systems didn't fit with customer's standards. This also includes bringing to our datacenter in managed services mode some services.</li>\
+<li>Responsible for all communications with customer</li>\
+<li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+  <td><p>Providing 2nd Tier support to Cantabria Government<ul> \
+<li>Deployed from scratch monitoring solution with Zabbix</li>\
+<li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
+   <tr> \
+  <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td><p>Mainframe Operator<ul> \
+<li>Team Coordinator</li>\
+<li>Linux Trainer</li>\
+</ul></p>\
+<p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
+</tr></table>\
+<table> \
+  <tr> \
+  <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
+  <th><p><b>.::TRAININGS::.</b></p></th> \
+</tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
+</table>";
+
+var i = 0,
     isTag,
     text;
 
-(function type() {
-    text = str.slice(0, ++i);
-    if (text === str) return;
-    
-    document.getElementById('mainContent').innerHTML = text;
+function typeWriter(content) {
+    i = 0;  // Reset the counter
+    text = '';  // Reset the text
+    function type() {
+        text = content.slice(0, ++i);
+        if (text === content) return;
+        
+        document.getElementById('mainContent').innerHTML = text;
 
-    var char = text.slice(-1);
-    if( char === '<' ) isTag = true;
-    if( char === '>' ) isTag = false;
+        var char = text.slice(-1);
+        if( char === '<' ) isTag = true;
+        if( char === '>' ) isTag = false;
 
-    if (isTag) return type();
-    setTimeout(type, 1);
-}());
+        if (isTag) return type();
+        setTimeout(type, 1);
+    }
+    type();
+}
+
+document.getElementById('flag-es').addEventListener('click', function() {
+    typeWriter(str_es);
+});
+
+document.getElementById('flag-uk').addEventListener('click', function() {
+    typeWriter(str_en);
+});
+
+// Initially load in Spanish
+typeWriter(str_es);
+
 </script>
 
 
