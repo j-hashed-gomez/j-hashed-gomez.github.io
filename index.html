@@ -1,110 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <style>
-        body {
-            background-color: black;
-            background-image: radial-gradient(
-                rgba(0, 150, 0, 0.75), black 120%
-            );
-            height: 100vh;
-            margin: 0;
-            overflow-y: scroll;
-            padding: 2rem;
-            color: white;
-            font: 1rem Inconsolata, monospace;
-            text-shadow: 0 0 5px #C8C8C8;
-        }
-        ::selection {
-            background: #0080FF;
-            text-shadow: none;
-        }
-        pre {
-            margin: 0;
-        }
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    body {
+      background-color: black;
+      background-image: radial-gradient(
+        rgba(0, 150, 0, 0.75), black 120%
+      );
+      height: 100vh;
+      margin: 0;
+      overflow-y: scroll;
+      padding: 2rem;
+      color: white;
+      font: 1rem Inconsolata, monospace;
+      text-shadow: 0 0 5px #C8C8C8;
+    }
+    ::selection {
+      background: #0080FF;
+      text-shadow: none;
+    }
+    pre {
+      margin: 0;
+    }
 
-        .menu {
-            float:left;
-            width:20%;
-            height:80%;
-        }
-        .mainContent {
-            float:left;
-            width:75%;
-            height:80%;
-        }
+    .menu {
+      float:left;
+      width:20%;
+      height:80%;
+    }
+    .mainContent {
+      float:left;
+      width:75%;
+      height:80%;
+    }
 
-        .label {
-            color: white;
-            padding: 8px;
-        }
+    .label {
+      color: white;
+      padding: 8px;
+    }
 
-        .label-keyword {background-color: #2196F3;} /* Blue */
+    .label-keyword {background-color: #2196F3;} /* Blue */
 
-        .language-selector {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
+    .language-selector {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
 
-        .language-selector img {
-            width: 60px;
-            height: 40px;
-            cursor: pointer;
-            margin: 10px;
-        }
+    .language-selector img {
+      width: 60px;
+      height: 40px;
+      cursor: pointer;
+      margin: 10px;
+    }
 
-        .language-selector-text {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
+    .language-selector-text {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
 
-        .hidden {
-            display: none;
-        }
+    .hidden {
+      display: none;
+    }
 
-        .top-right-flags {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
+    .top-right-flags {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
 
-        .top-right-flags img {
-            width: 30px;
-            height: 20px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-    </style>
+    .top-right-flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="menu hidden">
-    <p><img src='mifoto.png' class="center"></p>
-    <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
-    <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
-    <p><i class="material-icons">smartphone</i> +34 647721924</p>
-    <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
-    <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
-</div>
+ <p><img src='mifoto.png' class="center"></p>
+ <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
+ <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
+ <p><i class="material-icons">smartphone</i> +34 647721924</p>
+ <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
+ <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
+</div> 
 
 <div class="language-selector" id="language-selector">
-    <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
+  <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
 </div>
 
 <div class="top-right-flags hidden" id="top-right-flags">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
 </div>
 
 <div class="mainContent" id="mainContent"></div> 
@@ -140,7 +140,7 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
 <tr> \
-  <td>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
   <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
 <li>Máxima autoridad en temas de Redes y Seguridad Perimetral</li>\
 <li>Mantenimiento de la Infraestructura de Redes y diseño para nuevos requisitos y mejoras</li>\
@@ -149,7 +149,7 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 </ul></p>\
 <p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
-  <td>Junio 2011 - Julio 2016 : Líder de Equipo: Jefe de Línea de Negocios Estratégicos en <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+  <td> <p>Junio 2011 - Julio 2016 : Líder de Equipo: Jefe de Línea de Negocios Estratégicos en <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
   <td><p>Durante este período estuve liderando dos equipos: el equipo de Redes y Seguridad Perimetral, y el equipo de Housing: <ul> \
 <li>Desde el equipo de Redes éramos responsables de mantener toda la infraestructura de redes. Este contrato también incluyó una renovación de hardware, lo que significa que tuvimos que reemplazar todo. A veces fue solo una renovación de hardware en el mismo proveedor, pero también hicimos migraciones a otros proveedores</li>\
 <li>Desde el equipo de Housing éramos responsables de mantener vivos y actualizados algunos sistemas que no se ajustaban a los estándares del cliente. Esto también incluye llevar algunos servicios a nuestro centro de datos en modo de servicios gestionados.</li>\
@@ -158,14 +158,14 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 </ul></p>\
 <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
-  <td>Enero 2008 - Junio 2011 : 2º Nivel Redes y Seguridad Perimetral en <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+  <td> <p>Enero 2008 - Junio 2011 : 2º Nivel Redes y Seguridad Perimetral en <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
   <td><p>Proporcionando soporte de segundo nivel al Gobierno de Cantabria<ul> \
 <li>Desplegado desde cero una solución de monitoreo con Zabbix</li>\
 <li>Gestioné servicios de Internet como DNS (bind), relés de correo electrónico (postfix y sendmail), solución antispam (greylist + spam assasin + clamav + controles RBL)</li>\
 </ul></p>\
 <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
    <tr> \
-  <td>Enero 2006 - Enero 2008 : Operador de Host en <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td> <p>Enero 2006 - Enero 2008 : Operador de Host en <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
   <td><p>Operador de Mainframe<ul> \
 <li>Coordinador de Equipo</li>\
 <li>Instructor de Linux</li>\
@@ -182,11 +182,11 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
   <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
   <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
   <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2010 - Fundamentos de ITIL V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - Fundamentos de ITIL V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
@@ -195,7 +195,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <p></p><p><b>.::WORK EXPERIENCE::.</b></p><p> \
 <table> \
 <tr> \
-  <td>Jan 2022 - Present : Infrastructure/SRE Technical Team Lead at <span style='color:red;'>Ingram Micro Cloud</span></td> \
+  <td> <p>Jan 2022 - Present : Infrastructure/SRE Technical Team Lead at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
   <td><p>In a 50 Billion $ platform we are in charge of :</p><ul> \
 <li>Guarantee High Availability</li>\
 <li>Guarantee Scalability</li>\
@@ -205,13 +205,13 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
 <tr> \   <tr> \
 <tr> \
-  <td>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></td> \
+  <td> <p>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
   <td><p>Making things possible at Support Team some of my responsibilities include:  <ul> \
 <li>This is a very new Support Service, working together with IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by AI</li>\
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
 <tr> \   <tr> \
-  <td>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></td> \
+  <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
   <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 Billion $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
 <li>We designed all the new platform in Cloud Providers like Azure, AWS and GCP</li>\
 <li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
@@ -219,7 +219,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 </ul></p>\
 <p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
 <tr> \
-  <td>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></td> \
+  <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
   <td><p>This was a project for the Cantabria Government I was honored to lead: <ul> \
 <li>Top Tier and maximum authority on Networking and Perimetral Security stuff</li>\
 <li>Maintain Networking Infrastructure and design for new requirements and improvements</li>\
@@ -228,7 +228,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 </ul></p>\
 <p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
-  <td>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></td> \
+  <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
   <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
 <li>From Networking Team we were responsible for maintaining all networking infrastructure. This contract also included a hardware renewal which means we had to replace everything there. Sometimes it was just hardware renewal in the same vendor, but we also dealt with migrations in other vendors</li>\
 <li>From Housing Team we were responsible for maintaining alive and up to date some systems didn't fit with customer's standards. This also includes bringing to our datacenter in managed services mode some services.</li>\
@@ -237,14 +237,14 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 </ul></p>\
 <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
-  <td>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></td> \
+  <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
   <td><p>Providing 2nd Tier support to Cantabria Government<ul> \
 <li>Deployed from scratch monitoring solution with Zabbix</li>\
 <li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
 </ul></p>\
 <p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
    <tr> \
-  <td>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
   <td><p>Mainframe Operator<ul> \
 <li>Team Coordinator</li>\
 <li>Linux Trainer</li>\
@@ -261,11 +261,11 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
   <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
   <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
   <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
-  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
-  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect for HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var i = 0,
@@ -287,7 +287,7 @@ function typeWriter(content) {
         if( char === '>' ) isTag = false;
 
         if (isTag) return type();
-        typingInterval = setTimeout(type, 1);  // Acelera la velocidad de tipeo
+        typingInterval = setTimeout(type, 1);  // Velocidad máxima
     }
     type();
 }
@@ -311,8 +311,11 @@ function startContent(content) {
     document.getElementById('top-right-flags').classList.remove('hidden');
     typeWriter(content);
 
-    // Mostrar el texto completo al pulsar cualquier tecla
+    // Solo añadimos estos listeners después de seleccionar el idioma
     document.addEventListener('keydown', function() {
+        showFullText(content);
+    });
+    document.addEventListener('click', function() {
         showFullText(content);
     });
 }
