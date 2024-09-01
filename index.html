@@ -45,7 +45,18 @@
       padding: 8px;
     }
 
-    .label-keyword {background-color: #2196F3;} /* Blue */
+    .label-keyword {
+      background-color: #2196F3; /* Azul de fondo */
+      color: white;
+      padding: 8px 16px;
+      border-radius: 12px; /* Bordes redondeados */
+      box-shadow: 8px 8px 16px #1a70c2, -8px -8px 16px #27b6ff; /* Sombra con efecto de profundidad */
+      transition: box-shadow 0.3s ease;
+    }
+
+    .label-keyword:hover {
+      box-shadow: inset 8px 8px 16px #1a70c2, inset -8px -8px 16px #27b6ff; /* Sombra invertida al hacer hover */
+    }
 
     .language-selector {
       position: absolute;
@@ -153,7 +164,6 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <li>Garantizar Escalabilidad</li>\
 <li>Garantizar Observabilidad</li>\
 </ul></p>\
-<p>Trabajando junto a diferentes equipos, definimos estándares y procesos para alinear a las personas en objetivos clave. Nuestro territorio de caza es todo el CI/CD, básicamente estamos en línea en cada pipeline de todos asegurando que cumplimos con los estándares esperados.</p><ul> \
 <p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>Automatización</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Python</span> <span class='label label-keyword'>IaC</span></p></td> \
 <tr> \   <tr> \
 <tr> \
@@ -379,9 +389,9 @@ document.addEventListener('keydown', function() {
 function updateLoadingMessage(language) {
     var loadingText = document.getElementById('loading-text');
     if (language === 'es') {
-        loadingText.textContent = 'Conectando con Interpol y cargando datos, por favor presiona cualquier tecla para resumir';
+        loadingText.textContent = 'Cargando datos, por favor presiona espacio para mostrar todo el texto';
     } else {
-        loadingText.textContent = 'Connecting to Interpol and loading profile, please press any key to resume';
+        loadingText.textContent = 'Loading, please press space to show all the text';
     }
 }
 </script>
