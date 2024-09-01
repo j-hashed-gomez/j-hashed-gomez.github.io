@@ -3,65 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    body {
+      background-color: black;
+      background-image: radial-gradient(
+        rgba(0, 150, 0, 0.75), black 120%
+      );
+      height: 100vh;
+      margin: 0;
+      overflow-y: scroll;
+      padding: 2rem;
+      color: white;
+      font: 1rem Inconsolata, monospace;
+      text-shadow: 0 0 5px #C8C8C8;
+    }
+    ::selection {
+      background: #0080FF;
+      text-shadow: none;
+    }
+    pre {
+      margin: 0;
+    }
+
+    .menu {
+      float:left;
+      width:20%;
+      height:80%;
+    }
+    .mainContent {
+      float:left;
+      width:75%;
+      height:80%;
+    }
+
+    .label {
+      color: white;
+      padding: 8px;
+    }
+
+    .label-keyword {background-color: #2196F3;} /* Blue */
+
+    .language-selector {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .language-selector img {
+      width: 60px;
+      height: 40px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    .language-selector-text {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
-
-<style>
-body {
-  background-color: black;
-  background-image: radial-gradient(
-    rgba(0, 150, 0, 0.75), black 120%
-  );
-  height: 100vh;
-  margin: 0;
-  overflow-y: scroll;
-  padding: 2rem;
-  color: white;
-  font: 1rem Inconsolata, monospace;
-  text-shadow: 0 0 5px #C8C8C8;
-}
-::selection {
-  background: #0080FF;
-  text-shadow: none;
-}
-pre {
-  margin: 0;
-}
-
-.menu {
-  float:left;
-  width:20%;
-  height:80%;
-}
-.mainContent {
-  float:left;
-  width:75%;
-  height:80%;
-}
-
-.label {
-  color: white;
-  padding: 8px;
-}
-
-.label-keyword {background-color: #2196F3;} /* Blue */
-
-.language-selector {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.language-selector img {
-  width: 30px;
-  height: 20px;
-  cursor: pointer;
-  margin-left: 5px;
-}
-</style>
 
 <body>
 
-<div class="menu">
+<div class="menu hidden">
  <p><img src='mifoto.png' class="center"></p>
  <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
  <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
@@ -70,13 +80,13 @@ pre {
  <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (B2)</p>
 </div> 
 
-<div class="language-selector">
+<div class="language-selector" id="language-selector">
+  <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
 </div>
 
-<div class="mainContent" id="mainContent">
-</div> 
+<div class="mainContent" id="mainContent" class="hidden"></div> 
 
 <script>
 var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desde que mis padres me regalaron un Sinclair Spectrum 128k en 1986, cuando los dinosaurios aún caminaban sobre la tierra. Desde ese maravilloso día, hasta hoy, 40 años después, no recuerdo un solo día en que no haya aprendido algo nuevo, encontrado algo emocionante en lo que me gustara profundizar.</p>\
@@ -239,7 +249,8 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 
 var i = 0,
     isTag,
-    text;
+    text,
+    typingInterval;
 
 function typeWriter(content) {
     i = 0;  // Reset the counter
@@ -255,21 +266,35 @@ function typeWriter(content) {
         if( char === '>' ) isTag = false;
 
         if (isTag) return type();
-        setTimeout(type, 1);
+        typingInterval = setTimeout(type, 1);
     }
     type();
 }
 
+function showFullText(content) {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = content;
+}
+
 document.getElementById('flag-es').addEventListener('click', function() {
-    typeWriter(str_es);
+    startContent(str_es);
 });
 
 document.getElementById('flag-uk').addEventListener('click', function() {
-    typeWriter(str_en);
+    startContent(str_en);
 });
 
-// Initially load in Spanish
-typeWriter(str_es);
+function startContent(content) {
+    document.getElementById('language-selector').classList.add('hidden');
+    document.querySelector('.menu').classList.remove('hidden');
+    typeWriter(content);
+    document.addEventListener('keydown', function() {
+        showFullText(content);
+    });
+    document.addEventListener('click', function() {
+        showFullText(content);
+    });
+}
 
 </script>
 
