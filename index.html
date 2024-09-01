@@ -66,6 +66,19 @@
     .hidden {
       display: none;
     }
+
+    .top-right-flags {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .top-right-flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
   </style>
 </head>
 
@@ -84,6 +97,11 @@
   <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
+</div>
+
+<div class="top-right-flags hidden" id="top-right-flags">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
 </div>
 
 <div class="mainContent" id="mainContent" class="hidden"></div> 
@@ -287,13 +305,32 @@ document.getElementById('flag-uk').addEventListener('click', function() {
 function startContent(content) {
     document.getElementById('language-selector').classList.add('hidden');
     document.querySelector('.menu').classList.remove('hidden');
+    document.getElementById('top-right-flags').classList.remove('hidden');
     typeWriter(content);
+
+    // Solo añadimos estos listeners después de seleccionar el idioma
     document.addEventListener('keydown', function() {
         showFullText(content);
     });
     document.addEventListener('click', function() {
         showFullText(content);
     });
+}
+
+// Listeners para las banderas en la parte superior derecha
+document.getElementById('flag-es-top').addEventListener('click', function() {
+    resetAndStart(str_es);
+});
+
+document.getElementById('flag-uk-top').addEventListener('click', function() {
+    resetAndStart(str_en);
+});
+
+function resetAndStart(content) {
+    // Reiniciar el contenido
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = '';
+    typeWriter(content);
 }
 
 </script>
