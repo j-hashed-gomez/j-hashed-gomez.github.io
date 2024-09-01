@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
     body {
       background-color: black;
@@ -12,54 +15,27 @@
       height: 100vh;
       margin: 0;
       overflow-y: scroll;
-      padding: 0;
+      padding: 2rem;
       color: white;
       font: 1rem Inconsolata, monospace;
       text-shadow: 0 0 5px #C8C8C8;
     }
-
     ::selection {
       background: #0080FF;
       text-shadow: none;
     }
-
-    .header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 10px;
-      text-align: center;
-      z-index: 1000;
-    }
-
-    .header .top-right-flags {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-
-    .header .top-right-flags img {
-      width: 30px;
-      height: 20px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .loading-text {
-      font-size: 1.2rem;
-      margin-top: 10px;
-    }
-
-    .mainContent {
-      padding-top: 80px; /* Añade espacio para que el contenido no se superponga con el encabezado */
-      padding-left: 20px;
-      padding-right: 20px;
+    pre {
+      margin: 0;
     }
 
     .menu {
       float:left;
       width:20%;
+      height:80%;
+    }
+    .mainContent {
+      float:left;
+      width:75%;
       height:80%;
     }
 
@@ -68,23 +44,50 @@
       padding: 8px;
     }
 
-    .label-keyword {
-      background-color: #2196F3; /* Blue */
+    .label-keyword {background-color: #2196F3;} /* Blue */
+
+    .language-selector {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .language-selector img {
+      width: 60px;
+      height: 40px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    .language-selector-text {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .top-right-flags {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .top-right-flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 5px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="header">
-  <div class="loading-text" id="loading-text">Cargando datos, por favor presiona space para mostrar todo el texto <span class='loading'>⏳</span></div>
-  <div class="top-right-flags">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
-  </div>
-</div>
-
-<div class="menu">
+<div class="menu hidden">
  <p><img src='mifoto.png' class="center"></p>
  <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
  <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
@@ -92,6 +95,17 @@
  <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
  <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
 </div> 
+
+<div class="language-selector" id="language-selector">
+  <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
+</div>
+
+<div class="top-right-flags hidden" id="top-right-flags">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
+</div>
 
 <div class="mainContent" id="mainContent"></div> 
 
@@ -109,14 +123,14 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <li>Garantizar Observabilidad</li>\
 </ul></p>\
 <p>Trabajando junto a diferentes equipos, definimos estándares y procesos para alinear a las personas en objetivos clave. Nuestro territorio de caza es todo el CI/CD, básicamente estamos en línea en cada pipeline de todos asegurando que cumplimos con los estándares esperados.</p><ul> \
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>Automatización</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Python</span> <span class='label label-keyword'>IaC</span></p>\
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automatización</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
 <tr> \   <tr> \
 <tr> \
   <td> <p>Julio 2021 - Enero 2022 : Ingeniero de Soporte Senior - OpenShift en <span style='color:red;'>Red Hat</span></p></td> \
   <td><p>Haciendo las cosas posibles en el equipo de soporte, algunas de mis responsabilidades incluyen:  <ul> \
 <li>Este es un servicio de soporte muy nuevo, trabajando junto a IBM proporcionamos soporte avanzado de OpenShift en su servicio Cloud Pak, que mejora los servicios en la nube agregando muchas ventajas impulsadas por IA</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>OpenShift</span> <span class='label label-keyword'>RHEL</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>Kubernetes</span> <span class='label label-keyword'>IBM Cloud Pak</span> <span class='label label-keyword'>Python</span> <span class='label label-keyword'>Cloud Híbrida</span></p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Cloud Híbrida</span></p></td> \
 <tr> \   <tr> \
   <td> <p>Abril 2019 - Julio 2021 : Administrador de Sistemas en la Nube en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
   <td><p>Aquí el desafío fue la migración de Odin Automation, una aplicación monolítica que se ejecutaba en centros de datos físicos en todo el mundo, a CloudBlue, un mercado de 5 mil millones de dólares que fue diseñado como un mercado de microservicios y desplegado en Azure AKS<ul> \
@@ -124,7 +138,7 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <li>Actuamos como Arquitectos y Arquitectos de Soluciones alineando la estrategia comercial y técnica</li>\
 <li>Soporte Técnico de Primer Nivel</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>Linux</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>k8s</span> <span class='label label-keyword'>PowerShell</span> <span class='label label-keyword'>VMware</span> <span class='label label-keyword'>Terraform</span> <span class='label label-keyword'>Puppet</span></p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
 <tr> \
   <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
   <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
@@ -133,7 +147,7 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <li>Responsable de todas las comunicaciones con el cliente</li>\
 <li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Cisco</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Juniper</span> <span class='label label-keyword'>BigIP F5</span> <span class='label label-keyword'>IPS/IDS</span> <span class='label label-keyword'>WAF</span> <span class='label label-keyword'>Bluecoat</span> <span class='label label-keyword'>VMware</span></p></td> \
+<p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
   <td> <p>Junio 2011 - Julio 2016 : Líder de Equipo: Jefe de Línea de Negocios Estratégicos en <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
   <td><p>Durante este período estuve liderando dos equipos: el equipo de Redes y Seguridad Perimetral, y el equipo de Housing: <ul> \
@@ -142,31 +156,31 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
 <li>Responsable de todas las comunicaciones con el cliente</li>\
 <li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
 </ul></p>\
-<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Checkpoint</span> <span class='label label-keyword'>DNS</span> <span class='label label-keyword'>DBs</span> <span class='label label-keyword'>Apache</span> <span class='label label-keyword'>nginx</span> <span class='label label-keyword'>VMware</span></p></td> \
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
   <td> <p>Enero 2008 - Junio 2011 : 2º Nivel Redes y Seguridad Perimetral en <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
   <td><p>Proporcionando soporte de segundo nivel al Gobierno de Cantabria<ul> \
 <li>Desplegado desde cero una solución de monitoreo con Zabbix</li>\
 <li>Gestioné servicios de Internet como DNS (bind), relés de correo electrónico (postfix y sendmail), solución antispam (greylist + spam assasin + clamav + controles RBL)</li>\
 </ul></p>\
-<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Cisco Pix</span> <span class='label label-keyword'>Sendmail</span> <span class='label label-keyword'>Bind</span> <span class='label label-keyword'>Zabbix</span> <span class='label label-keyword'>Red Hat</span> <span class='label label-keyword'>ISA Proxy Server</span> <span class='label label-keyword'>Contivity VPN</span></p></td> \
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
    <tr> \
   <td> <p>Enero 2006 - Enero 2008 : Operador de Host en <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
   <td><p>Operador de Mainframe<ul> \
 <li>Coordinador de Equipo</li>\
 <li>Instructor de Linux</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Mainframe</span> <span class='label label-keyword'>MVS</span> <span class='label label-keyword'>zOS</span> <span class='label label-keyword'>CONTROL-M</span> <span class='label label-keyword'>OPCC</span></p></td> \
+<p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
 </tr></table>\
 <table> \
   <tr> \
   <th><p><b>.::CERTIFICACIONES::.</b></p></th> \
   <th><p><b>.::FORMACIONES::.</b></p></th> \
 </tr> \
-  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
   <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
   <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
   <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
@@ -188,14 +202,14 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Guarantee Observability</li>\
 </ul></p>\
 <p>Working together with different Teams we define standards and processes to align people on key objectives. Our hunting territory is the whole CI/CD, we are basically inline in everyone's pipeline ensuring we are in compliance with expected standards.</p><ul> \
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>Automation</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Python</span> <span class='label label-keyword'>IaC</span></p>\
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">Automation</span> <span class=\"label label-keyword\">CI/CD</span> <span class=\"label label-keyword\">Kubernetes</span>  <span class=\"label label-keyword\">Python</span> <span class=\"label label-keyword\">IaC</span></p>\
 <tr> \   <tr> \
 <tr> \
   <td> <p>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
   <td><p>Making things possible at Support Team some of my responsibilities include:  <ul> \
 <li>This is a very new Support Service, working together with IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by AI</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>OpenShift</span> <span class='label label-keyword'>RHEL</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>Kubernetes</span> <span class='label label-keyword'>IBM Cloud Pak</span> <span class='label label-keyword'>Python</span> <span class='label label-keyword'>Hybrid Cloud</span></p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">OpenShift</span> <span class=\"label label-keyword\">RHEL</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">Kubernetes</span> <span class=\"label label-keyword\">IBM Cloud Pak</span> <span class=\"label label-keyword\">Hybrid Cloud</span></p></td> \
 <tr> \   <tr> \
   <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
   <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 Billion $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
@@ -203,7 +217,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
 <li>Top Tier Technical Support</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>Linux</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>k8s</span> <span class='label label-keyword'>PowerShell</span> <span class='label label-keyword'>VMware</span> <span class='label label-keyword'>Terraform</span> <span class='label label-keyword'>Puppet</span></p></td> \
+<p><span class=\"label label-keyword\">Azure</span> <span class=\"label label-keyword\">AWS</span> <span class=\"label label-keyword\">GCP</span> <span class=\"label label-keyword\">Linux</span> <span class=\"label label-keyword\">Docker</span> <span class=\"label label-keyword\">k8s</span> <span class=\"label label-keyword\">PowerShell</span> <span class=\"label label-keyword\">VMware</span> <span class=\"label label-keyword\">Terraform</span> <span class=\"label label-keyword\">Puppet</span>\</p></td> \
 <tr> \
   <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
   <td><p>This was a project for the Cantabria Government I was honored to lead: <ul> \
@@ -212,7 +226,7 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Responsible for all communications with customer</li>\
 <li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Cisco</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Juniper</span> <span class='label label-keyword'>BigIP F5</span> <span class='label label-keyword'>IPS/IDS</span> <span class='label label-keyword'>WAF</span> <span class='label label-keyword'>Bluecoat</span> <span class='label label-keyword'>VMware</span></p></td> \
+<p><span class=\"label label-keyword\">Cisco</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Juniper</span> <span class=\"label label-keyword\">BigIP F5</span> <span class=\"label label-keyword\">IPS/IDS</span> <span class=\"label label-keyword\">WAF</span> <span class=\"label label-keyword\">Bluecoat</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
   <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
   <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
@@ -221,31 +235,31 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 <li>Responsible for all communications with customer</li>\
 <li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
 </ul></p>\
-<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Checkpoint</span> <span class='label label-keyword'>DNS</span> <span class='label label-keyword'>DBs</span> <span class='label label-keyword'>Apache</span> <span class='label label-keyword'>nginx</span> <span class='label label-keyword'>VMware</span></p></td> \
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Enterasys</span> <span class=\"label label-keyword\">Fortinet</span> <span class=\"label label-keyword\">Checkpoint</span> <span class=\"label label-keyword\">DNS</span> <span class=\"label label-keyword\">DBs</span> <span class=\"label label-keyword\">Apache</span> <span class=\"label label-keyword\">nginx</span> <span class=\"label label-keyword\">VMware</span>\</p></td> \
    <tr> \
   <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
   <td><p>Providing 2nd Tier support to Cantabria Government<ul> \
 <li>Deployed from scratch monitoring solution with Zabbix</li>\
 <li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
 </ul></p>\
-<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Cisco Pix</span> <span class='label label-keyword'>Sendmail</span> <span class='label label-keyword'>Bind</span> <span class='label label-keyword'>Zabbix</span> <span class='label label-keyword'>Red Hat</span> <span class='label label-keyword'>ISA Proxy Server</span> <span class='label label-keyword'>Contivity VPN</span></p></td> \
+<p><span class=\"label label-keyword\">IPtables</span> <span class=\"label label-keyword\">Cisco Pix</span> <span class=\"label label-keyword\">Sendmail</span> <span class=\"label label-keyword\">Bind</span> <span class=\"label label-keyword\">Zabbix</span> <span class=\"label label-keyword\">Red Hat</span> <span class=\"label label-keyword\">ISA Proxy Server</span> <span class=\"label label-keyword\">Contivity VPN</span></p></td> \
    <tr> \
   <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
   <td><p>Mainframe Operator<ul> \
 <li>Team Coordinator</li>\
 <li>Linux Trainer</li>\
 </ul></p>\
-<p><span class='label label-keyword'>Mainframe</span> <span class='label label-keyword'>MVS</span> <span class='label label-keyword'>zOS</span> <span class='label label-keyword'>CONTROL-M</span> <span class='label label-keyword'>OPCC</span></p></td> \
+<p><span class=\"label label-keyword\">Mainframe</span> <span class=\"label label-keyword\">MVS</span> <span class=\"label label-keyword\">zOS</span> <span class=\"label label-keyword\">CONTROL-M</span> <span class=\"label label-keyword\">OPCC</span></p></td> \
 </tr></table>\
 <table> \
   <tr> \
   <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
   <th><p><b>.::TRAININGS::.</b></p></th> \
 </tr> \
-  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
   <tr><td><p>2021 - Red Hat Certified System Administrator (RHCSA)</p></td><td><p></p></td></tr> \
-  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in Containers and Kubernetes (EX180)</p></td><td><p></p></td></tr> \
   <tr><td><p>2015 - Cisco CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - Fortigate Certified Networking Security Professional FCNSP v5</p></td><td><p></p></td></tr> \
   <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
@@ -257,65 +271,66 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 var i = 0,
     isTag,
     text,
-    typingInterval;
+    typingInterval,
+    currentContent;  // Nuevo: variable para mantener el contenido actual
 
 function typeWriter(content) {
-    i = 0;
-    text = '';
+    currentContent = content;  // Nuevo: actualizar el contenido actual
+    i = 0;  // Reset the counter
+    text = '';  // Reset the text
     function type() {
         text = content.slice(0, ++i);
+        if (text === content) return;
+        
         document.getElementById('mainContent').innerHTML = text;
 
         var char = text.slice(-1);
         if( char === '<' ) isTag = true;
         if( char === '>' ) isTag = false;
 
-        if (text === content) {
-            removeLoadingText();
-            return;
-        }
         if (isTag) return type();
         typingInterval = setTimeout(type, 1);
     }
     type();
 }
 
-function removeLoadingText() {
-    document.getElementById('loading-text').style.display = 'none';
+function showFullText() {  // Modificado: no requiere contenido como argumento
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = currentContent;
 }
 
-function showFullText(content) {
-    clearTimeout(typingInterval);
-    document.getElementById('mainContent').innerHTML = content;
-    removeLoadingText();
-}
-
-document.getElementById('flag-es-top').addEventListener('click', function() {
-    resetAndStart(str_es, "Cargando datos, por favor presiona space para mostrar todo el texto");
+document.getElementById('flag-es').addEventListener('click', function() {
+    startContent(str_es);
 });
 
-document.getElementById('flag-uk-top').addEventListener('click', function() {
-    resetAndStart(str_en, "Loading, please press space to show all the text");
+document.getElementById('flag-uk').addEventListener('click', function() {
+    startContent(str_en);
 });
 
-function resetAndStart(content, loadingText) {
-    document.getElementById('loading-text').innerHTML = loadingText + " <span class='loading'>⏳</span>";
-    document.getElementById('loading-text').style.display = 'block';
-    clearTimeout(typingInterval);
-    document.getElementById('mainContent').innerHTML = '';
+function startContent(content) {
+    document.getElementById('language-selector').classList.add('hidden');
+    document.querySelector('.menu').classList.remove('hidden');
+    document.getElementById('top-right-flags').classList.remove('hidden');
     typeWriter(content);
 }
 
+// Listeners para las banderas en la parte superior derecha
+document.getElementById('flag-es-top').addEventListener('click', function() {
+    resetAndStart(str_es);
+});
+
+document.getElementById('flag-uk-top').addEventListener('click', function() {
+    resetAndStart(str_en);
+});
+
+function resetAndStart(content) {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = '';
+    startContent(content);  // Modificado: asegura que se inicie correctamente con el efecto de máquina de escribir
+}
+
 document.addEventListener('keydown', function() {
-    showFullText(text);
-});
-
-document.addEventListener('click', function() {
-    showFullText(text);
-});
-
-window.addEventListener('load', () => {
-    resetAndStart(str_es, "Cargando datos, por favor presiona space para mostrar todo el texto");
+    showFullText();  // Modificado: muestra el texto completo cuando se presiona cualquier tecla
 });
 </script>
 
