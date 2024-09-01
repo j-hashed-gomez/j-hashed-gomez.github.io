@@ -2,10 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
     body {
       background-color: black;
@@ -272,71 +272,66 @@ var i = 0,
     isTag,
     text,
     typingInterval,
-    content;
+    currentContent;  // Nuevo: variable para mantener el contenido actual
 
-function typeWriter() {
-    text = content.slice(0, ++i);
-    if (text === content) return;
-    
-    document.getElementById('mainContent').innerHTML = text;
+function typeWriter(content) {
+    currentContent = content;  // Nuevo: actualizar el contenido actual
+    i = 0;  // Reset the counter
+    text = '';  // Reset the text
+    function type() {
+        text = content.slice(0, ++i);
+        if (text === content) return;
+        
+        document.getElementById('mainContent').innerHTML = text;
 
-    var char = text.slice(-1);
-    if( char === '<' ) isTag = true;
-    if( char === '>' ) isTag = false;
+        var char = text.slice(-1);
+        if( char === '<' ) isTag = true;
+        if( char === '>' ) isTag = false;
 
-    if (isTag) return type();
-    typingInterval = setTimeout(typeWriter, 1); // Set to 1 for maximum speed
+        if (isTag) return type();
+        typingInterval = setTimeout(type, 1);
+    }
+    type();
 }
 
-function showFullText() {
+function showFullText() {  // Modificado: no requiere contenido como argumento
     clearTimeout(typingInterval);
-    document.getElementById('mainContent').innerHTML = content;
+    document.getElementById('mainContent').innerHTML = currentContent;
 }
 
 document.getElementById('flag-es').addEventListener('click', function() {
-    content = str_es;
-    startContent();
+    startContent(str_es);
 });
 
 document.getElementById('flag-uk').addEventListener('click', function() {
-    content = str_en;
-    startContent();
+    startContent(str_en);
 });
 
-function startContent() {
+function startContent(content) {
     document.getElementById('language-selector').classList.add('hidden');
     document.querySelector('.menu').classList.remove('hidden');
     document.getElementById('top-right-flags').classList.remove('hidden');
-    i = 0;  // Reset the index
-    typeWriter();
+    typeWriter(content);
 }
 
 // Listeners para las banderas en la parte superior derecha
 document.getElementById('flag-es-top').addEventListener('click', function() {
-    content = str_es;
-    resetAndStart();
+    resetAndStart(str_es);
 });
 
 document.getElementById('flag-uk-top').addEventListener('click', function() {
-    content = str_en;
-    resetAndStart();
+    resetAndStart(str_en);
 });
 
-function resetAndStart() {
+function resetAndStart(content) {
     clearTimeout(typingInterval);
     document.getElementById('mainContent').innerHTML = '';
-    i = 0;  // Reset the index
-    typeWriter();
+    startContent(content);  // Modificado: asegura que se inicie correctamente con el efecto de máquina de escribir
 }
 
-// Solo añadimos estos listeners después de seleccionar el idioma
 document.addEventListener('keydown', function() {
-    showFullText();
+    showFullText();  // Modificado: muestra el texto completo cuando se presiona cualquier tecla
 });
-document.addEventListener('click', function() {
-    showFullText();
-});
-
 </script>
 
 </body>
