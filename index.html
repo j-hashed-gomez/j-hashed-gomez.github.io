@@ -185,8 +185,8 @@ var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desd
   <tr><td><p>2012 - Enterasys Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
   <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
   <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
-  <tr><td><p>2010 - Fundamentos de ITIL V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
-  <tr><td><p>2008 - Fundamentos de ITIL V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2010 - ITIL Foundations V3</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
 </table>";
 
 var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
@@ -271,70 +271,71 @@ var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my paren
 var i = 0,
     isTag,
     text,
-    typingInterval;
+    typingInterval,
+    content;
 
-function typeWriter(content) {
-    i = 0;  // Reset the counter
-    text = '';  // Reset the text
-    function type() {
-        text = content.slice(0, ++i);
-        if (text === content) return;
-        
-        document.getElementById('mainContent').innerHTML = text;
+function typeWriter() {
+    text = content.slice(0, ++i);
+    if (text === content) return;
+    
+    document.getElementById('mainContent').innerHTML = text;
 
-        var char = text.slice(-1);
-        if( char === '<' ) isTag = true;
-        if( char === '>' ) isTag = false;
+    var char = text.slice(-1);
+    if( char === '<' ) isTag = true;
+    if( char === '>' ) isTag = false;
 
-        if (isTag) return type();
-        typingInterval = setTimeout(type, 1);  // Velocidad máxima
-    }
-    type();
+    if (isTag) return type();
+    typingInterval = setTimeout(typeWriter, 1); // Set to 1 for maximum speed
 }
 
-function showFullText(content) {
+function showFullText() {
     clearTimeout(typingInterval);
     document.getElementById('mainContent').innerHTML = content;
 }
 
 document.getElementById('flag-es').addEventListener('click', function() {
-    startContent(str_es);
+    content = str_es;
+    startContent();
 });
 
 document.getElementById('flag-uk').addEventListener('click', function() {
-    startContent(str_en);
+    content = str_en;
+    startContent();
 });
 
-function startContent(content) {
+function startContent() {
     document.getElementById('language-selector').classList.add('hidden');
     document.querySelector('.menu').classList.remove('hidden');
     document.getElementById('top-right-flags').classList.remove('hidden');
-    typeWriter(content);
-
-    // Solo añadimos estos listeners después de seleccionar el idioma
-    document.addEventListener('keydown', function() {
-        showFullText(content);
-    });
-    document.addEventListener('click', function() {
-        showFullText(content);
-    });
+    i = 0;  // Reset the index
+    typeWriter();
 }
 
 // Listeners para las banderas en la parte superior derecha
 document.getElementById('flag-es-top').addEventListener('click', function() {
-    resetAndStart(str_es);
+    content = str_es;
+    resetAndStart();
 });
 
 document.getElementById('flag-uk-top').addEventListener('click', function() {
-    resetAndStart(str_en);
+    content = str_en;
+    resetAndStart();
 });
 
-function resetAndStart(content) {
-    // Reiniciar el contenido
+function resetAndStart() {
     clearTimeout(typingInterval);
     document.getElementById('mainContent').innerHTML = '';
-    typeWriter(content);
+    i = 0;  // Reset the index
+    typeWriter();
 }
+
+// Solo añadimos estos listeners después de seleccionar el idioma
+document.addEventListener('keydown', function() {
+    showFullText();
+});
+document.addEventListener('click', function() {
+    showFullText();
+});
 
 </script>
 
