@@ -104,7 +104,7 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
 </div>
 
-<div class="mainContent" id="mainContent" class="hidden"></div> 
+<div class="mainContent" id="mainContent"></div> 
 
 <script>
 var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desde que mis padres me regalaron un Sinclair Spectrum 128k en 1986, cuando los dinosaurios aún caminaban sobre la tierra. Desde ese maravilloso día, hasta hoy, 40 años después, no recuerdo un solo día en que no haya aprendido algo nuevo, encontrado algo emocionante en lo que me gustara profundizar.</p>\
@@ -284,7 +284,7 @@ function typeWriter(content) {
         if( char === '>' ) isTag = false;
 
         if (isTag) return type();
-        typingInterval = setTimeout(type, 1);
+        typingInterval = setTimeout(type, 10);
     }
     type();
 }
