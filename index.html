@@ -134,17 +134,25 @@
  <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
 
  <!-- Reproducción de video -->
- <video width="100%" controls autoplay loop="false" style="margin-top: 20px;">
+ <video id="video-player" width="100%" controls autoplay style="margin-top: 20px;">
   <source src="viaje.m4v" type="video/mp4">
   Tu navegador no soporta la reproducción de video.
 </video>
 
- <!-- Loading message -->
- <div id="loading-message" class="loading-message">
-   <span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
-   <div class="loading-animation"></div>
- </div>
+<!-- Loading message -->
+<div id="loading-message" class="loading-message">
+  <span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
+  <div class="loading-animation"></div>
+</div>
 </div> 
+
+<script>
+ // JavaScript para detener el video después de la primera reproducción
+ document.getElementById('video-player').addEventListener('ended', function() {
+   this.pause(); // Pausa el video al finalizar
+   this.currentTime = 0; // Reinicia el video al inicio
+ });
+</script>
 
 <div class="language-selector" id="language-selector">
   <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
