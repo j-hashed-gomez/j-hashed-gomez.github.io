@@ -1,0 +1,117 @@
+/* estilos.css */
+
+body {
+    background-color: black;
+    background-image: radial-gradient(
+      rgba(0, 150, 0, 0.75), black 120%
+    );
+    height: 100vh;
+    margin: 0;
+    overflow-y: scroll;
+    padding: 2rem;
+    color: white;
+    font: 1rem Inconsolata, monospace;
+    text-shadow: 0 0 5px #C8C8C8;
+  }
+  
+  ::selection {
+    background: #0080FF;
+    text-shadow: none;
+  }
+  
+  pre {
+    margin: 0;
+  }
+  
+  .menu {
+    float: left;
+    width: 20%;
+    height: 80%;
+    position: relative;
+  }
+  
+  .mainContent {
+    float: left;
+    width: 75%;
+    height: 80%;
+  }
+  
+  .label {
+    color: white;
+    padding: 8px;
+  }
+  
+  .label-keyword {
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px #1a70c2, -2px -2px 5px #27b6ff;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .label-keyword:hover {
+    box-shadow: inset 2px 2px 5px #1a70c2, inset -2px -2px 5px #27b6ff;
+  }
+  
+  .language-selector {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  .language-selector img {
+    width: 60px;
+    height: 40px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  
+  .language-selector-text {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .top-right-flags {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .top-right-flags img {
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+  
+  .loading-message {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .loading-animation {
+    margin-left: 5px;
+    border: 2px solid white;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
