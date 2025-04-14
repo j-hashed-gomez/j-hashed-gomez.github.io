@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <div class="menu hidden">
+    <p style="text-align: center;"><img src='img/mifoto.png' class="center" style="max-width: 100%; height: auto;"></p>
+    <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
+    <p><i class="material-icons">location_on</i> Liérganes 39722, Cantabria, ES</p>
+    <p><i class="material-icons">smartphone</i> +34 647721924</p>
+    <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
+    <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
+
+    <p><b>.::PROJECTS::.</b></p>
+<ul>
+  <li>
+    <a href="resume.html" target="_blank" style="color: #00ffff; text-decoration: none;">
+      Resume
+    </a>
+  </li>
+  <li>
+    <a href="api_owner.html" target="_blank" style="color: #00ffff; text-decoration: none;">
+      API Owner
+    </a>
+  </li>
+</ul>
+
+    <div id="loading-message" class="loading-message">
+      <span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
+      <div class="loading-animation"></div>
+    </div>
+  </div>
+
+<div class="top-right-flags hidden" id="top-right-flags">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
+</div>
+
+<div class="mainContent" id="mainContent"></div>
+
+<script>
+var str_es = "<p><b>.::GOBERNANZA DE APIS::.</b></p><p>API Addicts aborda la gobernanza de APIs como una disciplina estratégica que permite escalar de forma sostenible la entrega de valor digital. Establece políticas, directrices y buenas prácticas para definir cómo deben diseñarse, desarrollarse, documentarse, versionarse, monitorizarse y retirarse las APIs.</p><p>Todo esto permite fomentar la reutilización, incrementar la calidad y seguridad, y facilitar la colaboración entre equipos.</p><p><b>.::CICLO DE VIDA DE LAS APIS::.</b></p><p>El ciclo de vida de las APIs gestionado por API Addicts se apoya en tecnologías clave:</p><ul><li><b>Diseño:</b> Stoplight, Swagger, Postman</li><li><b>Desarrollo:</b> Node.js, Spring Boot, FastAPI</li><li><b>Testing:</b> Postman, SoapUI, Newman</li><li><b>Deploy:</b> Jenkins, GitLab CI/CD, Docker, Kubernetes</li><li><b>Gobernanza:</b> Apigee, Azure API Management, Kong</li><li><b>Monitorización:</b> Prometheus, Grafana, ELK, DataDog</li></ul>";
+
+var str_en = "<p><b>.::API GOVERNANCE::.</b></p><p>API Addicts addresses API governance as a strategic discipline to sustainably scale the delivery of digital value. It establishes policies, guidelines and best practices to define how APIs should be designed, developed, documented, versioned, monitored and retired.</p><p>All of this fosters reuse, increases quality and security, and facilitates team collaboration.</p><p><b>.::API LIFECYCLE::.</b></p><p>The API lifecycle managed by API Addicts relies on key technologies:</p><ul><li><b>Design:</b> Stoplight, Swagger, Postman</li><li><b>Development:</b> Node.js, Spring Boot, FastAPI</li><li><b>Testing:</b> Postman, SoapUI, Newman</li><li><b>Deploy:</b> Jenkins, GitLab CI/CD, Docker, Kubernetes</li><li><b>Governance:</b> Apigee, Azure API Management, Kong</li><li><b>Monitoring:</b> Prometheus, Grafana, ELK, DataDog</li></ul>";
+
+var i = 0, isTag, text, typingInterval, currentContent;
+
+function typeWriter(content) {
+    currentContent = content;
+    i = 0;
+    text = '';
+    function type() {
+        text = content.slice(0, ++i);
+        if (text === content) return completeLoading();
+        document.getElementById('mainContent').innerHTML = text;
+        var char = text.slice(-1);
+        if( char === '<' ) isTag = true;
+        if( char === '>' ) isTag = false;
+        if (isTag) return type();
+        typingInterval = setTimeout(type, 1);
+    }
+    type();
+}
+
+function showFullText() {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = currentContent;
+    completeLoading();
+}
+
+function completeLoading() {
+    var loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) loadingMessage.style.display = 'none';
+}
+
+function resetAndStart(content) {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = '';
+    startContent(content);
+}
+
+function startContent(content) {
+    document.querySelector('.menu').classList.remove('hidden');
+    document.getElementById('top-right-flags').classList.remove('hidden');
+    document.getElementById('loading-message').style.display = 'flex';
+    typeWriter(content);
+}
+
+document.getElementById('flag-es-top').addEventListener('click', function() {
+    resetAndStart(str_es);
+    updateLoadingMessage('es');
+});
+
+document.getElementById('flag-uk-top').addEventListener('click', function() {
+    resetAndStart(str_en);
+    updateLoadingMessage('en');
+});
+
+document.addEventListener('keydown', function() {
+    showFullText();
+});
+
+function updateLoadingMessage(language) {
+    var loadingText = document.getElementById('loading-text');
+    loadingText.textContent = (language === 'es') ?
+      'Cargando perfil por favor presiona cualquier tecla resumir' :
+      'Loading profile please press any key to resume';
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+window.onload = function() {
+  var lang = getCookie("selectedLanguage") || "es";
+  var content = lang === "es" ? str_es : str_en;
+  startContent(content);
+  updateLoadingMessage(lang);
+};
+</script>
+
+</body>
+</html>
