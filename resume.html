@@ -53,7 +53,7 @@
    </script>
    
 
-<div class="language-selector hidden" id="lang-selection">
+<div class="language-selector" id="language-selector">
   <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
@@ -336,41 +336,19 @@ function updateLoadingMessage(language) {
 
 
 <script>
-function setCookie(name, value, days) {
-  var expires = "";
-  if (days) {
-    var date = new Date();
-    date.setTime(date.getTime() + (days*24*60*60*1000));
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
 function getCookie(name) {
-  var nameEQ = name + "=";
-  var ca = document.cookie.split(';');
-  for(var i=0;i < ca.length;i++) {
-    var c = ca[i];
-    while (c.charAt(0)==' ') c = c.substring(1,c.length);
-    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-  }
-  return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
 }
+
 window.onload = function() {
-  var lang = getCookie("selectedLanguage");
-  if (!lang) {
-    document.getElementById("lang-selection").classList.remove("hidden");
-  } else {
-    var content = lang === "es" ? str_es : str_en;
-    startContent(content);
-    updateLoadingMessage(lang);
-  }
+  var lang = getCookie("selectedLanguage") || "es";
+  var content = lang === "es" ? str_es : str_en;
+  startContent(content);
+  updateLoadingMessage(lang);
 };
-document.getElementById('flag-es').addEventListener('click', function() {
-  setCookie("selectedLanguage", "es", 365);
-});
-document.getElementById('flag-uk').addEventListener('click', function() {
-  setCookie("selectedLanguage", "en", 365);
-});
 </script>
+
 </body>
 </html>

@@ -2,12 +2,36 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=resume.html">
-  <script>
-    window.location.href = "resume.html";
-  </script>
+  <link rel="stylesheet" href="estilos.css">
+  <title>Select Language</title>
 </head>
 <body>
-  Si no redirige automáticamente, haz <a href="resume.html">click aquí</a>.
+  <div class="language-selector" id="language-selector">
+    <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-en" alt="English">
+  </div>
+
+  <script>
+    function setCookie(name, value, days) {
+      let expires = "";
+      if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+
+    document.getElementById("flag-es").addEventListener("click", function() {
+      setCookie("selectedLanguage", "es", 365);
+      window.location.href = "resume.html";
+    });
+
+    document.getElementById("flag-en").addEventListener("click", function() {
+      setCookie("selectedLanguage", "en", 365);
+      window.location.href = "resume.html";
+    });
+  </script>
 </body>
 </html>
