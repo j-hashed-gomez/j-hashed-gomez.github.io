@@ -488,3 +488,18 @@ pre {
 .pdf-download-btn i {
   font-size: 18px;
 }
+
+/* Fix for technology buttons with both label and label-keyword classes */
+.label.label-keyword {
+  color: #000000 !important;
+  background: var(--gradient-primary) !important;
+}
+
+.label.label-keyword:hover {
+  color: #000000 !important;
+  background: linear-gradient(135deg, #00ff41, #ff4081) !important;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 255, 65, 0.6);
+  border-color: var(--primary-green);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}

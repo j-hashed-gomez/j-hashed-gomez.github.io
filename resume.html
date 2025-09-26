@@ -360,242 +360,310 @@ function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Colors matching website theme
+    // Professional color palette
     const colors = {
-        background: [10, 10, 10],
-        primary: [0, 255, 65],
-        secondary: [0, 128, 255],
-        accent: [255, 64, 129],
+        darkBg: [15, 23, 42],      // Slate dark
+        primary: [34, 197, 94],    // Green-500
+        secondary: [59, 130, 246], // Blue-500
+        accent: [168, 85, 247],    // Purple-500
         white: [255, 255, 255],
-        lightGray: [180, 180, 180],
-        darkGray: [80, 80, 80]
+        lightGray: [203, 213, 225], // Slate-300
+        mediumGray: [148, 163, 184], // Slate-400
+        text: [241, 245, 249]      // Slate-50
     };
 
-    // Set dark background
-    doc.setFillColor(...colors.background);
+    // Clean white background for professional look
+    doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
 
-    let yPos = 15;
+    let y = 20;
 
-    // HEADER SECTION WITH PHOTO PLACEHOLDER
-    // Header background gradient effect
-    doc.setFillColor(0, 255, 65, 0.1);
-    doc.rect(0, 0, 210, 45, 'F');
+    // HEADER SECTION
+    // Header background strip
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 5, 210, 35, 'F');
 
-    // Photo placeholder (since we can't easily load external images in jsPDF)
-    doc.setFillColor(...colors.secondary);
-    doc.rect(15, 10, 25, 30, 'F');
-    doc.setTextColor(...colors.white);
-    doc.setFontSize(8);
-    doc.text('PHOTO', 20, 27);
-
-    // Name and title
-    doc.setTextColor(...colors.primary);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('JOSE LUIS GÓMEZ MARÍN', 50, 20);
+    // Photo placeholder with professional styling
+    doc.setFillColor(...colors.white);
+    doc.rect(15, 10, 28, 35, 'F');
+    doc.setDrawColor(...colors.secondary);
+    doc.setLineWidth(2);
+    doc.rect(15, 10, 28, 35, 'S');
 
     doc.setTextColor(...colors.secondary);
-    doc.setFontSize(14);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PHOTO', 24, 30);
+
+    // Name and title
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('JOSE LUIS GOMEZ MARIN', 50, 20);
+
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('SRE & DevOps & Tech Lead', 50, 30);
+    doc.text('SRE & DevOps & Tech Lead', 50, 28);
 
     // Contact info
-    doc.setTextColor(...colors.white);
     doc.setFontSize(10);
-    const contactText = currentLanguage === 'es' ?
-        '📧 jose.gnu@gmail.com  |  🌍 Trabajo Remoto Disponible' :
-        '📧 jose.gnu@gmail.com  |  🌍 Remote Work Available';
-    doc.text(contactText, 50, 38);
+    doc.text('jose.gnu@gmail.com', 50, 36);
 
-    yPos = 55;
+    y = 55;
 
-    // LANGUAGES SECTION
+    // TWO-COLUMN LAYOUT
+    const leftCol = 20;
+    const rightCol = 115;
+    const colWidth = 85;
+
+    // LEFT COLUMN
+    // Languages section
     doc.setFillColor(...colors.secondary);
-    doc.rect(15, yPos - 2, 180, 6, 'F');
-    doc.setTextColor(...colors.background);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(currentLanguage === 'es' ? 'IDIOMAS' : 'LANGUAGES', 20, yPos + 2);
-
-    yPos += 12;
+    doc.rect(leftCol - 5, y - 3, colWidth, 8, 'F');
     doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'IDIOMAS' : 'LANGUAGES', leftCol, y + 2);
+
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('• Spanish (Native)  • English (C1 Advanced)', 20, yPos);
 
-    yPos += 15;
+    const languages = currentLanguage === 'es' ?
+        ['Español (Nativo)', 'Inglés (C1 Avanzado)'] :
+        ['Spanish (Native)', 'English (C1 Advanced)'];
 
-    // SKILLS SECTION
+    languages.forEach(lang => {
+        doc.text(`• ${lang}`, leftCol, y);
+        y += 6;
+    });
+
+    y += 8;
+
+    // Skills section
     doc.setFillColor(...colors.secondary);
-    doc.rect(15, yPos - 2, 180, 6, 'F');
-    doc.setTextColor(...colors.background);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(currentLanguage === 'es' ? 'COMPETENCIAS TÉCNICAS' : 'TECHNICAL SKILLS', 20, yPos + 2);
-
-    yPos += 12;
+    doc.rect(leftCol - 5, y - 3, colWidth, 8, 'F');
     doc.setTextColor(...colors.white);
-    doc.setFontSize(10);
-    const skills = [
-        '☁️ Cloud Architecture (Azure, AWS, GCP)',
-        '🐳 DevOps & Containers (Docker, Kubernetes)',
-        '⚡ Infrastructure as Code (Terraform, Puppet)',
-        '🚀 Team Leadership & SRE Practices'
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'COMPETENCIAS' : 'SKILLS', leftCol, y + 2);
+
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+
+    const skillCategories = currentLanguage === 'es' ? [
+        'Cloud Platforms',
+        '• Azure, AWS, GCP',
+        '',
+        'DevOps & SRE',
+        '• Docker, Kubernetes',
+        '• CI/CD, GitOps',
+        '• Monitoring & Observability',
+        '',
+        'Infrastructure',
+        '• Terraform, Puppet',
+        '• Linux System Admin',
+        '• Networking & Security',
+        '',
+        'Leadership',
+        '• Team Management',
+        '• Technical Strategy',
+        '• Stakeholder Communication'
+    ] : [
+        'Cloud Platforms',
+        '• Azure, AWS, GCP',
+        '',
+        'DevOps & SRE',
+        '• Docker, Kubernetes',
+        '• CI/CD, GitOps',
+        '• Monitoring & Observability',
+        '',
+        'Infrastructure',
+        '• Terraform, Puppet',
+        '• Linux System Admin',
+        '• Networking & Security',
+        '',
+        'Leadership',
+        '• Team Management',
+        '• Technical Strategy',
+        '• Stakeholder Communication'
     ];
 
-    skills.forEach(skill => {
-        doc.text(skill, 20, yPos);
-        yPos += 6;
+    skillCategories.forEach(skill => {
+        if (skill === '') {
+            y += 3;
+        } else if (!skill.startsWith('•')) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...colors.primary);
+            doc.text(skill, leftCol, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...colors.darkBg);
+            y += 6;
+        } else {
+            doc.text(skill, leftCol, y);
+            y += 5;
+        }
     });
 
-    yPos += 10;
-
-    // PROFESSIONAL SUMMARY
-    doc.setFillColor(...colors.secondary);
-    doc.rect(15, yPos - 2, 180, 6, 'F');
-    doc.setTextColor(...colors.background);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(currentLanguage === 'es' ? 'RESUMEN PROFESIONAL' : 'PROFESSIONAL SUMMARY', 20, yPos + 2);
-
-    yPos += 12;
+    // RIGHT COLUMN - Professional Summary
+    y = 55;
+    doc.setFillColor(...colors.accent);
+    doc.rect(rightCol - 5, y - 3, colWidth, 8, 'F');
     doc.setTextColor(...colors.white);
-    doc.setFontSize(10);
-    const summary = currentLanguage === 'es' ?
-        'Profesional de TI con +20 años de experiencia. Especializado en liderazgo de equipos, servicios en la nube y administración de sistemas. Apasionado por DevOps, SRE y arquitecturas escalables.' :
-        'IT Professional with +20 years of experience. Specialized in team leadership, cloud services and system administration. Passionate about DevOps, SRE and scalable architectures.';
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'PERFIL PROFESIONAL' : 'PROFESSIONAL PROFILE', rightCol, y + 2);
 
-    const summaryLines = doc.splitTextToSize(summary, 175);
-    summaryLines.forEach(line => {
-        doc.text(line, 20, yPos);
-        yPos += 5;
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+
+    const profile = currentLanguage === 'es' ?
+        'Profesional de TI con más de 20 años de experiencia. Especializado en arquitecturas cloud, liderazgo técnico y prácticas DevOps/SRE. Experto en plataformas Azure, AWS y GCP, con un historial comprobado en la gestión de infraestructuras críticas y equipos de alto rendimiento.' :
+        'IT Professional with over 20 years of experience. Specialized in cloud architectures, technical leadership and DevOps/SRE practices. Expert in Azure, AWS and GCP platforms, with a proven track record in managing critical infrastructures and high-performance teams.';
+
+    const profileLines = doc.splitTextToSize(profile, colWidth - 5);
+    profileLines.forEach(line => {
+        doc.text(line, rightCol, y);
+        y += 5;
     });
 
-    yPos += 10;
+    y += 10;
 
-    // WORK EXPERIENCE
-    doc.setFillColor(...colors.secondary);
-    doc.rect(15, yPos - 2, 180, 6, 'F');
-    doc.setTextColor(...colors.background);
-    doc.setFontSize(12);
+    // Work Experience
+    doc.setFillColor(...colors.accent);
+    doc.rect(rightCol - 5, y - 3, colWidth, 8, 'F');
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text(currentLanguage === 'es' ? 'EXPERIENCIA PROFESIONAL' : 'PROFESSIONAL EXPERIENCE', 20, yPos + 2);
+    doc.text(currentLanguage === 'es' ? 'EXPERIENCIA' : 'EXPERIENCE', rightCol, y + 2);
 
-    yPos += 15;
+    y += 15;
 
-    // Work experiences data
+    // Work experiences with corrected data
     const experiences = currentLanguage === 'es' ? [
         {
-            period: 'Abril 2025 - Presente',
+            period: 'Abr 2025 - Presente',
             title: 'DevOps Manager',
             company: 'CloudAppi',
-            description: 'Liderazgo de equipo DevOps/SRE. Implementación de mejores prácticas y metodologías.',
-            stack: 'Azure, AWS, GCP, Kubernetes, CI/CD'
+            description: 'Liderazgo de equipos DevOps/SRE aplicando mejores prácticas en entorno multinacional.',
+            stack: 'Azure • AWS • GCP • K8s • CI/CD'
         },
         {
-            period: 'Enero 2022 - Abril 2025',
-            title: 'Líder Técnico Infraestructura/SRE',
+            period: 'Ene 2022 - Abr 2025',
+            title: 'SRE Technical Lead',
             company: 'Ingram Micro Cloud',
-            description: 'Garantía de alta disponibilidad, escalabilidad y observabilidad en plataforma de $55B.',
-            stack: 'Azure, AWS, Kubernetes, Python, DataDog, IaC'
+            description: 'Garantía de HA, escalabilidad y observabilidad en plataforma de $55B.',
+            stack: 'Azure • K8s • Python • DataDog'
         },
         {
-            period: 'Julio 2021 - Enero 2022',
-            title: 'Ingeniero Senior - OpenShift',
+            period: 'Jul 2021 - Ene 2022',
+            title: 'Senior Support Engineer',
             company: 'Red Hat',
-            description: 'Soporte avanzado OpenShift en servicios IBM Cloud Pak con tecnologías IA.',
-            stack: 'OpenShift, Kubernetes, RHEL, IBM Cloud Pak'
+            description: 'Soporte avanzado OpenShift en IBM Cloud Pak con tecnologías IA.',
+            stack: 'OpenShift • RHEL • IBM Cloud'
         },
         {
-            period: 'Abril 2019 - Julio 2021',
-            title: 'Administrador Sistemas Cloud',
+            period: 'Abr 2019 - Jul 2021',
+            title: 'Cloud System Administrator',
             company: 'Ingram Micro Cloud',
-            description: 'Migración Odin Automation a CloudBlue. Diseño nueva plataforma microservicios.',
-            stack: 'Azure AKS, AWS, GCP, Docker, Terraform'
+            description: 'Migración Odin a CloudBlue. Diseño de plataforma de microservicios.',
+            stack: 'Azure AKS • Docker • Terraform'
         }
     ] : [
         {
-            period: 'April 2025 - Present',
+            period: 'Apr 2025 - Present',
             title: 'DevOps Manager',
             company: 'CloudAppi',
-            description: 'Leading DevOps/SRE team. Implementation of best practices and methodologies.',
-            stack: 'Azure, AWS, GCP, Kubernetes, CI/CD'
+            description: 'Leading DevOps/SRE teams applying best practices in multinational environment.',
+            stack: 'Azure • AWS • GCP • K8s • CI/CD'
         },
         {
-            period: 'January 2022 - April 2025',
-            title: 'Infrastructure/SRE Technical Lead',
+            period: 'Jan 2022 - Apr 2025',
+            title: 'SRE Technical Lead',
             company: 'Ingram Micro Cloud',
-            description: 'Ensuring high availability, scalability and observability on $55B platform.',
-            stack: 'Azure, AWS, Kubernetes, Python, DataDog, IaC'
+            description: 'Ensuring HA, scalability and observability on $55B platform.',
+            stack: 'Azure • K8s • Python • DataDog'
         },
         {
-            period: 'July 2021 - January 2022',
-            title: 'Senior Engineer - OpenShift',
+            period: 'Jul 2021 - Jan 2022',
+            title: 'Senior Support Engineer',
             company: 'Red Hat',
-            description: 'Advanced OpenShift support on IBM Cloud Pak services with AI technologies.',
-            stack: 'OpenShift, Kubernetes, RHEL, IBM Cloud Pak'
+            description: 'Advanced OpenShift support on IBM Cloud Pak with AI technologies.',
+            stack: 'OpenShift • RHEL • IBM Cloud'
         },
         {
-            period: 'April 2019 - July 2021',
+            period: 'Apr 2019 - Jul 2021',
             title: 'Cloud System Administrator',
             company: 'Ingram Micro Cloud',
-            description: 'Migration from Odin Automation to CloudBlue. New microservices platform design.',
-            stack: 'Azure AKS, AWS, GCP, Docker, Terraform'
+            description: 'Migration from Odin to CloudBlue. Microservices platform design.',
+            stack: 'Azure AKS • Docker • Terraform'
         }
     ];
 
-    experiences.forEach(exp => {
-        if (yPos > 250) {
+    experiences.forEach((exp, index) => {
+        if (y > 240) {
             doc.addPage();
-            doc.setFillColor(...colors.background);
+            doc.setFillColor(255, 255, 255);
             doc.rect(0, 0, 210, 297, 'F');
-            yPos = 20;
+            y = 30;
         }
 
         // Period and company
         doc.setTextColor(...colors.primary);
-        doc.setFontSize(11);
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
-        doc.text(exp.period, 20, yPos);
+        doc.text(exp.period, rightCol, y);
 
         doc.setTextColor(...colors.accent);
-        doc.text(exp.company, 120, yPos);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        const companyText = doc.splitTextToSize(exp.company, 45);
+        doc.text(companyText, rightCol + 50, y);
 
-        yPos += 7;
+        y += 6;
 
         // Job title
-        doc.setTextColor(...colors.white);
+        doc.setTextColor(...colors.darkBg);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
-        doc.text(exp.title, 20, yPos);
+        doc.text(exp.title, rightCol, y);
 
-        yPos += 6;
+        y += 6;
 
         // Description
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        const descLines = doc.splitTextToSize(exp.description, 175);
+        const descLines = doc.splitTextToSize(exp.description, colWidth - 5);
         descLines.forEach(line => {
-            doc.text(line, 20, yPos);
-            yPos += 4;
+            doc.text(line, rightCol, y);
+            y += 4;
         });
-
-        yPos += 2;
 
         // Tech stack
         doc.setTextColor(...colors.secondary);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
-        doc.text(`Tech Stack: ${exp.stack}`, 20, yPos);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        const stackLines = doc.splitTextToSize(exp.stack, colWidth - 5);
+        stackLines.forEach(line => {
+            doc.text(line, rightCol, y);
+            y += 3;
+        });
 
-        yPos += 12;
+        y += 8;
     });
 
     // Footer
     const currentDate = new Date().toLocaleDateString(currentLanguage === 'es' ? 'es-ES' : 'en-US');
-    doc.setTextColor(...colors.darkGray);
+    doc.setTextColor(...colors.mediumGray);
     doc.setFontSize(8);
-    doc.text(currentLanguage === 'es' ? `Generado el ${currentDate}` : `Generated on ${currentDate}`, 20, 285);
+    doc.setFont('helvetica', 'normal');
+    doc.text(currentLanguage === 'es' ? `Generado: ${currentDate}` : `Generated: ${currentDate}`, 20, 285);
     doc.text('jose.gnu@gmail.com', 150, 285);
 
     // Save the PDF
