@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { background: #0a0a0a; color: white; font-family: monospace; padding: 20px; }
+    .pdf-download-btn {
+      background: linear-gradient(135deg, #00ff41, #0080ff);
+      border: none;
+      color: #0a0a0a;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 200px;
+      margin: 20px 0;
+    }
+    .pdf-download-btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <h1>Test PDF Download</h1>
+
+  <div class="pdf-download-section">
+    <button id="download-pdf-btn" class="pdf-download-btn">
+      <i class="material-icons">download</i> Download PDF Test
+    </button>
+  </div>
+
+  <script>
+    function generateTestPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Set background to dark
+      doc.setFillColor(10, 10, 10);
+      doc.rect(0, 0, 210, 297, 'F');
+
+      // Add text
+      doc.setTextColor(0, 255, 65);
+      doc.setFontSize(24);
+      doc.text('Test PDF Generation', 20, 30);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.text('This is a test PDF to verify functionality.', 20, 50);
+
+      doc.save('test.pdf');
+    }
+
+    document.getElementById('download-pdf-btn').addEventListener('click', generateTestPDF);
+  </script>
+</body>
+</html>
