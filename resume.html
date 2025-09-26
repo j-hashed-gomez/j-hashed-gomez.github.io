@@ -356,7 +356,40 @@ function updatePdfButton(language) {
 // PDF Generation functionality
 var currentLanguage = 'es';
 
+// Function to load image as base64
+function getImageAsBase64(imgPath, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to image size
+        canvas.width = this.width;
+        canvas.height = this.height;
+
+        // Draw image to canvas
+        ctx.drawImage(this, 0, 0);
+
+        // Get base64 data
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        callback(dataURL);
+    };
+    img.onerror = function() {
+        console.log('Error loading image, using placeholder');
+        callback(null);
+    };
+    img.crossOrigin = 'anonymous';
+    img.src = imgPath;
+}
+
 function generatePDF() {
+    // First, try to load the image
+    getImageAsBase64('img/mifoto.png', function(imageData) {
+        generatePDFWithImage(imageData);
+    });
+}
+
+function generatePDFWithImage(imageData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -383,17 +416,40 @@ function generatePDF() {
     doc.setFillColor(...colors.primary);
     doc.rect(0, 5, 210, 35, 'F');
 
-    // Photo placeholder with professional styling
-    doc.setFillColor(...colors.white);
-    doc.rect(15, 10, 28, 35, 'F');
-    doc.setDrawColor(...colors.secondary);
-    doc.setLineWidth(2);
-    doc.rect(15, 10, 28, 35, 'S');
-
-    doc.setTextColor(...colors.secondary);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PHOTO', 24, 30);
+    // Photo - real image or placeholder
+    if (imageData) {
+        try {
+            // Add the real photo
+            doc.addImage(imageData, 'JPEG', 15, 10, 28, 35);
+            // Add border around the photo
+            doc.setDrawColor(...colors.secondary);
+            doc.setLineWidth(2);
+            doc.rect(15, 10, 28, 35, 'S');
+        } catch (error) {
+            console.log('Error adding image, using placeholder');
+            // Fallback to placeholder
+            doc.setFillColor(...colors.white);
+            doc.rect(15, 10, 28, 35, 'F');
+            doc.setDrawColor(...colors.secondary);
+            doc.setLineWidth(2);
+            doc.rect(15, 10, 28, 35, 'S');
+            doc.setTextColor(...colors.secondary);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PHOTO', 24, 30);
+        }
+    } else {
+        // Placeholder when image fails to load
+        doc.setFillColor(...colors.white);
+        doc.rect(15, 10, 28, 35, 'F');
+        doc.setDrawColor(...colors.secondary);
+        doc.setLineWidth(2);
+        doc.rect(15, 10, 28, 35, 'S');
+        doc.setTextColor(...colors.secondary);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PHOTO', 24, 30);
+    }
 
     // Name and title
     doc.setTextColor(...colors.white);
