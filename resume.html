@@ -33,7 +33,12 @@
   <li style="color: #00ffff;">🚀 Team Leadership</li>
 </ul>
 
-   
+    <!-- Game of Life Canvas -->
+    <div style="margin: 20px 0; text-align: center;">
+      <p style="color: #00ffff; font-size: 12px; margin-bottom: 10px;">Conway's Game of Life</p>
+      <canvas id="game-of-life" width="200" height="200" style="border: 1px solid #00ffff; background: #000;"></canvas>
+    </div>
+
     <!-- Loading message -->
     <div id="loading-message" class="loading-message">
       <br></br><br></br><br></br><span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
@@ -747,7 +752,101 @@ window.onload = function() {
 
   // Add PDF download button event listener
   document.getElementById('download-pdf-btn').addEventListener('click', generatePDF);
+
+  // Initialize Game of Life
+  initGameOfLife();
 };
+
+// Conway's Game of Life Implementation
+function initGameOfLife() {
+  const canvas = document.getElementById('game-of-life');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const cellSize = 10;
+  const cols = canvas.width / cellSize;
+  const rows = canvas.height / cellSize;
+
+  let grid = createRandomGrid();
+  let generation = 0;
+  const maxGenerations = 100;
+
+  function createRandomGrid() {
+    const newGrid = [];
+    for (let i = 0; i < rows; i++) {
+      newGrid[i] = [];
+      for (let j = 0; j < cols; j++) {
+        // 30% chance of cell being alive
+        newGrid[i][j] = Math.random() < 0.3 ? 1 : 0;
+      }
+    }
+    return newGrid;
+  }
+
+  function countNeighbors(grid, x, y) {
+    let count = 0;
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        if (i === 0 && j === 0) continue;
+        const row = (x + i + rows) % rows;
+        const col = (y + j + cols) % cols;
+        count += grid[row][col];
+      }
+    }
+    return count;
+  }
+
+  function nextGeneration() {
+    const newGrid = [];
+    for (let i = 0; i < rows; i++) {
+      newGrid[i] = [];
+      for (let j = 0; j < cols; j++) {
+        const neighbors = countNeighbors(grid, i, j);
+        const cell = grid[i][j];
+
+        // Conway's rules
+        if (cell === 1 && (neighbors === 2 || neighbors === 3)) {
+          newGrid[i][j] = 1; // Survival
+        } else if (cell === 0 && neighbors === 3) {
+          newGrid[i][j] = 1; // Birth
+        } else {
+          newGrid[i][j] = 0; // Death
+        }
+      }
+    }
+    return newGrid;
+  }
+
+  function draw() {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (grid[i][j] === 1) {
+          ctx.fillStyle = '#00ffff';
+          ctx.fillRect(j * cellSize, i * cellSize, cellSize - 1, cellSize - 1);
+        }
+      }
+    }
+  }
+
+  function animate() {
+    if (generation < maxGenerations) {
+      draw();
+      grid = nextGeneration();
+      generation++;
+      setTimeout(animate, 150); // Update every 150ms
+    } else {
+      // Restart with new random pattern
+      grid = createRandomGrid();
+      generation = 0;
+      setTimeout(animate, 150);
+    }
+  }
+
+  animate();
+}
 </script>
 
 </body>
