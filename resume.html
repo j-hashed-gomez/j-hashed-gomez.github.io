@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .terminal-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.2em;
+      background: #00ff00;
+      animation: blink 1s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="menu hidden">
+    <p style="text-align: center;"><img src='img/mifoto.png'></p>
+    <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
+    <p><i class="material-icons">public</i> Remote Work Available</p>
+    <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
+    <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
+
+    <div class="pdf-download-section">
+      <button id="download-pdf-btn" class="pdf-download-btn">
+        <i class="material-icons">download</i> <span id="pdf-btn-text">Descargar CV PDF</span>
+      </button>
+    </div>
+
+    <p><b>.::SKILLS & TECHNOLOGIES::.</b></p>
+<ul>
+  <li style="color: #00ffff;">☁️ Cloud Architecture</li>
+  <li style="color: #00ffff;">🐳 DevOps & Containers</li>
+  <li style="color: #00ffff;">⚡ Clouds and On-prem Environments</li>
+  <li style="color: #00ffff;">🚀 Team Leadership</li>
+</ul>
+
+    <!-- Game of Life Canvas -->
+    <div style="margin: 20px 0; text-align: center;">
+      <p style="color: #00ffff; font-size: 12px; margin-bottom: 10px;">Conway's Game of Life</p>
+      <canvas id="game-of-life" width="200" height="200" style="border: 1px solid #00ffff; background: #000;"></canvas>
+    </div>
+
+    <!-- Loading message -->
+    <div id="loading-message" class="loading-message">
+      <br></br><br></br><br></br><span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
+      <div class="loading-animation"></div>
+    </div>
+   </div> 
+   
+   <script>
+     document.getElementById('video-player').addEventListener('loadedmetadata', function() {
+       var videoDuration = this.duration;
+       var pauseTime = videoDuration - 1; // 1 segundo antes de que termine
+   
+       // Programar pausa 1 segundo antes del final
+       setTimeout(() => {
+         this.pause();
+       }, pauseTime * 1000); // Convertir segundos a milisegundos
+     });
+   </script>
+   
+
+<div class="language-selector" id="language-selector">
+  <div class="language-selector-text">Seleccione su idioma preferido / Select your preferred language</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk" alt="English">
+</div>
+
+<div class="top-right-flags hidden" id="top-right-flags">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png" id="flag-es-top" alt="Spanish">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
+</div>
+
+<div class="mainContent" id="mainContent"></div>
+
+<div class="footer-info">
+  > jose.gnu@gmail.com | SRE & DevOps & Tech Lead<br>
+  > Powered by pure HTML/CSS/JS - No frameworks, No databases
+</div>
+
+<script>
+var str_es = "<p><b>.::SOBRE MÍ::.</b></p><p>Fascinado por la informática desde que mis padres me regalaron un Sinclair Spectrum 128k en 1986, cuando los dinosaurios aún caminaban sobre la tierra. Desde ese maravilloso día, hasta hoy, 40 años después, no recuerdo un solo día en que no haya aprendido algo nuevo, encontrado algo emocionante en lo que me gustara profundizar.</p>\
+<p>Creo que estoy en un punto dulce de mi carrera profesional. Con más de 20 años de experiencia, he tenido la oportunidad de aprender este negocio desde los fundamentos, creciendo paso a paso, sin apresurarme, saboreando cada nuevo trabajo, cada nuevo rol.</p>\
+<p>Ahora puedo ofrecerme como un profesional de TI de alto nivel con una sólida experiencia en temas clave: Liderazgo de equipos, Servicios en la Nube, Redes y Administración de Sistemas. Enfocado en los resultados, compromiso a largo plazo y cultura de equipo en el ADN.</p>\
+<p></p><p><b>.::EXPERIENCIA LABORAL::.</b></p><p> \
+<table> \
+<tr> \
+  <td> <p>Abril 2025 - Presente : DevOps Manager en <span style='color:red;'>CloudAppi</span></p></td> \
+  <td><p>Liderando un ejército de Guerreros :</p><ul> \
+<li>Aplicar las mejores prácticas y metodologías DevOps/SRE</li>\
+<li>Asegurar la satisfacción de nuestros clientes</li>\
+<li>Reforzar al equipo en su proceso de crecimiento, mejora continua y optimización de procesos</li>\
+</ul></p>\
+<p>En un entorno multi-nacional, multi-cliente, con un amplio abanico de tecnologías, ofrecemos a nuestros clientes una variedad de servicios incluídos en nuestro catálogo. Estamos comprometidos en la utilización de las mejores tecnologías y las metodologías más efectivas para aportar valor real a sus negocios</p><ul> \
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Automation</span> <span class='label label-keyword'>App Architecture</span> <span class='label label-keyword'>SRE/DevOps</span></p></td> \
+<tr> \   <tr> \
+<tr> \
+<tr> \
+  <td> <p>Enero 2022 - Abril 2025 : Líder Técnico del Equipo de Infraestructura/SRE en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>En una plataforma de 55 billones de dólares estamos a cargo de :</p><ul> \
+<li>Garantizar Alta Disponibilidad</li>\
+<li>Garantizar Escalabilidad</li>\
+<li>Garantizar Observabilidad</li>\
+</ul></p>\
+<p>Trabajando junto a diferentes equipos, definimos estándares y procesos para alinear a las personas en objetivos clave. Nuestro territorio de caza es todo el CI/CD, básicamente estamos en línea en cada pipeline de todos asegurando que cumplimos con los estándares esperados.</p><ul> \
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>Automatización</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Python</span> <span class='label label-keyword'>IaC</span> <span class='label label-keyword'>DataDog</span></p></td> \
+<tr> \   <tr> \
+<tr> \
+  <td> <p>Julio 2021 - Enero 2022 : Ingeniero de Soporte Senior - OpenShift en <span style='color:red;'>Red Hat</span></p></td> \
+  <td><p>Haciendo las cosas posibles en el equipo de soporte, algunas de mis responsabilidades incluyen:  <ul> \
+<li>Este es un servicio de soporte muy nuevo, trabajando junto a IBM proporcionamos soporte avanzado de OpenShift en su servicio Cloud Pak, que mejora los servicios en la nube agregando muchas ventajas impulsadas por IA</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>OpenShift</span> <span class='label label-keyword'>RHEL</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>Kubernetes</span> <span class='label label-keyword'>IBM Cloud Pak</span> <span class='label label-keyword'>Cloud Híbrida</span></p></td> \
+<tr> \   <tr> \
+  <td> <p>Abril 2019 - Julio 2021 : Administrador de Sistemas en la Nube en <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>Aquí el desafío fue la migración de Odin Automation, una aplicación monolítica que se ejecutaba en centros de datos físicos en todo el mundo, a CloudBlue, un mercado de 5 mil millones de dólares que fue diseñado como un mercado de microservicios y desplegado en Azure AKS<ul> \
+<li>Diseñamos toda la nueva plataforma en proveedores de la nube como Azure, AWS y GCP</li>\
+<li>Actuamos como Arquitectos y Arquitectos de Soluciones alineando la estrategia comercial y técnica</li>\
+<li>Soporte Técnico de Primer Nivel</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>Linux</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>k8s</span> <span class='label label-keyword'>PowerShell</span> <span class='label label-keyword'>VMware</span> <span class='label label-keyword'>Terraform</span> <span class='label label-keyword'>Puppet</span>\</p></td> \
+<tr> \
+  <td> <p>Julio 2016 - Abril 2019 : Líder de Equipo: Redes y Seguridad Perimetral en <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td><p>Este fue un proyecto para el Gobierno de Cantabria que tuve el honor de liderar: <ul> \
+<li>Máxima autoridad en temas de Redes y Seguridad Perimetral</li>\
+<li>Mantenimiento de la Infraestructura de Redes y diseño para nuevos requisitos y mejoras</li>\
+<li>Responsable de todas las comunicaciones con el cliente</li>\
+<li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Cisco</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Juniper</span> <span class='label label-keyword'>BigIP F5</span> <span class='label label-keyword'>IPS/IDS</span> <span class='label label-keyword'>WAF</span> <span class='label label-keyword'>Bluecoat</span> <span class='label label-keyword'>VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>Junio 2011 - Julio 2016 : Líder de Equipo: Jefe de Línea de Negocios Estratégicos en <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+  <td><p>Durante este período estuve liderando dos equipos: el equipo de Redes y Seguridad Perimetral, y el equipo de Housing: <ul> \
+<li>Desde el equipo de Redes éramos responsables de mantener toda la infraestructura de redes. Este contrato también incluyó una renovación de hardware, lo que significa que tuvimos que reemplazar todo. A veces fue solo una renovación de hardware en el mismo proveedor, pero también hicimos migraciones a otros proveedores</li>\
+<li>Desde el equipo de Housing éramos responsables de mantener vivos y actualizados algunos sistemas que no se ajustaban a los estándares del cliente. Esto también incluye llevar algunos servicios a nuestro centro de datos en modo de servicios gestionados.</li>\
+<li>Responsable de todas las comunicaciones con el cliente</li>\
+<li>Supervisar el flujo de trabajo del equipo y asegurarse de que cumplíamos con los SLA del cliente.</li>\
+</ul></p>\
+<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Checkpoint</span> <span class='label label-keyword'>DNS</span> <span class='label label-keyword'>DBs</span> <span class='label label-keyword'>Apache</span> <span class='label label-keyword'>nginx</span> <span class='label label-keyword'>VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>Enero 2008 - Junio 2011 : 2º Nivel Redes y Seguridad Perimetral en <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+  <td><p>Proporcionando soporte de segundo nivel al Gobierno de Cantabria<ul> \
+<li>Desplegado desde cero una solución de monitoreo con Zabbix</li>\
+<li>Gestioné servicios de Internet como DNS (bind), relés de correo electrónico (postfix y sendmail), solución antispam (greylist + spam assasin + clamav + controles RBL)</li>\
+</ul></p>\
+<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Cisco Pix</span> <span class='label label-keyword'>Sendmail</span> <span class='label label-keyword'>Bind</span> <span class='label label-keyword'>Zabbix</span> <span class='label label-keyword'>Red Hat</span> <span class='label label-keyword'>ISA Proxy Server</span> <span class='label label-keyword'>Contivity VPN</span></p></td> \
+   <tr> \
+  <td> <p>Enero 2006 - Enero 2008 : Operador de Host en <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td><p>Operador de Mainframe<ul> \
+<li>Coordinador de Equipo</li>\
+<li>Instructor de Linux</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Mainframe</span> <span class='label label-keyword'>MVS</span> <span class='label label-keyword'>zOS</span> <span class='label label-keyword'>CONTROL-M</span> <span class='label label-keyword'>OPCC</span></p></td> \
+</tr></table>\
+<table> \
+  <tr> \
+  <th><p><b>.::CERTIFICACIONES::.</b></p></th> \
+  <th><p><b>.::FORMACIONES::.</b></p></th> \
+</tr> \
+  <tr><td><p>2021 - <span style='color:yellow;'>Red Hat</span> Certified System Administrator (RHCSA)</p></td><td><p>vSphere 4.1 Instalación Configuración y Gestión (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in <span style='color:yellow;'>Containers and Kubernetes</span> (EX180)</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2015 - <span style='color:yellow;'>Cisco</span> CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - <span style='color:yellow;'>Fortigate</span> Certified Networking Security Professional FCNSP v5</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2012 - <span style='color:yellow;'>Enterasys</span> Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2010 - <span style='color:yellow;'>ITIL</span> Foundations V3</p></td><td><p></p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p></p></td></tr> \
+</table>";
+
+var str_en = "<p><b>.::ABOUT::.</b></p><p>Fascinated by computing since my parents gave me a Sinclair Spectrum 128k in 1986, when dinosaurs still walked the earth. From that wonderful day, until today, 40 years later, I can't remember a single day I haven't learned something new, found something exciting I liked to dig into.</p>\
+<p>I think I'm in a sweet spot of my professional career. With more than 20 years of experience, I've had the opportunity to learn this business from the ground up, growing step by step, not rushing, savoring every new job, every new role.</p>\
+<p>Now I can offer myself as a top IT professional with a solid background in key subjects: Team Leading, Cloud Services, Networking and System Administration. Results focused, long term commitment and Team Culture in DNA.</p>\
+<p></p><p><b>.::WORK EXPERIENCE::.</b></p><p> \
+<table> \
+<tr> \
+  <td> <p>April 2025 - Present : DevOps Manager at <span style='color:red;'>CloudAppi</span></p></td> \
+  <td><p>Leading an army of Warriors :</p><ul> \
+<li>Applying DevOps/SRE best practices and methodologies</li>\
+<li>Ensuring our customers' satisfaction</li>\
+<li>Empowering the team in their journey of growth, continuous improvement, and process optimization</li>\
+</ul></p>\
+<p>In a multi-national, multi-client environment with a wide range of technologies, we offer our customers a variety of services from our catalog. We are committed to leveraging the latest technologies and the most effective methodologies to deliver real value to their businesses. </p><ul> \
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Automation</span> <span class='label label-keyword'>App Architecture</span> <span class='label label-keyword'>SRE/DevOps</span></p></td> \
+<tr> \   <tr> \
+<tr> \
+  <tr> \
+  <td> <p>January 2022 - April 2025 : Infrastructure/SRE Technical Team Lead at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>In a 55 Billion $ platform we are in charge of :</p><ul> \
+<li>Guarantee High Availability</li>\
+<li>Guarantee Scalability</li>\
+<li>Guarantee Observability</li>\
+</ul></p>\
+<p>Working together with different Teams we define standards and processes to align people on key objectives. Our hunting territory is the whole CI/CD, we are basically inline in everyone's pipeline ensuring we are in compliance with expected standards.</p><ul> \
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>Automation</span> <span class='label label-keyword'>CI/CD</span> <span class='label label-keyword'>Kubernetes</span>  <span class='label label-keyword'>Python</span> <span class='label label-keyword'>IaC</span> <span class='label label-keyword'>DataDog</span></p></td> \
+<tr> \   <tr> \
+<tr> \
+  <td> <p>July 2021 - Jan 2022 : Senior Support Engineer - OpenShift at <span style='color:red;'>Red Hat</span></p></td> \
+  <td><p>Making things possible at Support Team some of my responsibilities include:  <ul> \
+<li>This is a very new Support Service, working together with IBM we are providing OpenShift advanced Support on their Cloud Pak service which enhances Cloud Services by adding lots of perks boosted by AI</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>OpenShift</span> <span class='label label-keyword'>RHEL</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>Kubernetes</span> <span class='label label-keyword'>IBM Cloud Pak</span> <span class='label label-keyword'>Hybrid Cloud</span></p></td> \
+<tr> \   <tr> \
+  <td> <p>April 2019 - July 2021 : Cloud System Administrator at <span style='color:red;'>Ingram Micro Cloud</span></p></td> \
+  <td><p>Here the challenge was the migration from Odin Automation, a monolithic app running on physical DataCenters around the world, to CloudBlue a 5 Billion $ Marketplace which was designed as a micro-services Marketplace and deployed on Azure AKS<ul> \
+<li>We designed all the new platform in Cloud Providers like Azure, AWS and GCP</li>\
+<li>Acted as Architects and Solution Architects aligning business and technical strategy</li>\
+<li>Top Tier Technical Support</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Azure</span> <span class='label label-keyword'>AWS</span> <span class='label label-keyword'>GCP</span> <span class='label label-keyword'>Linux</span> <span class='label label-keyword'>Docker</span> <span class='label label-keyword'>k8s</span> <span class='label label-keyword'>PowerShell</span> <span class='label label-keyword'>VMware</span> <span class='label label-keyword'>Terraform</span> <span class='label label-keyword'>Puppet</span>\</p></td> \
+<tr> \
+  <td> <p>July 2016 - April 2019 : Team Leader: Networking and Perimetral Security at <span style='color:red;'>ATOS IT Solutions</span></p></td> \
+  <td><p>This was a project for the Cantabria Government I was honored to lead: <ul> \
+<li>Top Tier and maximum authority on Networking and Perimetral Security stuff</li>\
+<li>Maintain Networking Infrastructure and design for new requirements and improvements</li>\
+<li>Responsible for all communications with customer</li>\
+<li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Cisco</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Juniper</span> <span class='label label-keyword'>BigIP F5</span> <span class='label label-keyword'>IPS/IDS</span> <span class='label label-keyword'>WAF</span> <span class='label label-keyword'>Bluecoat</span> <span class='label label-keyword'>VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>June 2011 - July 2016 : Team Leader: Head of Strategic Business Line at <span style='color:red;'>Ambar Comunicaciones SL</span></p></td> \
+  <td><p>Along this period I was leading two teams: Networking and Perimetral Security team, and Housing Team : <ul> \
+<li>From Networking Team we were responsible for maintaining all networking infrastructure. This contract also included a hardware renewal which means we had to replace everything there. Sometimes it was just hardware renewal in the same vendor, but we also dealt with migrations in other vendors</li>\
+<li>From Housing Team we were responsible for maintaining alive and up to date some systems didn't fit with customer's standards. This also includes bringing to our datacenter in managed services mode some services.</li>\
+<li>Responsible for all communications with customer</li>\
+<li>Monitor team's workflow and make sure we were compliant with customer's SLAs.</li>\
+</ul></p>\
+<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Enterasys</span> <span class='label label-keyword'>Fortinet</span> <span class='label label-keyword'>Checkpoint</span> <span class='label label-keyword'>DNS</span> <span class='label label-keyword'>DBs</span> <span class='label label-keyword'>Apache</span> <span class='label label-keyword'>nginx</span> <span class='label label-keyword'>VMware</span>\</p></td> \
+   <tr> \
+  <td> <p>January 2008 - June 2011 : 2nd Tier Networking and Perimetral Security at <span style='color:red;'>Valnera Consultoría y Sistemas SL</span></p></td> \
+  <td><p>Providing 2nd Tier support to Cantabria Government<ul> \
+<li>Deployed from scratch monitoring solution with Zabbix</li>\
+<li>I managed Internet services such as DNS (bind), email relays (postfix and sendmail), anti-spam solution (greylist + spam assasin + clamav + RBL checks)</li>\
+</ul></p>\
+<p><span class='label label-keyword'>IPtables</span> <span class='label label-keyword'>Cisco Pix</span> <span class='label label-keyword'>Sendmail</span> <span class='label label-keyword'>Bind</span> <span class='label label-keyword'>Zabbix</span> <span class='label label-keyword'>Red Hat</span> <span class='label label-keyword'>ISA Proxy Server</span> <span class='label label-keyword'>Contivity VPN</span></p></td> \
+   <tr> \
+  <td> <p>January 2006 - January 2008 : Host Operator at <span style='color:red;'>Ingeniería de Software Avanzado (IBM Global Services)</span></p></td> \
+  <td><p>Mainframe Operator<ul> \
+<li>Team Coordinator</li>\
+<li>Linux Trainer</li>\
+</ul></p>\
+<p><span class='label label-keyword'>Mainframe</span> <span class='label label-keyword'>MVS</span> <span class='label label-keyword'>zOS</span> <span class='label label-keyword'>CONTROL-M</span> <span class='label label-keyword'>OPCC</span></p></td> \
+</tr></table>\
+<table> \
+  <tr> \
+  <th><p><b>.::CERTIFICATIONS::.</b></p></th> \
+  <th><p><b>.::TRAININGS::.</b></p></th> \
+</tr> \
+  <tr><td><p>2021 - <span style='color:yellow;'>Red Hat</span> Certified System Administrator (RHCSA)</p></td><td><p>vSphere 4.1 Installation Configuration and Management (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2021 - Red Hat Certified Specialist in <span style='color:yellow;'>Containers and Kubernetes</span> (EX180)</p></td><td><p>HP Virtual Connect para HP BladeSystem (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2015 - <span style='color:yellow;'>Cisco</span> CCNA Routing and Switching</p></td><td><p>Enterasys Certified Specialist - NAC (35h Enterasys) </p></td></tr> \
+  <tr><td><p>2015 - <span style='color:yellow;'>Fortigate</span> Certified Networking Security Professional FCNSP v5</p></td><td><p>Implementing Cisco MPLS (35h Cisco Systems, Inc)</p></td></tr> \
+  <tr><td><p>2014 - Fortigate Certified Network Security Administrator FCNSA v5</p></td><td><p>Alcatel OXE Telephony (35h NextiraONE)</p></td></tr> \
+  <tr><td><p>2012 - <span style='color:yellow;'>Enterasys</span> Certified Specialist - Routing</p></td><td><p>Fortigate Multi-threat Security Systems I/II (35h Fortinet) </p></td></tr> \
+  <tr><td><p>2012 - Enterasys Certified Specialist - Switching</p></td><td><p>Management and Monitorization Insight Control (35h Hewlett Packard)</p></td></tr> \
+  <tr><td><p>2012 - Cisco Certified Entry Networking Technician (CCENT)</p></td><td><p></p></td></tr> \
+  <tr><td><p>2010 - <span style='color:yellow;'>ITIL</span> Foundations V3</p></td><td><p></p></td></tr> \
+  <tr><td><p>2008 - ITIL Foundations V2 </p></td><td><p></p></td></tr> \
+</table>";
+
+var i = 0,
+    isTag,
+    text,
+    typingInterval,
+    currentContent;
+
+function typeWriter(content) {
+    currentContent = content;
+    i = 0;
+    text = '';
+    function type() {
+        text = content.slice(0, ++i);
+        if (text === content) {
+            document.getElementById('mainContent').innerHTML = text;
+            return completeLoading();
+        }
+
+        document.getElementById('mainContent').innerHTML = text + '<span class="terminal-cursor"></span>';
+
+        var char = text.slice(-1);
+        if( char === '<' ) isTag = true;
+        if( char === '>' ) isTag = false;
+
+        if (isTag) return type();
+        typingInterval = setTimeout(type, 1);
+    }
+    type();
+}
+
+function showFullText() {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = currentContent;
+    completeLoading();
+}
+
+function completeLoading() {
+    var loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) {
+        loadingMessage.style.display = 'none';
+    }
+}
+
+document.getElementById('flag-es').addEventListener('click', function() {
+    currentLanguage = 'es';
+    startContent(str_es);
+    updateLoadingMessage('es');
+    updatePdfButton('es');
+});
+
+document.getElementById('flag-uk').addEventListener('click', function() {
+    currentLanguage = 'en';
+    startContent(str_en);
+    updateLoadingMessage('en');
+    updatePdfButton('en');
+});
+
+function startContent(content) {
+    document.getElementById('language-selector').classList.add('hidden');
+    document.querySelector('.menu').classList.remove('hidden');
+    document.getElementById('top-right-flags').classList.remove('hidden');
+    document.getElementById('loading-message').style.display = 'flex';
+    typeWriter(content);
+}
+
+document.getElementById('flag-es-top').addEventListener('click', function() {
+    currentLanguage = 'es';
+    resetAndStart(str_es);
+    updateLoadingMessage('es');
+    updatePdfButton('es');
+});
+
+document.getElementById('flag-uk-top').addEventListener('click', function() {
+    currentLanguage = 'en';
+    resetAndStart(str_en);
+    updateLoadingMessage('en');
+    updatePdfButton('en');
+});
+
+function resetAndStart(content) {
+    clearTimeout(typingInterval);
+    document.getElementById('mainContent').innerHTML = '';
+    startContent(content);
+}
+
+document.addEventListener('keydown', function() {
+    showFullText();
+});
+
+function updateLoadingMessage(language) {
+    var loadingText = document.getElementById('loading-text');
+    if (language === 'es') {
+        loadingText.textContent = 'Cargando perfil por favor presiona cualquier tecla resumir';
+    } else {
+        loadingText.textContent = 'Loading profile please press any key to resume';
+    }
+}
+
+function updatePdfButton(language) {
+    var pdfButtonText = document.getElementById('pdf-btn-text');
+    if (pdfButtonText) {
+        pdfButtonText.textContent = language === 'es' ? 'Descargar CV PDF' : 'Download PDF Resume';
+    }
+}
+
+// PDF Generation functionality
+var currentLanguage = 'es';
+
+// Function to load image as base64
+function getImageAsBase64(imgPath, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to image size
+        canvas.width = this.width;
+        canvas.height = this.height;
+
+        // Draw image to canvas
+        ctx.drawImage(this, 0, 0);
+
+        // Get base64 data
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        callback(dataURL);
+    };
+    img.onerror = function() {
+        console.log('Error loading image, using placeholder');
+        callback(null);
+    };
+    img.crossOrigin = 'anonymous';
+    img.src = imgPath;
+}
+
+function generatePDF() {
+    // First, try to load the image
+    getImageAsBase64('img/mifoto.png', function(imageData) {
+        generatePDFWithImage(imageData);
+    });
+}
+
+function generatePDFWithImage(imageData) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Professional color palette
+    const colors = {
+        darkBg: [15, 23, 42],      // Slate dark
+        primary: [34, 197, 94],    // Green-500
+        secondary: [59, 130, 246], // Blue-500
+        accent: [168, 85, 247],    // Purple-500
+        white: [255, 255, 255],
+        lightGray: [203, 213, 225], // Slate-300
+        mediumGray: [148, 163, 184], // Slate-400
+        text: [241, 245, 249]      // Slate-50
+    };
+
+    // Clean white background for professional look
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, 210, 297, 'F');
+
+    let y = 20;
+
+    // HEADER SECTION
+    // Header background strip
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 5, 210, 35, 'F');
+
+    // Photo - real image or placeholder
+    if (imageData) {
+        try {
+            // Add the real photo
+            doc.addImage(imageData, 'JPEG', 15, 10, 28, 35);
+            // Add border around the photo
+            doc.setDrawColor(...colors.secondary);
+            doc.setLineWidth(2);
+            doc.rect(15, 10, 28, 35, 'S');
+        } catch (error) {
+            console.log('Error adding image, using placeholder');
+            // Fallback to placeholder
+            doc.setFillColor(...colors.white);
+            doc.rect(15, 10, 28, 35, 'F');
+            doc.setDrawColor(...colors.secondary);
+            doc.setLineWidth(2);
+            doc.rect(15, 10, 28, 35, 'S');
+            doc.setTextColor(...colors.secondary);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PHOTO', 24, 30);
+        }
+    } else {
+        // Placeholder when image fails to load
+        doc.setFillColor(...colors.white);
+        doc.rect(15, 10, 28, 35, 'F');
+        doc.setDrawColor(...colors.secondary);
+        doc.setLineWidth(2);
+        doc.rect(15, 10, 28, 35, 'S');
+        doc.setTextColor(...colors.secondary);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PHOTO', 24, 30);
+    }
+
+    // Name and title
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('JOSE LUIS GOMEZ MARIN', 50, 20);
+
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('SRE & DevOps & Tech Lead', 50, 28);
+
+    // Contact info
+    doc.setFontSize(10);
+    doc.text('jose.gnu@gmail.com', 50, 36);
+
+    y = 55;
+
+    // TWO-COLUMN LAYOUT
+    const leftCol = 20;
+    const rightCol = 115;
+    const colWidth = 85;
+
+    // LEFT COLUMN
+    // Languages section
+    doc.setFillColor(...colors.secondary);
+    doc.rect(leftCol - 5, y - 3, colWidth, 8, 'F');
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'IDIOMAS' : 'LANGUAGES', leftCol, y + 2);
+
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+
+    const languages = currentLanguage === 'es' ?
+        ['Español (Nativo)', 'Inglés (C1 Avanzado)'] :
+        ['Spanish (Native)', 'English (C1 Advanced)'];
+
+    languages.forEach(lang => {
+        doc.text(`• ${lang}`, leftCol, y);
+        y += 6;
+    });
+
+    y += 8;
+
+    // Skills section
+    doc.setFillColor(...colors.secondary);
+    doc.rect(leftCol - 5, y - 3, colWidth, 8, 'F');
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'COMPETENCIAS' : 'SKILLS', leftCol, y + 2);
+
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+
+    const skillCategories = currentLanguage === 'es' ? [
+        'Cloud Platforms',
+        '• Azure, AWS, GCP',
+        '',
+        'DevOps & SRE',
+        '• Docker, Kubernetes',
+        '• CI/CD, GitOps',
+        '• Monitoring & Observability',
+        '',
+        'Infrastructure',
+        '• Terraform, Puppet',
+        '• Linux System Admin',
+        '• Networking & Security',
+        '',
+        'Leadership',
+        '• Team Management',
+        '• Technical Strategy',
+        '• Stakeholder Communication'
+    ] : [
+        'Cloud Platforms',
+        '• Azure, AWS, GCP',
+        '',
+        'DevOps & SRE',
+        '• Docker, Kubernetes',
+        '• CI/CD, GitOps',
+        '• Monitoring & Observability',
+        '',
+        'Infrastructure',
+        '• Terraform, Puppet',
+        '• Linux System Admin',
+        '• Networking & Security',
+        '',
+        'Leadership',
+        '• Team Management',
+        '• Technical Strategy',
+        '• Stakeholder Communication'
+    ];
+
+    skillCategories.forEach(skill => {
+        if (skill === '') {
+            y += 3;
+        } else if (!skill.startsWith('•')) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...colors.primary);
+            doc.text(skill, leftCol, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...colors.darkBg);
+            y += 6;
+        } else {
+            doc.text(skill, leftCol, y);
+            y += 5;
+        }
+    });
+
+    // RIGHT COLUMN - Professional Summary
+    y = 55;
+    doc.setFillColor(...colors.accent);
+    doc.rect(rightCol - 5, y - 3, colWidth, 8, 'F');
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'PERFIL PROFESIONAL' : 'PROFESSIONAL PROFILE', rightCol, y + 2);
+
+    y += 15;
+    doc.setTextColor(...colors.darkBg);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+
+    const profile = currentLanguage === 'es' ?
+        'Profesional de TI con más de 20 años de experiencia. Especializado en arquitecturas cloud, liderazgo técnico y prácticas DevOps/SRE. Experto en plataformas Azure, AWS y GCP, con un historial comprobado en la gestión de infraestructuras críticas y equipos de alto rendimiento.' :
+        'IT Professional with over 20 years of experience. Specialized in cloud architectures, technical leadership and DevOps/SRE practices. Expert in Azure, AWS and GCP platforms, with a proven track record in managing critical infrastructures and high-performance teams.';
+
+    const profileLines = doc.splitTextToSize(profile, colWidth - 5);
+    profileLines.forEach(line => {
+        doc.text(line, rightCol, y);
+        y += 5;
+    });
+
+    y += 10;
+
+    // Work Experience
+    doc.setFillColor(...colors.accent);
+    doc.rect(rightCol - 5, y - 3, colWidth, 8, 'F');
+    doc.setTextColor(...colors.white);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(currentLanguage === 'es' ? 'EXPERIENCIA' : 'EXPERIENCE', rightCol, y + 2);
+
+    y += 15;
+
+    // Work experiences with corrected data
+    const experiences = currentLanguage === 'es' ? [
+        {
+            period: 'Abr 2025 - Presente',
+            title: 'DevOps Manager',
+            company: 'CloudAppi',
+            description: 'Liderazgo de equipos DevOps/SRE aplicando mejores prácticas en entorno multinacional.',
+            stack: 'Azure • AWS • GCP • K8s • CI/CD'
+        },
+        {
+            period: 'Ene 2022 - Abr 2025',
+            title: 'SRE Technical Lead',
+            company: 'Ingram Micro Cloud',
+            description: 'Garantía de HA, escalabilidad y observabilidad en plataforma de $55B.',
+            stack: 'Azure • K8s • Python • DataDog'
+        },
+        {
+            period: 'Jul 2021 - Ene 2022',
+            title: 'Senior Support Engineer',
+            company: 'Red Hat',
+            description: 'Soporte avanzado OpenShift en IBM Cloud Pak con tecnologías IA.',
+            stack: 'OpenShift • RHEL • IBM Cloud'
+        },
+        {
+            period: 'Abr 2019 - Jul 2021',
+            title: 'Cloud System Administrator',
+            company: 'Ingram Micro Cloud',
+            description: 'Migración Odin a CloudBlue. Diseño de plataforma de microservicios.',
+            stack: 'Azure AKS • Docker • Terraform'
+        }
+    ] : [
+        {
+            period: 'Apr 2025 - Present',
+            title: 'DevOps Manager',
+            company: 'CloudAppi',
+            description: 'Leading DevOps/SRE teams applying best practices in multinational environment.',
+            stack: 'Azure • AWS • GCP • K8s • CI/CD'
+        },
+        {
+            period: 'Jan 2022 - Apr 2025',
+            title: 'SRE Technical Lead',
+            company: 'Ingram Micro Cloud',
+            description: 'Ensuring HA, scalability and observability on $55B platform.',
+            stack: 'Azure • K8s • Python • DataDog'
+        },
+        {
+            period: 'Jul 2021 - Jan 2022',
+            title: 'Senior Support Engineer',
+            company: 'Red Hat',
+            description: 'Advanced OpenShift support on IBM Cloud Pak with AI technologies.',
+            stack: 'OpenShift • RHEL • IBM Cloud'
+        },
+        {
+            period: 'Apr 2019 - Jul 2021',
+            title: 'Cloud System Administrator',
+            company: 'Ingram Micro Cloud',
+            description: 'Migration from Odin to CloudBlue. Microservices platform design.',
+            stack: 'Azure AKS • Docker • Terraform'
+        }
+    ];
+
+    experiences.forEach((exp, index) => {
+        if (y > 240) {
+            doc.addPage();
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 0, 210, 297, 'F');
+            y = 30;
+        }
+
+        // Period and company
+        doc.setTextColor(...colors.primary);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(exp.period, rightCol, y);
+
+        doc.setTextColor(...colors.accent);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        const companyText = doc.splitTextToSize(exp.company, 45);
+        doc.text(companyText, rightCol + 50, y);
+
+        y += 6;
+
+        // Job title
+        doc.setTextColor(...colors.darkBg);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(exp.title, rightCol, y);
+
+        y += 6;
+
+        // Description
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        const descLines = doc.splitTextToSize(exp.description, colWidth - 5);
+        descLines.forEach(line => {
+            doc.text(line, rightCol, y);
+            y += 4;
+        });
+
+        // Tech stack
+        doc.setTextColor(...colors.secondary);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        const stackLines = doc.splitTextToSize(exp.stack, colWidth - 5);
+        stackLines.forEach(line => {
+            doc.text(line, rightCol, y);
+            y += 3;
+        });
+
+        y += 8;
+    });
+
+    // Footer
+    const currentDate = new Date().toLocaleDateString(currentLanguage === 'es' ? 'es-ES' : 'en-US');
+    doc.setTextColor(...colors.mediumGray);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(currentLanguage === 'es' ? `Generado: ${currentDate}` : `Generated: ${currentDate}`, 20, 285);
+    doc.text('jose.gnu@gmail.com', 150, 285);
+
+    // Save the PDF
+    const fileName = currentLanguage === 'es' ? 'CV_Jose_Luis_Gomez_ES.pdf' : 'Resume_Jose_Luis_Gomez_EN.pdf';
+    doc.save(fileName);
+}
+</script>
+
+
+<script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+window.onload = function() {
+  var lang = getCookie("selectedLanguage") || "es";
+  currentLanguage = lang;
+  var content = lang === "es" ? str_es : str_en;
+  startContent(content);
+  updateLoadingMessage(lang);
+  updatePdfButton(lang);
+
+  // Add PDF download button event listener
+  document.getElementById('download-pdf-btn').addEventListener('click', generatePDF);
+
+  // Initialize Game of Life
+  initGameOfLife();
+};
+
+// Conway's Game of Life Implementation
+function initGameOfLife() {
+  const canvas = document.getElementById('game-of-life');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const cellSize = 10;
+  const cols = canvas.width / cellSize;
+  const rows = canvas.height / cellSize;
+
+  let grid = createRandomGrid();
+  let generation = 0;
+  const maxGenerations = 100;
+
+  function createRandomGrid() {
+    const newGrid = [];
+    for (let i = 0; i < rows; i++) {
+      newGrid[i] = [];
+      for (let j = 0; j < cols; j++) {
+        // 30% chance of cell being alive
+        newGrid[i][j] = Math.random() < 0.3 ? 1 : 0;
+      }
+    }
+    return newGrid;
+  }
+
+  function countNeighbors(grid, x, y) {
+    let count = 0;
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        if (i === 0 && j === 0) continue;
+        const row = (x + i + rows) % rows;
+        const col = (y + j + cols) % cols;
+        count += grid[row][col];
+      }
+    }
+    return count;
+  }
+
+  function nextGeneration() {
+    const newGrid = [];
+    for (let i = 0; i < rows; i++) {
+      newGrid[i] = [];
+      for (let j = 0; j < cols; j++) {
+        const neighbors = countNeighbors(grid, i, j);
+        const cell = grid[i][j];
+
+        // Conway's rules
+        if (cell === 1 && (neighbors === 2 || neighbors === 3)) {
+          newGrid[i][j] = 1; // Survival
+        } else if (cell === 0 && neighbors === 3) {
+          newGrid[i][j] = 1; // Birth
+        } else {
+          newGrid[i][j] = 0; // Death
+        }
+      }
+    }
+    return newGrid;
+  }
+
+  function draw() {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (grid[i][j] === 1) {
+          ctx.fillStyle = '#00ffff';
+          ctx.fillRect(j * cellSize, i * cellSize, cellSize - 1, cellSize - 1);
+        }
+      }
+    }
+  }
+
+  function animate() {
+    if (generation < maxGenerations) {
+      draw();
+      grid = nextGeneration();
+      generation++;
+      setTimeout(animate, 150); // Update every 150ms
+    } else {
+      // Restart with new random pattern
+      grid = createRandomGrid();
+      generation = 0;
+      setTimeout(animate, 150);
+    }
+  }
+
+  animate();
+}
+</script>
+
+</body>
+</html>
