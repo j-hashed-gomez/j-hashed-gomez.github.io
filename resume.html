@@ -294,6 +294,7 @@
     <p style="text-align: center;"><img src='img/mifoto.png'></p>
     <p><i class="material-icons">badge</i> Jose Luis Gómez Marín</p>
     <p><i class="material-icons">public</i> Remote Work Available</p>
+    <p><i class="material-icons">business_center</i> <span id="b2b-text">Abierto a contrataciones B2B</span></p>
     <p><i class="material-icons">email</i> jose.gnu@gmail.com</p>
     <p><i class="material-icons">record_voice_over</i> Spanish (Native), English (C1)</p>
 
@@ -654,6 +655,7 @@ document.getElementById('flag-es').addEventListener('click', function() {
     startContent(str_es);
     updateLoadingMessage('es');
     updatePdfButton('es');
+    updateB2BText('es');
 });
 
 document.getElementById('flag-uk').addEventListener('click', function() {
@@ -661,6 +663,7 @@ document.getElementById('flag-uk').addEventListener('click', function() {
     startContent(str_en);
     updateLoadingMessage('en');
     updatePdfButton('en');
+    updateB2BText('en');
 });
 
 function startContent(content) {
@@ -676,6 +679,7 @@ document.getElementById('flag-es-top').addEventListener('click', function() {
     resetAndStart(str_es);
     updateLoadingMessage('es');
     updatePdfButton('es');
+    updateB2BText('es');
 });
 
 document.getElementById('flag-uk-top').addEventListener('click', function() {
@@ -683,6 +687,7 @@ document.getElementById('flag-uk-top').addEventListener('click', function() {
     resetAndStart(str_en);
     updateLoadingMessage('en');
     updatePdfButton('en');
+    updateB2BText('en');
 });
 
 function resetAndStart(content) {
@@ -708,6 +713,13 @@ function updatePdfButton(language) {
     var pdfButtonText = document.getElementById('pdf-btn-text');
     if (pdfButtonText) {
         pdfButtonText.textContent = language === 'es' ? 'Descargar CV PDF' : 'Download PDF Resume';
+    }
+}
+
+function updateB2BText(language) {
+    var b2bText = document.getElementById('b2b-text');
+    if (b2bText) {
+        b2bText.textContent = language === 'es' ? 'Abierto a contrataciones B2B' : 'Open to B2B contracts';
     }
 }
 
@@ -1101,6 +1113,7 @@ window.onload = function() {
   startContent(content);
   updateLoadingMessage(lang);
   updatePdfButton(lang);
+  updateB2BText(lang);
 
   // Add PDF download button event listener
   document.getElementById('download-pdf-btn').addEventListener('click', generatePDF);
