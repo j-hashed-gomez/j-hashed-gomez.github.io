@@ -318,7 +318,7 @@ pre {
 /* Loading message styling */
 .loading-message {
   position: fixed;
-  bottom: 20px;
+  bottom: 90px;
   left: 20px;
   font-size: 0.9rem;
   color: var(--text-secondary);
@@ -329,6 +329,7 @@ pre {
   border-radius: 10px;
   border: 1px solid var(--border-glow);
   backdrop-filter: blur(10px);
+  z-index: 100;
 }
 
 .loading-animation {
@@ -435,12 +436,13 @@ pre {
   left: 20px;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  background: rgba(10, 10, 10, 0.8);
+  background: rgba(10, 10, 10, 0.9);
   padding: 10px 15px;
   border-radius: 8px;
   border: 1px solid var(--border-glow);
   backdrop-filter: blur(10px);
   line-height: 1.4;
+  z-index: 50;
 }
 
 /* PDF Download Button */
