@@ -438,13 +438,14 @@ pre {
   left: 20px;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  background: rgba(10, 10, 10, 0.9);
+  background: rgba(10, 10, 10, 0.95);
   padding: 10px 15px;
   border-radius: 8px;
   border: 1px solid var(--border-glow);
   backdrop-filter: blur(10px);
   line-height: 1.4;
-  z-index: 50;
+  z-index: 200;
+  box-shadow: var(--shadow-glow);
 }
 
 /* PDF Download Button */
