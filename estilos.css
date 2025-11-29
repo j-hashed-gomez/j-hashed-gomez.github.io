@@ -435,7 +435,8 @@ pre {
 .footer-info {
   position: fixed !important;
   bottom: 20px !important;
-  left: 20px !important;
+  right: 20px !important;
+  left: auto !important;
   font-size: 0.8rem;
   color: #b0b0b0 !important;
   background: rgba(10, 10, 10, 0.95) !important;
@@ -454,6 +455,7 @@ pre {
   height: auto !important;
   overflow: visible !important;
   pointer-events: auto !important;
+  text-align: right !important;
 }
 
 /* PDF Download Button */
