@@ -437,18 +437,23 @@ pre {
   bottom: 20px !important;
   left: 20px !important;
   font-size: 0.8rem;
-  color: var(--text-secondary) !important;
+  color: #b0b0b0 !important;
   background: rgba(10, 10, 10, 0.95) !important;
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid var(--border-glow);
+  padding: 10px 15px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  line-height: 1.4;
+  line-height: 1.4 !important;
   z-index: 2000 !important;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.3) !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
 }
 
 /* PDF Download Button */
