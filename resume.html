@@ -1129,7 +1129,7 @@ function runBootSequence() {
     'boot-line-6'
   ];
 
-  const delays = [0, 300, 600, 900, 1200, 1500];
+  const delays = [0, 600, 1200, 1800, 2400, 3000];
 
   bootLines.forEach((lineId, index) => {
     setTimeout(() => {
@@ -1143,7 +1143,7 @@ function runBootSequence() {
         setTimeout(() => {
           document.getElementById('boot-sequence').classList.add('hidden');
           document.getElementById('normal-loading').classList.remove('hidden');
-        }, 1000);
+        }, 1500);
       }
     }, delays[index]);
   });
