@@ -1,4 +1,5 @@
 /* ULTRA-MODERN CV STYLES v1.1 - 2025 */
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --primary-green: #00ff41;
@@ -25,13 +26,22 @@
 }
 
 body {
-  font-family: 'Fira Code', 'Inconsolata', monospace;
+  font-family: 'VT323', monospace;
   background: var(--gradient-bg);
   min-height: 100vh;
   color: var(--text-primary);
   overflow-x: hidden;
   position: relative;
   line-height: 1.6;
+  font-size: 20px;
+}
+
+/* Headings with retro-futuristic font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* Animated background effects */
@@ -196,7 +206,7 @@ body::before {
 
 /* Pre-formatted text styling */
 pre {
-  font-family: 'Fira Code', 'Inconsolata', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text-primary);
