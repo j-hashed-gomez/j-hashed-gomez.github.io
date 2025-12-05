@@ -351,6 +351,18 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg" id="flag-uk-top" alt="English">
 </div>
 
+<!-- Boot Sequence Overlay -->
+<div id="boot-sequence" class="boot-sequence">
+  <div class="boot-content">
+    <div class="boot-line" id="boot-line-1">> SYSTEM INITIALIZING...</div>
+    <div class="boot-line" id="boot-line-2">> LOADING RESUME.DAT...</div>
+    <div class="boot-line" id="boot-line-3">> [<span class="boot-ok">OK</span>] PROFILE LOADED</div>
+    <div class="boot-line" id="boot-line-4">> [<span class="boot-ok">OK</span>] SKILLS COMPILED</div>
+    <div class="boot-line" id="boot-line-5">> [<span class="boot-ok">OK</span>] EXPERIENCE VERIFIED</div>
+    <div class="boot-line" id="boot-line-6">> READY<span class="terminal-cursor"></span></div>
+  </div>
+</div>
+
 <div class="mainContent" id="mainContent"></div>
 
 <!-- Loading message -->
@@ -1108,7 +1120,45 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-window.onload = function() {
+// Boot sequence animation
+function runBootSequence() {
+  return new Promise((resolve) => {
+    const bootLines = [
+      'boot-line-1',
+      'boot-line-2',
+      'boot-line-3',
+      'boot-line-4',
+      'boot-line-5',
+      'boot-line-6'
+    ];
+
+    const delays = [0, 400, 800, 1200, 1600, 2000];
+
+    bootLines.forEach((lineId, index) => {
+      setTimeout(() => {
+        const line = document.getElementById(lineId);
+        if (line) {
+          line.style.animationDelay = '0s';
+          line.style.opacity = '1';
+        }
+
+        // After last line, wait a bit then hide boot sequence
+        if (index === bootLines.length - 1) {
+          setTimeout(() => {
+            document.getElementById('boot-sequence').classList.add('hidden');
+            resolve();
+          }, 800);
+        }
+      }, delays[index]);
+    });
+  });
+}
+
+window.onload = async function() {
+  // Run boot sequence first
+  await runBootSequence();
+
+  // Then continue with normal initialization
   var lang = getCookie("selectedLanguage") || "es";
   currentLanguage = lang;
   var content = lang === "es" ? str_es : str_en;

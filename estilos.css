@@ -59,6 +59,28 @@ body::before {
   pointer-events: none;
   z-index: -1;
   animation: gradientShift 15s ease-in-out infinite alternate;
+  /* Vignette effect - darkened edges like CRT monitors */
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.8), inset 0 0 200px rgba(0, 0, 0, 0.5);
+}
+
+/* CRT Scanlines effect - horizontal lines across screen */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.8;
 }
 
 @keyframes gradientShift {
@@ -527,4 +549,59 @@ pre {
   box-shadow: 0 10px 30px rgba(0, 255, 65, 0.6);
   border-color: var(--primary-green);
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Boot Sequence Styles */
+.boot-sequence {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'VT323', monospace;
+}
+
+.boot-sequence.hidden {
+  display: none;
+}
+
+.boot-content {
+  text-align: left;
+  padding: 2rem;
+  max-width: 600px;
+}
+
+.boot-line {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+  line-height: 2;
+  opacity: 0;
+  text-shadow:
+    0 0 5px var(--primary-green),
+    0 0 10px var(--primary-green);
+  animation: bootFadeIn 0.3s ease-in forwards;
+}
+
+.boot-ok {
+  color: var(--primary-green);
+  font-weight: bold;
+  text-shadow:
+    0 0 10px var(--primary-green),
+    0 0 20px var(--primary-green);
+}
+
+@keyframes bootFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
