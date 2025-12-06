@@ -361,7 +361,7 @@
     <div id="boot-line-3" class="boot-line">> [<span class="boot-ok">OK</span>] PROFILE LOADED</div>
     <div id="boot-line-4" class="boot-line">> [<span class="boot-ok">OK</span>] SKILLS COMPILED</div>
     <div id="boot-line-5" class="boot-line">> [<span class="boot-ok">OK</span>] EXPERIENCE VERIFIED</div>
-    <div id="boot-line-6" class="boot-line">> Loading Profile<span class="retro-dots"></span> press any key to resume <span class="retro-spinner">▮</span></div>
+    <div id="boot-line-6" class="boot-line">> Loading Profile... press any key to resume <span class="retro-spinner">▮</span></div>
   </div>
 </div>
 
@@ -1119,6 +1119,18 @@ function runBootSequence() {
       const line = document.getElementById(lineId);
       if (line) {
         line.classList.add('visible');
+      }
+
+      // When the last line appears, hide all previous lines
+      if (index === bootLines.length - 1) {
+        setTimeout(() => {
+          for (let i = 0; i < bootLines.length - 1; i++) {
+            const prevLine = document.getElementById(bootLines[i]);
+            if (prevLine) {
+              prevLine.style.display = 'none';
+            }
+          }
+        }, 300);
       }
     }, delays[index]);
   });

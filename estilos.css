@@ -596,7 +596,7 @@ pre {
   }
 }
 
-/* Retro 80s loading animations */
+/* Retro 80s loading animation */
 .retro-spinner {
   display: inline-block;
   animation: retroBlink 0.8s steps(2, start) infinite;
@@ -607,31 +607,11 @@ pre {
     0 0 20px var(--primary-green);
 }
 
-.retro-dots::after {
-  content: '';
-  animation: retroDots 1.5s steps(4, end) infinite;
-}
-
 @keyframes retroBlink {
   0%, 50% {
     opacity: 1;
   }
   51%, 100% {
     opacity: 0;
-  }
-}
-
-@keyframes retroDots {
-  0% {
-    content: '.';
-  }
-  25% {
-    content: '..';
-  }
-  50% {
-    content: '...';
-  }
-  75% {
-    content: '';
   }
 }
