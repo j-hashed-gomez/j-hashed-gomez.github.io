@@ -44,6 +44,18 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
 }
 
+/* Override headings in mainContent to use VT323 with phosphor effect */
+.mainContent h1,
+.mainContent h2,
+.mainContent h3,
+.mainContent h4,
+.mainContent h5,
+.mainContent h6 {
+  font-family: 'VT323', monospace;
+  color: var(--primary-green);
+  text-shadow: 0 0 8px var(--primary-green);
+}
+
 /* Animated background effects */
 body::before {
   content: '';
@@ -204,6 +216,9 @@ body::after {
   background: rgba(5, 5, 5, 0.7);
   backdrop-filter: blur(10px);
   position: relative;
+  font-family: 'VT323', monospace;
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
 }
 
 .mainContent::before {
@@ -235,6 +250,48 @@ pre {
   text-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* Tables with green phosphor effect in mainContent */
+.mainContent table {
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
+}
+
+.mainContent td,
+.mainContent th {
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
+}
+
+.mainContent p {
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
+}
+
+.mainContent b {
+  color: var(--primary-green);
+  text-shadow: 0 0 8px var(--primary-green);
+  font-weight: bold;
+}
+
+/* Colored text overrides in mainContent */
+.mainContent [style*="color:red"],
+.mainContent [style*="color: red"] {
+  color: #ff4081 !important;
+  text-shadow: 0 0 8px #ff4081 !important;
+}
+
+.mainContent [style*="color:yellow"],
+.mainContent [style*="color: yellow"] {
+  color: #ffd700 !important;
+  text-shadow: 0 0 8px #ffd700 !important;
+}
+
+.mainContent ul,
+.mainContent li {
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
 }
 
 /* Enhanced label styling */
