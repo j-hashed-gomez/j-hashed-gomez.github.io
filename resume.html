@@ -361,11 +361,7 @@
     <div id="boot-line-3" class="boot-line">> [<span class="boot-ok">OK</span>] PROFILE LOADED</div>
     <div id="boot-line-4" class="boot-line">> [<span class="boot-ok">OK</span>] SKILLS COMPILED</div>
     <div id="boot-line-5" class="boot-line">> [<span class="boot-ok">OK</span>] EXPERIENCE VERIFIED</div>
-    <div id="boot-line-6" class="boot-line">> READY<span class="terminal-cursor"></span></div>
-  </div>
-  <div id="normal-loading" class="hidden">
-    <span id="loading-text">Cargando datos, por favor presiona espacio para mostrar todo el texto</span>
-    <div class="loading-animation"></div>
+    <div id="boot-line-6" class="boot-line">> Loading Profile<span class="retro-dots"></span> press any key to resume <span class="retro-spinner">▮</span></div>
   </div>
 </div>
 
@@ -665,7 +661,6 @@ function completeLoading() {
 document.getElementById('flag-es').addEventListener('click', function() {
     currentLanguage = 'es';
     startContent(str_es);
-    updateLoadingMessage('es');
     updatePdfButton('es');
     updateB2BText('es');
 });
@@ -673,7 +668,6 @@ document.getElementById('flag-es').addEventListener('click', function() {
 document.getElementById('flag-uk').addEventListener('click', function() {
     currentLanguage = 'en';
     startContent(str_en);
-    updateLoadingMessage('en');
     updatePdfButton('en');
     updateB2BText('en');
 });
@@ -689,7 +683,6 @@ function startContent(content) {
 document.getElementById('flag-es-top').addEventListener('click', function() {
     currentLanguage = 'es';
     resetAndStart(str_es);
-    updateLoadingMessage('es');
     updatePdfButton('es');
     updateB2BText('es');
 });
@@ -697,7 +690,6 @@ document.getElementById('flag-es-top').addEventListener('click', function() {
 document.getElementById('flag-uk-top').addEventListener('click', function() {
     currentLanguage = 'en';
     resetAndStart(str_en);
-    updateLoadingMessage('en');
     updatePdfButton('en');
     updateB2BText('en');
 });
@@ -711,15 +703,6 @@ function resetAndStart(content) {
 document.addEventListener('keydown', function() {
     showFullText();
 });
-
-function updateLoadingMessage(language) {
-    var loadingText = document.getElementById('loading-text');
-    if (language === 'es') {
-        loadingText.textContent = 'Cargando perfil por favor presiona cualquier tecla resumir';
-    } else {
-        loadingText.textContent = 'Loading profile please press any key to resume';
-    }
-}
 
 function updatePdfButton(language) {
     var pdfButtonText = document.getElementById('pdf-btn-text');
@@ -1137,14 +1120,6 @@ function runBootSequence() {
       if (line) {
         line.classList.add('visible');
       }
-
-      // After last line, wait a bit then switch to normal loading message
-      if (index === bootLines.length - 1) {
-        setTimeout(() => {
-          document.getElementById('boot-sequence').classList.add('hidden');
-          document.getElementById('normal-loading').classList.remove('hidden');
-        }, 1500);
-      }
     }, delays[index]);
   });
 }
@@ -1158,7 +1133,6 @@ window.onload = function() {
   currentLanguage = lang;
   var content = lang === "es" ? str_es : str_en;
   startContent(content);
-  updateLoadingMessage(lang);
   updatePdfButton(lang);
   updateB2BText(lang);
 
