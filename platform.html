@@ -298,6 +298,14 @@ var cyStyle = [
     }
   },
   {
+    selector: 'node[type="artifact-child"][region="us"]',
+    style: { 'background-color': '#050a05', 'border-color': G, 'color': G }
+  },
+  {
+    selector: 'node[type="artifact-child"][region="ap"]',
+    style: { 'background-color': '#0a0508', 'border-color': P, 'color': P }
+  },
+  {
     selector: 'node[type="customer"]',
     style: {
       'border-style': 'dashed',
@@ -347,6 +355,14 @@ var cyStyle = [
       'text-margin-y': 12,
       'padding': 30,
     }
+  },
+  {
+    selector: 'node[type="region-onprem"][region="us"]',
+    style: { 'border-color': G, 'color': G }
+  },
+  {
+    selector: 'node[type="region-onprem"][region="ap"]',
+    style: { 'border-color': P, 'color': P }
   },
   {
     selector: 'node[type="customer"][region="ap"]',
@@ -685,7 +701,54 @@ paasHybrid2Pos['artif-ap'] = {x:-191, y:462};
 // ============================================================
 var paasFutureNodes = JSON.parse(JSON.stringify(paasHybrid2Nodes));
 var paasFutureEdges = JSON.parse(JSON.stringify(paasHybrid2Edges));
+
+// Add Americas and APAC regions for Virtuozzo with their DCs
+paasFutureNodes.push(
+  n('rg-vz-us', 'AMERICAS', 'region-onprem', { region: 'us' }),
+  n('dc-virginia', 'DATACENTER VIRGINIA\nVirtuozzo Platform\nOn-Premises', 'dc', { region: 'us', parent: 'rg-vz-us' }),
+  n('rg-vz-ap', 'APAC', 'region-onprem', { region: 'ap' }),
+  n('dc-singapore', 'DATACENTER SINGAPORE\nVirtuozzo Platform\nOn-Premises', 'dc', { region: 'ap', parent: 'rg-vz-ap' }),
+  n('vpn-us', 'VPN GATEWAY\nSite-to-Site IPSec', 'vpn'),
+  n('vpn-ap', 'VPN GATEWAY\nSite-to-Site IPSec', 'vpn')
+);
+
+// Add Artifactory nodes for the new DCs
+paasFutureNodes.push(
+  n('jfrog-us', 'Artifactory', 'artifact-child', { region: 'us' }),
+  n('jfrog-ap', 'Artifactory', 'artifact-child', { region: 'ap' })
+);
+
+// Remove old edges: artif-us -> artif EU and artif-ap -> artif EU (no more cascading through EU)
+paasFutureEdges = paasFutureEdges.filter(function(ed) {
+  // Remove regional commercerndci -> EU commercerndci artifact-pull edges
+  if (ed.data.type === 'artifact-pull' && (ed.data.source === 'artif-us' || ed.data.source === 'artif-ap')) return false;
+  return true;
+});
+
+// New edges: each regional commercerndci connects to its own VPN and DC
+paasFutureEdges.push(
+  // Americas: commercerndci-us -> vpn-us -> dc-virginia
+  e('artif-us', 'vpn-us', G, 'vpn'),
+  e('vpn-us', 'dc-virginia', G, 'vpn'),
+  // APAC: commercerndci-ap -> vpn-ap -> dc-singapore
+  e('artif-ap', 'vpn-ap', P, 'vpn'),
+  e('vpn-ap', 'dc-singapore', P, 'vpn'),
+  // Virtuozzo provider connects to all its regions
+  e('virtuozzo', 'rg-vz-us', O, 'flow'),
+  e('virtuozzo', 'rg-vz-ap', O, 'flow')
+);
+
 var paasFuturePos = JSON.parse(JSON.stringify(paasHybrid2Pos));
+// Virtuozzo Americas region (left side, above Americas)
+paasFuturePos['rg-vz-us'] = {x:-921, y:450};
+paasFuturePos['dc-virginia'] = {x:-921, y:450};
+paasFuturePos['vpn-us'] = {x:-555, y:450};
+paasFuturePos['jfrog-us'] = {x:-1013, y:410};
+// Virtuozzo APAC region (left side, below)
+paasFuturePos['rg-vz-ap'] = {x:-921, y:670};
+paasFuturePos['dc-singapore'] = {x:-921, y:670};
+paasFuturePos['vpn-ap'] = {x:-555, y:670};
+paasFuturePos['jfrog-ap'] = {x:-1013, y:630};
 
 // ============================================================
 // CYTOSCAPE
