@@ -61,6 +61,21 @@
       width: 100%;
       height: calc(100vh - 50px);
     }
+    #draw-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 900;
+      cursor: crosshair;
+    }
+    #draw-overlay.active { pointer-events: auto; }
+    .ctrl-btn.draw-active {
+      color: #ff4081 !important;
+      border-color: #ff4081 !important;
+      text-shadow: 0 0 10px #ff4081;
+      background: rgba(255,64,129,0.1) !important;
+    }
     .footer-info {
       position: fixed;
       bottom: 8px; left: 8px;
@@ -91,13 +106,18 @@
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-export">EXPORT</button>
   <button class="ctrl-btn" id="btn-svg">SVG</button>
+  <span class="sep">|</span>
+  <button class="ctrl-btn" id="btn-draw">DRAW</button>
+  <button class="ctrl-btn" id="btn-clear">CLEAR</button>
 </div>
 
 
-<div id="cy-container"></div>
+<div id="cy-container" style="position:relative;">
+  <canvas id="draw-overlay"></canvas>
+</div>
 
 <div class="footer-info">
-  Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause
+  Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause | D=draw
 </div>
 
 <script>
@@ -1056,6 +1076,79 @@ document.getElementById('btn-export').addEventListener('click', function() {
 });
 
 
+// ============================================================
+// FREEHAND DRAWING
+// ============================================================
+var drawCanvas = document.getElementById('draw-overlay');
+var drawCtx = drawCanvas.getContext('2d');
+var drawing = false;
+var drawMode = false;
+
+function resizeDrawCanvas() {
+  var container = document.getElementById('cy-container');
+  drawCanvas.width = container.offsetWidth;
+  drawCanvas.height = container.offsetHeight;
+}
+resizeDrawCanvas();
+window.addEventListener('resize', resizeDrawCanvas);
+
+drawCanvas.addEventListener('mousedown', function(e) {
+  if (!drawMode) return;
+  drawing = true;
+  drawCtx.beginPath();
+  drawCtx.moveTo(e.offsetX, e.offsetY);
+  drawCtx.strokeStyle = '#ff4081';
+  drawCtx.lineWidth = 2;
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+});
+
+drawCanvas.addEventListener('mousemove', function(e) {
+  if (!drawing) return;
+  drawCtx.lineTo(e.offsetX, e.offsetY);
+  drawCtx.stroke();
+});
+
+drawCanvas.addEventListener('mouseup', function() { drawing = false; });
+drawCanvas.addEventListener('mouseleave', function() { drawing = false; });
+
+// Touch support
+drawCanvas.addEventListener('touchstart', function(e) {
+  if (!drawMode) return;
+  e.preventDefault();
+  var touch = e.touches[0];
+  var rect = drawCanvas.getBoundingClientRect();
+  drawing = true;
+  drawCtx.beginPath();
+  drawCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  drawCtx.strokeStyle = '#ff4081';
+  drawCtx.lineWidth = 2;
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+}, { passive: false });
+
+drawCanvas.addEventListener('touchmove', function(e) {
+  if (!drawing) return;
+  e.preventDefault();
+  var touch = e.touches[0];
+  var rect = drawCanvas.getBoundingClientRect();
+  drawCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  drawCtx.stroke();
+}, { passive: false });
+
+drawCanvas.addEventListener('touchend', function() { drawing = false; });
+
+document.getElementById('btn-draw').addEventListener('click', function() {
+  drawMode = !drawMode;
+  drawCanvas.classList.toggle('active', drawMode);
+  this.classList.toggle('draw-active', drawMode);
+  this.textContent = drawMode ? 'DRAW ON' : 'DRAW';
+});
+
+document.getElementById('btn-clear').addEventListener('click', function() {
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+});
+
 // Export SVG of current tab
 document.getElementById('btn-svg').addEventListener('click', function() {
   var svgContent = cy.svg({ scale: 1, full: true, bg: '#050508' });
@@ -1078,6 +1171,7 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='6') document.querySelector('[data-tab="paas-future"]').click();
   else if (ev.key==='f'||ev.key==='F') document.getElementById('btn-fit').click();
   else if (ev.key==='r'||ev.key==='R') document.getElementById('btn-reset').click();
+  else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
 </body>
