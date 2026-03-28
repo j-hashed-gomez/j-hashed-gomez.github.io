@@ -7,6 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;500;600;700;800;900&display=swap">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.4/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/cytoscape-svg@0.4.0/cytoscape-svg.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -89,6 +90,7 @@
   <button class="ctrl-btn" id="btn-anim">PAUSE</button>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-export">EXPORT</button>
+  <button class="ctrl-btn" id="btn-svg">SVG</button>
 </div>
 
 
@@ -1053,6 +1055,18 @@ document.getElementById('btn-export').addEventListener('click', function() {
   URL.revokeObjectURL(url);
 });
 
+
+// Export SVG of current tab
+document.getElementById('btn-svg').addEventListener('click', function() {
+  var svgContent = cy.svg({ scale: 1, full: true, bg: '#050508' });
+  var blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'platform-' + currentTab + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 document.addEventListener('keydown', function(ev) {
   if (ev.key==='p'||ev.key==='P') toggleAnim();
