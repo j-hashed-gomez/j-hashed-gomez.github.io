@@ -255,6 +255,14 @@ var cyStyle = [
     }
   },
   {
+    selector: 'node[type="artifactory"][region="eu"]',
+    style: {
+      'background-color': '#050508',
+      'border-color': B,
+      'color': B,
+    }
+  },
+  {
     selector: 'node[type="customer"]',
     style: {
       'border-style': 'dashed',
@@ -486,6 +494,11 @@ var paasPos = {
 // ============================================================
 var paasHybridNodes = JSON.parse(JSON.stringify(paasNodes));
 
+// Restyle commercerndci to Europe color
+paasHybridNodes.forEach(function(nd) {
+  if (nd.data.id === 'artif') nd.data.region = 'eu';
+});
+
 // Add VPN gateway node
 paasHybridNodes.push(
   n('vpn', 'VPN GATEWAY\nSite-to-Site IPSec', 'vpn'),
@@ -502,11 +515,11 @@ paasHybridEdges.push(
 
 var paasHybridPos = {
   'azure':  {x:480,y:50},
-  'rg-us':  {x:160,y:300}, 'rg-eu':  {x:480,y:300}, 'rg-ap':  {x:800,y:300},
-  'p-tech': {x:160,y:240}, 'p-glob': {x:160,y:340}, 'p-mega': {x:160,y:440},
-  'p-euro': {x:480,y:240}, 'p-nord': {x:480,y:340}, 'p-dach': {x:480,y:440},
+  'rg-us':  {x:150,y:300}, 'rg-eu':  {x:473,y:300}, 'rg-ap':  {x:800,y:300},
+  'p-tech': {x:473,y:240}, 'p-glob': {x:473,y:340}, 'p-mega': {x:473,y:440},
+  'p-euro': {x:150,y:240}, 'p-nord': {x:150,y:340}, 'p-dach': {x:150,y:440},
   'p-toky': {x:800,y:240}, 'p-sing': {x:800,y:340}, 'p-indi': {x:800,y:440},
-  'artif':  {x:-213,y:222},
+  'artif':  {x:-218,y:222},
   'vpn':    {x:-596,y:225},
   'dc-dublin': {x:-921,y:226},
   'inet-a': {x:-218,y:728},
