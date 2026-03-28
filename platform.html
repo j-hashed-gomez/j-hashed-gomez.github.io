@@ -89,11 +89,8 @@
   <button class="ctrl-btn" id="btn-anim">PAUSE</button>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-export">EXPORT</button>
-  <button class="ctrl-btn" id="btn-import">IMPORT</button>
 </div>
 
-<!-- Hidden file input for import -->
-<input type="file" id="import-file" accept=".json" style="display:none">
 
 <div id="cy-container"></div>
 
@@ -506,17 +503,16 @@ var saasEdges = [
 
 var saasPos = {
   'azure':    {x:480,y:50},
-  'rg-us':    {x:160,y:240}, 'rg-eu':    {x:480,y:240}, 'rg-ap':    {x:800,y:240},
-  's-mkt-us': {x:110,y:210}, 's-shr-us': {x:240,y:210}, 's-con-us': {x:160,y:310},
-  's-mkt-eu': {x:430,y:210}, 's-shr-eu': {x:560,y:210}, 's-con-eu': {x:480,y:310},
-  's-mkt-ap': {x:750,y:210}, 's-shr-ap': {x:880,y:210}, 's-con-ap': {x:800,y:310},
-  'tp-us':    {x:160,y:440}, 'tp-eu':    {x:480,y:440}, 'tp-ap':    {x:800,y:440},
-  'er':       {x:480,y:540},
-  'dc-us1':   {x:80,y:650}, 'dc-us2': {x:250,y:650},
-  'dc-eu1':   {x:400,y:650}, 'dc-eu2': {x:570,y:650},
-  'dc-ap1':   {x:720,y:650}, 'dc-ap2': {x:890,y:650},
-  'inet':     {x:480,y:770},
-  'c-us':     {x:160,y:870}, 'c-eu': {x:480,y:870}, 'c-ap': {x:800,y:870},
+  's-mkt-us': {x:-211.72,y:182.84}, 's-shr-us': {x:55.12,y:181.80}, 's-con-us': {x:-79.20,y:318.36},
+  's-mkt-eu': {x:423.73,y:183.89}, 's-shr-eu': {x:690.57,y:183.89}, 's-con-eu': {x:533.27,y:318.36},
+  's-mkt-ap': {x:1062.32,y:187.02}, 's-shr-ap': {x:1328.11,y:184.93}, 's-con-ap': {x:1177.08,y:320.45},
+  'tp-us':    {x:-84.22,y:530.87}, 'tp-eu':    {x:536.80,y:523.77}, 'tp-ap':    {x:1275.26,y:504.76},
+  'er':       {x:539.64,y:691.93},
+  'dc-us1':   {x:50.70,y:857.84}, 'dc-us2': {x:254.42,y:860.02},
+  'dc-eu1':   {x:465.97,y:859.35}, 'dc-eu2': {x:665.89,y:859.72},
+  'dc-ap1':   {x:877.06,y:861.44}, 'dc-ap2': {x:1081.15,y:862.19},
+  'inet':     {x:-375.07,y:856.29},
+  'c-us':     {x:-876.80,y:720.52}, 'c-eu': {x:-887.44,y:873.50}, 'c-ap': {x:-874.91,y:1023.71},
 };
 
 // ============================================================
@@ -1057,35 +1053,6 @@ document.getElementById('btn-export').addEventListener('click', function() {
   URL.revokeObjectURL(url);
 });
 
-// Import positions from JSON file
-document.getElementById('btn-import').addEventListener('click', function() {
-  document.getElementById('import-file').click();
-});
-
-document.getElementById('import-file').addEventListener('change', function(ev) {
-  var file = ev.target.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var data = JSON.parse(e.target.result);
-      if (data.positions) {
-        // Switch tab if needed
-        if (data.tab && data.tab !== currentTab) {
-          document.querySelector('[data-tab="' + data.tab + '"]').click();
-        }
-        // Save and reload
-        localStorage.setItem('cy-pos-' + (data.tab || currentTab), JSON.stringify(data.positions));
-        initGraph(data.tab || currentTab);
-      }
-    } catch(err) {
-      alert('Invalid JSON file');
-    }
-  };
-  reader.readAsText(file);
-  // Reset input so same file can be re-imported
-  ev.target.value = '';
-});
 
 document.addEventListener('keydown', function(ev) {
   if (ev.key==='p'||ev.key==='P') toggleAnim();
