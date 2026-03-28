@@ -81,6 +81,7 @@
   <div class="tab" data-tab="paas-hybrid">PaaS (Hybrid OnPrem Stage 0)</div>
   <div class="tab" data-tab="paas-hybrid-1">PaaS (Hybrid OnPrem Stage 1)</div>
   <div class="tab" data-tab="paas-hybrid-2">PaaS (Hybrid OnPrem Stage 2)</div>
+  <div class="tab" data-tab="paas-future">PaaS (Hybrid OnPrem Future)</div>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-fit">FIT</button>
   <button class="ctrl-btn" id="btn-reset">RESET</button>
@@ -680,6 +681,13 @@ paasHybrid2Pos['artif-us'] = {x:-190, y:341};
 paasHybrid2Pos['artif-ap'] = {x:-191, y:462};
 
 // ============================================================
+// PAAS HYBRID ONPREM FUTURE (copy of Stage 2)
+// ============================================================
+var paasFutureNodes = JSON.parse(JSON.stringify(paasHybrid2Nodes));
+var paasFutureEdges = JSON.parse(JSON.stringify(paasHybrid2Edges));
+var paasFuturePos = JSON.parse(JSON.stringify(paasHybrid2Pos));
+
+// ============================================================
 // CYTOSCAPE
 // ============================================================
 var cy = null;
@@ -705,6 +713,7 @@ function initGraph(tab) {
     'paas-hybrid': { nodes: paasHybridNodes, edges: paasHybridEdges, pos: paasHybridPos },
     'paas-hybrid-1': { nodes: paasHybrid1Nodes, edges: paasHybrid1Edges, pos: paasHybrid1Pos },
     'paas-hybrid-2': { nodes: paasHybrid2Nodes, edges: paasHybrid2Edges, pos: paasHybrid2Pos },
+    'paas-future': { nodes: paasFutureNodes, edges: paasFutureEdges, pos: paasFuturePos },
   };
   var d = tabData[tab] || tabData['saas'];
   var nodes = d.nodes;
@@ -934,6 +943,7 @@ document.getElementById('btn-reset').addEventListener('click', function() {
   localStorage.removeItem('cy-pos-paas-hybrid');
   localStorage.removeItem('cy-pos-paas-hybrid-1');
   localStorage.removeItem('cy-pos-paas-hybrid-2');
+  localStorage.removeItem('cy-pos-paas-future');
   animPaused = false;
   document.getElementById('btn-anim').textContent = 'PAUSE';
   initGraph(currentTab);
