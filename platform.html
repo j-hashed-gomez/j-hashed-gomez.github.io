@@ -738,17 +738,41 @@ paasFutureEdges.push(
   e('virtuozzo', 'rg-vz-ap', O, 'flow')
 );
 
+// Add Jenkins and Databases nodes per region
+paasFutureNodes.push(
+  n('jenkins-eu', 'Jenkins', 'artifact-child', { region: 'eu' }),
+  n('db-eu', 'Databases', 'artifact-child', { region: 'eu' }),
+  n('jenkins-us', 'Jenkins', 'artifact-child', { region: 'us' }),
+  n('db-us', 'Databases', 'artifact-child', { region: 'us' }),
+  n('jenkins-ap', 'Jenkins', 'artifact-child', { region: 'ap' }),
+  n('db-ap', 'Databases', 'artifact-child', { region: 'ap' })
+);
+
 var paasFuturePos = JSON.parse(JSON.stringify(paasHybrid2Pos));
-// Virtuozzo Americas region (left side, above Americas)
+paasFuturePos['virtuozzo'] = {x:-1430, y:443};
+paasFuturePos['artif-us'] = {x:-191, y:444};
+paasFuturePos['artif-ap'] = {x:-196, y:666};
+// Europe
+paasFuturePos['rg-vz-eu'] = {x:-921, y:226};
+paasFuturePos['dc-dublin'] = {x:-921, y:226};
+paasFuturePos['vpn'] = {x:-555, y:225};
+paasFuturePos['jfrog'] = {x:-1013, y:191};
+paasFuturePos['jenkins-eu'] = {x:-1013, y:240};
+paasFuturePos['db-eu'] = {x:-1013, y:280};
+// Americas
 paasFuturePos['rg-vz-us'] = {x:-921, y:450};
 paasFuturePos['dc-virginia'] = {x:-921, y:450};
 paasFuturePos['vpn-us'] = {x:-555, y:450};
 paasFuturePos['jfrog-us'] = {x:-1013, y:410};
-// Virtuozzo APAC region (left side, below)
+paasFuturePos['jenkins-us'] = {x:-1013, y:460};
+paasFuturePos['db-us'] = {x:-1013, y:500};
+// APAC
 paasFuturePos['rg-vz-ap'] = {x:-921, y:670};
 paasFuturePos['dc-singapore'] = {x:-921, y:670};
 paasFuturePos['vpn-ap'] = {x:-555, y:670};
 paasFuturePos['jfrog-ap'] = {x:-1013, y:630};
+paasFuturePos['jenkins-ap'] = {x:-1013, y:680};
+paasFuturePos['db-ap'] = {x:-1013, y:720};
 
 // ============================================================
 // CYTOSCAPE
