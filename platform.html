@@ -77,6 +77,24 @@
       text-shadow: 0 0 10px #ff4081;
       background: rgba(255,64,129,0.1) !important;
     }
+    .version-badge {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(45deg, #00ff41, #0080ff);
+      color: #050505;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 0 20px rgba(0,255,65,0.3);
+      animation: badge-pulse 2s infinite;
+      z-index: 9999;
+    }
+    @keyframes badge-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
     .footer-info {
       position: fixed;
       bottom: 8px; left: 8px;
@@ -1192,5 +1210,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
+<div class="version-badge">v1.2.1 ⚡</div>
 </body>
 </html>
