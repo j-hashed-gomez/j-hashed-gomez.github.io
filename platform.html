@@ -499,9 +499,19 @@ paasHybridEdges.push(
   e('vpn', 'dc-dublin', PR, 'vpn')
 );
 
-var paasHybridPos = JSON.parse(JSON.stringify(paasPos));
-paasHybridPos['vpn'] = {x:-213, y:450};
-paasHybridPos['dc-dublin'] = {x:-213, y:620};
+var paasHybridPos = {
+  'azure':  {x:480,y:50},
+  'rg-us':  {x:160,y:300}, 'rg-eu':  {x:480,y:300}, 'rg-ap':  {x:800,y:300},
+  'p-tech': {x:160,y:240}, 'p-glob': {x:160,y:340}, 'p-mega': {x:160,y:440},
+  'p-euro': {x:480,y:240}, 'p-nord': {x:480,y:340}, 'p-dach': {x:480,y:440},
+  'p-toky': {x:800,y:240}, 'p-sing': {x:800,y:340}, 'p-indi': {x:800,y:440},
+  'artif':  {x:-213,y:222},
+  'vpn':    {x:-213,y:420},
+  'dc-dublin': {x:-213,y:600},
+  'inet-a': {x:-218,y:728},
+  'inet-c': {x:470,y:736},
+  'c-us':   {x:160,y:950}, 'c-eu': {x:480,y:950}, 'c-ap': {x:800,y:950},
+};
 
 // ============================================================
 // CYTOSCAPE
