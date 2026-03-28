@@ -95,7 +95,7 @@
 <div id="cy-container"></div>
 
 <div class="footer-info">
-  Drag nodes | Scroll zoom | 1/2=tabs | F=fit | R=reset | P=pause
+  Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause
 </div>
 
 <script>
@@ -1058,6 +1058,10 @@ document.addEventListener('keydown', function(ev) {
   if (ev.key==='p'||ev.key==='P') toggleAnim();
   else if (ev.key==='1') document.querySelector('[data-tab="saas"]').click();
   else if (ev.key==='2') document.querySelector('[data-tab="paas"]').click();
+  else if (ev.key==='3') document.querySelector('[data-tab="paas-hybrid"]').click();
+  else if (ev.key==='4') document.querySelector('[data-tab="paas-hybrid-1"]').click();
+  else if (ev.key==='5') document.querySelector('[data-tab="paas-hybrid-2"]').click();
+  else if (ev.key==='6') document.querySelector('[data-tab="paas-future"]').click();
   else if (ev.key==='f'||ev.key==='F') document.getElementById('btn-fit').click();
   else if (ev.key==='r'||ev.key==='R') document.getElementById('btn-reset').click();
 });
