@@ -79,6 +79,71 @@
       text-shadow: 0 0 10px #ff4081;
       background: rgba(255,64,129,0.1) !important;
     }
+    #draw-toolbar {
+      display: none;
+      position: fixed;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10,10,10,0.95);
+      border: 1px solid rgba(255,64,129,0.4);
+      border-radius: 8px;
+      padding: 8px;
+      z-index: 1001;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 0 15px rgba(255,64,129,0.2);
+    }
+    #draw-toolbar.visible { display: flex; }
+    #draw-toolbar label {
+      color: #aaa;
+      font-size: 0.7rem;
+      font-family: 'VT323', monospace;
+      margin-top: 4px;
+    }
+    #draw-toolbar label:first-child { margin-top: 0; }
+    .tool-btn {
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(255,64,129,0.25);
+      color: #ff4081;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'VT323', monospace;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .tool-btn:hover { background: rgba(255,64,129,0.1); }
+    .tool-btn.active {
+      background: rgba(255,64,129,0.2);
+      border-color: #ff4081;
+      text-shadow: 0 0 8px #ff4081;
+    }
+    #draw-toolbar input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid rgba(255,64,129,0.25);
+      border-radius: 4px;
+      background: rgba(20,20,20,0.9);
+      cursor: pointer;
+      padding: 2px;
+    }
+    #draw-toolbar input[type="range"] {
+      width: 100%;
+      accent-color: #ff4081;
+    }
+    #draw-toolbar select {
+      width: 100%;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(255,64,129,0.25);
+      color: #ff4081;
+      padding: 4px;
+      border-radius: 4px;
+      font-family: 'VT323', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
     .version-badge {
       position: fixed;
       bottom: 20px;
@@ -135,6 +200,26 @@
 
 <div id="cy-container" style="position:relative;"></div>
 <canvas id="draw-overlay"></canvas>
+
+<div id="draw-toolbar">
+  <label>TOOL</label>
+  <button class="tool-btn active" data-tool="free">Dibujo</button>
+  <button class="tool-btn" data-tool="line">Linea</button>
+  <button class="tool-btn" data-tool="arrow">Flecha</button>
+  <button class="tool-btn" data-tool="rect">Rect</button>
+  <button class="tool-btn" data-tool="circle">Circulo</button>
+  <button class="tool-btn" data-tool="ellipse">Elipse</button>
+  <label>COLOR</label>
+  <input type="color" id="draw-color" value="#ff4081">
+  <label>GROSOR</label>
+  <input type="range" id="draw-width" min="1" max="10" value="2">
+  <label>TRAZO</label>
+  <select id="draw-dash">
+    <option value="solid">Continuo</option>
+    <option value="dashed">Discontinuo</option>
+    <option value="dotted">Punteado</option>
+  </select>
+</div>
 
 <div class="footer-info">
   Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause | D=draw
@@ -1097,74 +1182,196 @@ document.getElementById('btn-export').addEventListener('click', function() {
 
 
 // ============================================================
-// FREEHAND DRAWING
+// DRAWING ENGINE
 // ============================================================
 var drawCanvas = document.getElementById('draw-overlay');
 var drawCtx = drawCanvas.getContext('2d');
 var drawing = false;
 var drawMode = false;
+var drawTool = 'free';
+var startX, startY;
+var snapshot; // to restore canvas when previewing shapes
 
 function resizeDrawCanvas() {
+  var img = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
   drawCanvas.width = window.innerWidth;
   drawCanvas.height = window.innerHeight;
+  drawCtx.putImageData(img, 0, 0);
 }
 resizeDrawCanvas();
 window.addEventListener('resize', resizeDrawCanvas);
 
+function getDrawStyle() {
+  var color = document.getElementById('draw-color').value;
+  var width = parseInt(document.getElementById('draw-width').value);
+  var dash = document.getElementById('draw-dash').value;
+  var dashPattern = [];
+  if (dash === 'dashed') dashPattern = [width * 4, width * 2];
+  else if (dash === 'dotted') dashPattern = [width, width * 2];
+  return { color: color, width: width, dash: dashPattern };
+}
+
+function applyStyle(ctx, style) {
+  ctx.strokeStyle = style.color;
+  ctx.lineWidth = style.width;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.setLineDash(style.dash);
+}
+
+function drawArrowHead(ctx, fromX, fromY, toX, toY, size) {
+  var angle = Math.atan2(toY - fromY, toX - fromX);
+  ctx.beginPath();
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(toX - size * Math.cos(angle - Math.PI / 6), toY - size * Math.sin(angle - Math.PI / 6));
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(toX - size * Math.cos(angle + Math.PI / 6), toY - size * Math.sin(angle + Math.PI / 6));
+  ctx.stroke();
+}
+
+// Tool buttons
+document.querySelectorAll('.tool-btn[data-tool]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    drawTool = btn.getAttribute('data-tool');
+  });
+});
+
+// Mouse events
 drawCanvas.addEventListener('mousedown', function(e) {
   if (!drawMode) return;
   e.stopPropagation(); e.preventDefault();
   drawing = true;
-  drawCtx.beginPath();
-  drawCtx.moveTo(e.offsetX, e.offsetY);
-  drawCtx.strokeStyle = '#ff4081';
-  drawCtx.lineWidth = 2;
-  drawCtx.lineCap = 'round';
-  drawCtx.lineJoin = 'round';
+  startX = e.offsetX;
+  startY = e.offsetY;
+  var style = getDrawStyle();
+  if (drawTool === 'free') {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, startY);
+    applyStyle(drawCtx, style);
+  } else {
+    snapshot = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
+  }
 });
 
 drawCanvas.addEventListener('mousemove', function(e) {
   if (!drawing) return;
   e.stopPropagation(); e.preventDefault();
-  drawCtx.lineTo(e.offsetX, e.offsetY);
-  drawCtx.stroke();
+  var mx = e.offsetX, my = e.offsetY;
+  var style = getDrawStyle();
+
+  if (drawTool === 'free') {
+    drawCtx.lineTo(mx, my);
+    drawCtx.stroke();
+    return;
+  }
+
+  // Restore snapshot and draw preview
+  drawCtx.putImageData(snapshot, 0, 0);
+  applyStyle(drawCtx, style);
+  drawCtx.beginPath();
+
+  if (drawTool === 'line' || drawTool === 'arrow') {
+    drawCtx.moveTo(startX, startY);
+    drawCtx.lineTo(mx, my);
+    drawCtx.stroke();
+    if (drawTool === 'arrow') drawArrowHead(drawCtx, startX, startY, mx, my, style.width * 5 + 8);
+  } else if (drawTool === 'rect') {
+    drawCtx.strokeRect(startX, startY, mx - startX, my - startY);
+  } else if (drawTool === 'circle') {
+    var radius = Math.sqrt(Math.pow(mx - startX, 2) + Math.pow(my - startY, 2));
+    drawCtx.arc(startX, startY, radius, 0, Math.PI * 2);
+    drawCtx.stroke();
+  } else if (drawTool === 'ellipse') {
+    var rx = Math.abs(mx - startX);
+    var ry = Math.abs(my - startY);
+    var cx = (startX + mx) / 2;
+    var cy2 = (startY + my) / 2;
+    drawCtx.ellipse(cx, cy2, rx / 2, ry / 2, 0, 0, Math.PI * 2);
+    drawCtx.stroke();
+  }
 });
 
-drawCanvas.addEventListener('mouseup', function(e) { e.stopPropagation(); drawing = false; });
-drawCanvas.addEventListener('mouseleave', function(e) { drawing = false; });
+drawCanvas.addEventListener('mouseup', function(e) {
+  if (!drawing) return;
+  e.stopPropagation();
+  drawing = false;
+  snapshot = null;
+});
+drawCanvas.addEventListener('mouseleave', function() { drawing = false; snapshot = null; });
 drawCanvas.addEventListener('wheel', function(e) { if (drawMode) { e.stopPropagation(); e.preventDefault(); } }, { passive: false });
 
 // Touch support
+function touchPos(e) {
+  var t = e.touches[0];
+  var r = drawCanvas.getBoundingClientRect();
+  return { x: t.clientX - r.left, y: t.clientY - r.top };
+}
+
 drawCanvas.addEventListener('touchstart', function(e) {
   if (!drawMode) return;
   e.preventDefault();
-  var touch = e.touches[0];
-  var rect = drawCanvas.getBoundingClientRect();
+  var p = touchPos(e);
   drawing = true;
-  drawCtx.beginPath();
-  drawCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  drawCtx.strokeStyle = '#ff4081';
-  drawCtx.lineWidth = 2;
-  drawCtx.lineCap = 'round';
-  drawCtx.lineJoin = 'round';
+  startX = p.x; startY = p.y;
+  var style = getDrawStyle();
+  if (drawTool === 'free') {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, startY);
+    applyStyle(drawCtx, style);
+  } else {
+    snapshot = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
+  }
 }, { passive: false });
 
 drawCanvas.addEventListener('touchmove', function(e) {
   if (!drawing) return;
   e.preventDefault();
-  var touch = e.touches[0];
-  var rect = drawCanvas.getBoundingClientRect();
-  drawCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  drawCtx.stroke();
+  var p = touchPos(e);
+  var style = getDrawStyle();
+
+  if (drawTool === 'free') {
+    drawCtx.lineTo(p.x, p.y);
+    drawCtx.stroke();
+    return;
+  }
+
+  drawCtx.putImageData(snapshot, 0, 0);
+  applyStyle(drawCtx, style);
+  drawCtx.beginPath();
+
+  if (drawTool === 'line' || drawTool === 'arrow') {
+    drawCtx.moveTo(startX, startY);
+    drawCtx.lineTo(p.x, p.y);
+    drawCtx.stroke();
+    if (drawTool === 'arrow') drawArrowHead(drawCtx, startX, startY, p.x, p.y, style.width * 5 + 8);
+  } else if (drawTool === 'rect') {
+    drawCtx.strokeRect(startX, startY, p.x - startX, p.y - startY);
+  } else if (drawTool === 'circle') {
+    var radius = Math.sqrt(Math.pow(p.x - startX, 2) + Math.pow(p.y - startY, 2));
+    drawCtx.arc(startX, startY, radius, 0, Math.PI * 2);
+    drawCtx.stroke();
+  } else if (drawTool === 'ellipse') {
+    var rx = Math.abs(p.x - startX);
+    var ry = Math.abs(p.y - startY);
+    var cx = (startX + p.x) / 2;
+    var cy2 = (startY + p.y) / 2;
+    drawCtx.ellipse(cx, cy2, rx / 2, ry / 2, 0, 0, Math.PI * 2);
+    drawCtx.stroke();
+  }
 }, { passive: false });
 
-drawCanvas.addEventListener('touchend', function() { drawing = false; });
+drawCanvas.addEventListener('touchend', function() { drawing = false; snapshot = null; });
 
+// Draw mode toggle
 function setDrawMode(on) {
   drawMode = on;
   drawing = false;
+  snapshot = null;
   drawCanvas.classList.toggle('active', drawMode);
   document.getElementById('cy-container').classList.toggle('drawing-mode', drawMode);
+  document.getElementById('draw-toolbar').classList.toggle('visible', drawMode);
   var btn = document.getElementById('btn-draw');
   btn.classList.toggle('draw-active', drawMode);
   btn.textContent = drawMode ? 'DRAW ON' : 'DRAW';
@@ -1210,6 +1417,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
-<div class="version-badge">v1.2.4 ⚡</div>
+<div class="version-badge">v1.2.5 ⚡</div>
 </body>
 </html>
