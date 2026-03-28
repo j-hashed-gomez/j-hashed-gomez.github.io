@@ -1,0 +1,445 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'Courier New', monospace">
+  <defs>
+    <!-- Glow filters -->
+    <filter id="glow-green">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-blue">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-cyan">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Gradient for Azure cloud -->
+    <linearGradient id="azure-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078d4"/>
+      <stop offset="100%" style="stop-color:#00bcf2"/>
+    </linearGradient>
+
+    <!-- Gradient for internet globe -->
+    <radialGradient id="globe-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="70%" style="stop-color:#0a0a1a"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+
+    <!-- Region gradients -->
+    <linearGradient id="region-americas" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#00ff41;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="region-europe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0080ff;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#0080ff;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="region-apac" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff4081;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ff4081;stop-opacity:0.05"/>
+    </linearGradient>
+
+    <!-- Data packet symbol -->
+    <symbol id="packet" viewBox="0 0 8 8">
+      <rect width="8" height="8" rx="2" fill="currentColor" opacity="0.9"/>
+    </symbol>
+
+    <!-- User icon symbol -->
+    <symbol id="user-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M2 22c0-5.5 4.5-10 10-10s10 4.5 10 10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </symbol>
+
+    <!-- Server icon -->
+    <symbol id="server-icon" viewBox="0 0 30 40">
+      <rect x="2" y="2" width="26" height="36" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="2" y1="14" x2="28" y2="14" stroke="currentColor" stroke-width="1"/>
+      <line x1="2" y1="26" x2="28" y2="26" stroke="currentColor" stroke-width="1"/>
+      <circle cx="8" cy="8" r="2" fill="currentColor" opacity="0.8"/>
+      <circle cx="8" cy="20" r="2" fill="currentColor" opacity="0.8"/>
+      <circle cx="8" cy="32" r="2" fill="currentColor" opacity="0.8"/>
+      <line x1="14" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+      <line x1="14" y1="20" x2="24" y2="20" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+      <line x1="14" y1="32" x2="24" y2="32" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+    </symbol>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#0a0a0a"/>
+  <!-- Subtle grid -->
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#00ff41" stroke-width="0.15" opacity="0.3"/>
+  </pattern>
+  <rect width="900" height="620" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="450" y="32" text-anchor="middle" fill="#00ff41" font-size="16" font-weight="bold" filter="url(#glow-green)">
+    > SaaS MARKETPLACE PLATFORM — AZURE GLOBAL DEPLOYMENT_
+    <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- ==================== AZURE CLOUD SECTION ==================== -->
+  <!-- Azure cloud shape -->
+  <g transform="translate(450, 90)">
+    <!-- Cloud body -->
+    <ellipse cx="0" cy="0" rx="120" ry="40" fill="url(#azure-grad)" opacity="0.15" stroke="#0078d4" stroke-width="1.5">
+      <animate attributeName="ry" values="40;43;40" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="-50" cy="-10" rx="60" ry="30" fill="url(#azure-grad)" opacity="0.1"/>
+    <ellipse cx="50" cy="-10" rx="60" ry="30" fill="url(#azure-grad)" opacity="0.1"/>
+
+    <!-- Azure logo text -->
+    <text x="0" y="-8" text-anchor="middle" fill="#00bcf2" font-size="20" font-weight="bold" filter="url(#glow-blue)">AZURE</text>
+    <text x="0" y="12" text-anchor="middle" fill="#0078d4" font-size="10">CLOUD PLATFORM</text>
+
+    <!-- Pulsing ring -->
+    <ellipse cx="0" cy="0" rx="130" ry="45" fill="none" stroke="#0078d4" stroke-width="0.5" opacity="0.3">
+      <animate attributeName="rx" values="130;140;130" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="45;50;45" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- ==================== CONNECTION LINES: AZURE -> REGIONS ==================== -->
+  <!-- Line to Americas -->
+  <line x1="370" y1="120" x2="150" y2="210" stroke="#00ff41" stroke-width="1" opacity="0.4" stroke-dasharray="5,5">
+    <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <!-- Line to Europe -->
+  <line x1="450" y1="130" x2="450" y2="210" stroke="#0080ff" stroke-width="1" opacity="0.4" stroke-dasharray="5,5">
+    <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <!-- Line to APAC -->
+  <line x1="530" y1="120" x2="750" y2="210" stroke="#ff4081" stroke-width="1" opacity="0.4" stroke-dasharray="5,5">
+    <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Data packets: Azure -> Americas -->
+  <circle r="3" fill="#00ff41" filter="url(#glow-green)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M370,120 L150,210"/>
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Data packets: Azure -> Europe -->
+  <circle r="3" fill="#0080ff" filter="url(#glow-blue)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M450,130 L450,210"/>
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Data packets: Azure -> APAC -->
+  <circle r="3" fill="#ff4081">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M530,120 L750,210"/>
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ==================== REGION: AMERICAS ==================== -->
+  <g transform="translate(30, 200)">
+    <!-- Region box -->
+    <rect x="0" y="0" width="260" height="200" rx="8" fill="url(#region-americas)" stroke="#00ff41" stroke-width="1.5" opacity="0.9"/>
+    <!-- Header bar -->
+    <rect x="0" y="0" width="260" height="30" rx="8" fill="#00ff41" opacity="0.15"/>
+    <rect x="0" y="15" width="260" height="15" fill="#00ff41" opacity="0.15"/>
+    <text x="130" y="20" text-anchor="middle" fill="#00ff41" font-size="13" font-weight="bold" filter="url(#glow-green)">SUBSCRIPTION: AMERICAS</text>
+
+    <!-- Marketplace box -->
+    <rect x="15" y="40" width="230" height="65" rx="5" fill="rgba(0,255,65,0.05)" stroke="#00ff41" stroke-width="0.8" stroke-dasharray="3,3"/>
+    <text x="130" y="58" text-anchor="middle" fill="#00ff41" font-size="11" font-weight="bold">MARKETPLACE</text>
+
+    <!-- Servers -->
+    <use href="#server-icon" x="30" y="62" width="20" height="28" color="#00ff41" opacity="0.7"/>
+    <use href="#server-icon" x="60" y="62" width="20" height="28" color="#00ff41" opacity="0.7"/>
+    <use href="#server-icon" x="90" y="62" width="20" height="28" color="#00ff41" opacity="0.7"/>
+
+    <!-- Server activity indicators -->
+    <circle cx="40" cy="68" r="2" fill="#00ff41">
+      <animate attributeName="opacity" values="1;0.2;1" dur="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="70" cy="68" r="2" fill="#00ff41">
+      <animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="68" r="2" fill="#00ff41">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- AKS label -->
+    <text x="155" y="75" fill="#00ff41" font-size="9" opacity="0.7">AKS Cluster</text>
+    <text x="155" y="87" fill="#00ff41" font-size="8" opacity="0.5">East US / West US</text>
+
+    <!-- Services -->
+    <rect x="15" y="112" width="70" height="22" rx="4" fill="rgba(0,255,65,0.1)" stroke="#00ff41" stroke-width="0.5"/>
+    <text x="50" y="127" text-anchor="middle" fill="#00ff41" font-size="8">API Gateway</text>
+
+    <rect x="95" y="112" width="70" height="22" rx="4" fill="rgba(0,255,65,0.1)" stroke="#00ff41" stroke-width="0.5"/>
+    <text x="130" y="127" text-anchor="middle" fill="#00ff41" font-size="8">Cosmos DB</text>
+
+    <rect x="175" y="112" width="70" height="22" rx="4" fill="rgba(0,255,65,0.1)" stroke="#00ff41" stroke-width="0.5"/>
+    <text x="210" y="127" text-anchor="middle" fill="#00ff41" font-size="8">Redis Cache</text>
+
+    <!-- Traffic indicator -->
+    <text x="15" y="155" fill="#00ff41" font-size="9" opacity="0.6">> Traffic: ██████████░░ 78%</text>
+    <text x="15" y="170" fill="#00ff41" font-size="9" opacity="0.6">> Latency: 12ms</text>
+    <text x="15" y="185" fill="#00ff41" font-size="9" opacity="0.6">> Status: <tspan fill="#00ff41" font-weight="bold">ONLINE</tspan>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </text>
+  </g>
+
+  <!-- ==================== REGION: EUROPE ==================== -->
+  <g transform="translate(320, 200)">
+    <rect x="0" y="0" width="260" height="200" rx="8" fill="url(#region-europe)" stroke="#0080ff" stroke-width="1.5" opacity="0.9"/>
+    <rect x="0" y="0" width="260" height="30" rx="8" fill="#0080ff" opacity="0.15"/>
+    <rect x="0" y="15" width="260" height="15" fill="#0080ff" opacity="0.15"/>
+    <text x="130" y="20" text-anchor="middle" fill="#0080ff" font-size="13" font-weight="bold" filter="url(#glow-blue)">SUBSCRIPTION: EUROPE</text>
+
+    <!-- Marketplace box -->
+    <rect x="15" y="40" width="230" height="65" rx="5" fill="rgba(0,128,255,0.05)" stroke="#0080ff" stroke-width="0.8" stroke-dasharray="3,3"/>
+    <text x="130" y="58" text-anchor="middle" fill="#0080ff" font-size="11" font-weight="bold">MARKETPLACE</text>
+
+    <use href="#server-icon" x="30" y="62" width="20" height="28" color="#0080ff" opacity="0.7"/>
+    <use href="#server-icon" x="60" y="62" width="20" height="28" color="#0080ff" opacity="0.7"/>
+    <use href="#server-icon" x="90" y="62" width="20" height="28" color="#0080ff" opacity="0.7"/>
+
+    <circle cx="40" cy="68" r="2" fill="#0080ff">
+      <animate attributeName="opacity" values="1;0.2;1" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="70" cy="68" r="2" fill="#0080ff">
+      <animate attributeName="opacity" values="0.2;1;0.2" dur="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="68" r="2" fill="#0080ff">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.3s" repeatCount="indefinite"/>
+    </circle>
+
+    <text x="155" y="75" fill="#0080ff" font-size="9" opacity="0.7">AKS Cluster</text>
+    <text x="155" y="87" fill="#0080ff" font-size="8" opacity="0.5">West Europe / North EU</text>
+
+    <rect x="15" y="112" width="70" height="22" rx="4" fill="rgba(0,128,255,0.1)" stroke="#0080ff" stroke-width="0.5"/>
+    <text x="50" y="127" text-anchor="middle" fill="#0080ff" font-size="8">API Gateway</text>
+
+    <rect x="95" y="112" width="70" height="22" rx="4" fill="rgba(0,128,255,0.1)" stroke="#0080ff" stroke-width="0.5"/>
+    <text x="130" y="127" text-anchor="middle" fill="#0080ff" font-size="8">Cosmos DB</text>
+
+    <rect x="175" y="112" width="70" height="22" rx="4" fill="rgba(0,128,255,0.1)" stroke="#0080ff" stroke-width="0.5"/>
+    <text x="210" y="127" text-anchor="middle" fill="#0080ff" font-size="8">Redis Cache</text>
+
+    <text x="15" y="155" fill="#0080ff" font-size="9" opacity="0.6">> Traffic: ████████████ 95%</text>
+    <text x="15" y="170" fill="#0080ff" font-size="9" opacity="0.6">> Latency: 8ms</text>
+    <text x="15" y="185" fill="#0080ff" font-size="9" opacity="0.6">> Status: <tspan fill="#0080ff" font-weight="bold">ONLINE</tspan>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </text>
+  </g>
+
+  <!-- ==================== REGION: APAC ==================== -->
+  <g transform="translate(610, 200)">
+    <rect x="0" y="0" width="260" height="200" rx="8" fill="url(#region-apac)" stroke="#ff4081" stroke-width="1.5" opacity="0.9"/>
+    <rect x="0" y="0" width="260" height="30" rx="8" fill="#ff4081" opacity="0.15"/>
+    <rect x="0" y="15" width="260" height="15" fill="#ff4081" opacity="0.15"/>
+    <text x="130" y="20" text-anchor="middle" fill="#ff4081" font-size="13" font-weight="bold">SUBSCRIPTION: APAC</text>
+
+    <rect x="15" y="40" width="230" height="65" rx="5" fill="rgba(255,64,129,0.05)" stroke="#ff4081" stroke-width="0.8" stroke-dasharray="3,3"/>
+    <text x="130" y="58" text-anchor="middle" fill="#ff4081" font-size="11" font-weight="bold">MARKETPLACE</text>
+
+    <use href="#server-icon" x="30" y="62" width="20" height="28" color="#ff4081" opacity="0.7"/>
+    <use href="#server-icon" x="60" y="62" width="20" height="28" color="#ff4081" opacity="0.7"/>
+    <use href="#server-icon" x="90" y="62" width="20" height="28" color="#ff4081" opacity="0.7"/>
+
+    <circle cx="40" cy="68" r="2" fill="#ff4081">
+      <animate attributeName="opacity" values="1;0.2;1" dur="0.7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="70" cy="68" r="2" fill="#ff4081">
+      <animate attributeName="opacity" values="0.2;1;0.2" dur="1.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="68" r="2" fill="#ff4081">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+
+    <text x="155" y="75" fill="#ff4081" font-size="9" opacity="0.7">AKS Cluster</text>
+    <text x="155" y="87" fill="#ff4081" font-size="8" opacity="0.5">Southeast Asia / Japan</text>
+
+    <rect x="15" y="112" width="70" height="22" rx="4" fill="rgba(255,64,129,0.1)" stroke="#ff4081" stroke-width="0.5"/>
+    <text x="50" y="127" text-anchor="middle" fill="#ff4081" font-size="8">API Gateway</text>
+
+    <rect x="95" y="112" width="70" height="22" rx="4" fill="rgba(255,64,129,0.1)" stroke="#ff4081" stroke-width="0.5"/>
+    <text x="130" y="127" text-anchor="middle" fill="#ff4081" font-size="8">Cosmos DB</text>
+
+    <rect x="175" y="112" width="70" height="22" rx="4" fill="rgba(255,64,129,0.1)" stroke="#ff4081" stroke-width="0.5"/>
+    <text x="210" y="127" text-anchor="middle" fill="#ff4081" font-size="8">Redis Cache</text>
+
+    <text x="15" y="155" fill="#ff4081" font-size="9" opacity="0.6">> Traffic: ███████░░░░░ 58%</text>
+    <text x="15" y="170" fill="#ff4081" font-size="9" opacity="0.6">> Latency: 22ms</text>
+    <text x="15" y="185" fill="#ff4081" font-size="9" opacity="0.6">> Status: <tspan fill="#ff4081" font-weight="bold">ONLINE</tspan>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </text>
+  </g>
+
+  <!-- ==================== INTERNET LAYER ==================== -->
+  <!-- Internet label bar -->
+  <rect x="50" y="430" width="800" height="28" rx="5" fill="rgba(0,255,255,0.05)" stroke="#00ffff" stroke-width="0.8"/>
+  <text x="450" y="449" text-anchor="middle" fill="#00ffff" font-size="12" font-weight="bold" filter="url(#glow-cyan)">
+    INTERNET
+    <animate attributeName="opacity" values="1;0.6;1" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+  <!-- Globe icons -->
+  <circle cx="80" cy="444" r="8" fill="none" stroke="#00ffff" stroke-width="0.8" opacity="0.5"/>
+  <ellipse cx="80" cy="444" rx="4" ry="8" fill="none" stroke="#00ffff" stroke-width="0.5" opacity="0.4"/>
+  <line x1="72" y1="444" x2="88" y2="444" stroke="#00ffff" stroke-width="0.5" opacity="0.4"/>
+
+  <circle cx="820" cy="444" r="8" fill="none" stroke="#00ffff" stroke-width="0.8" opacity="0.5"/>
+  <ellipse cx="820" cy="444" rx="4" ry="8" fill="none" stroke="#00ffff" stroke-width="0.5" opacity="0.4"/>
+  <line x1="812" y1="444" x2="828" y2="444" stroke="#00ffff" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- ==================== CONNECTION LINES: REGIONS -> INTERNET ==================== -->
+  <line x1="160" y1="400" x2="160" y2="430" stroke="#00ff41" stroke-width="1" opacity="0.3" stroke-dasharray="4,4">
+    <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="450" y1="400" x2="450" y2="430" stroke="#0080ff" stroke-width="1" opacity="0.3" stroke-dasharray="4,4">
+    <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="740" y1="400" x2="740" y2="430" stroke="#ff4081" stroke-width="1" opacity="0.3" stroke-dasharray="4,4">
+    <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- ==================== CLIENTS SECTION ==================== -->
+  <!-- Connection lines: Internet -> Clients -->
+  <!-- Americas clients -->
+  <line x1="100" y1="458" x2="60" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="130" y1="458" x2="140" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="160" y1="458" x2="220" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.8s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Europe clients -->
+  <line x1="400" y1="458" x2="360" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.3s" repeatCount="indefinite"/>
+  </line>
+  <line x1="440" y1="458" x2="440" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.6s" repeatCount="indefinite"/>
+  </line>
+  <line x1="480" y1="458" x2="520" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- APAC clients -->
+  <line x1="700" y1="458" x2="660" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.4s" repeatCount="indefinite"/>
+  </line>
+  <line x1="740" y1="458" x2="740" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.7s" repeatCount="indefinite"/>
+  </line>
+  <line x1="780" y1="458" x2="820" y2="500" stroke="#00ffff" stroke-width="0.6" opacity="0.3" stroke-dasharray="3,3">
+    <animate attributeName="stroke-dashoffset" values="0;6" dur="1.0s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Data packets going up (clients -> platform) -->
+  <circle r="2" fill="#00ffff" opacity="0.8">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M60,510 L100,458"/>
+  </circle>
+  <circle r="2" fill="#00ffff" opacity="0.8">
+    <animateMotion dur="2.5s" repeatCount="indefinite" path="M440,510 L440,458"/>
+  </circle>
+  <circle r="2" fill="#00ffff" opacity="0.8">
+    <animateMotion dur="3.5s" repeatCount="indefinite" path="M820,510 L780,458"/>
+  </circle>
+
+  <!-- CLIENT GROUPS -->
+  <!-- Americas Clients -->
+  <g transform="translate(30, 500)">
+    <rect x="0" y="0" width="230" height="90" rx="6" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.6" opacity="0.6"/>
+    <text x="115" y="18" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — AMERICAS</text>
+
+    <!-- Client icons -->
+    <g transform="translate(20, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#00ff41"/>
+      <rect x="22" y="2" width="35" height="6" rx="2" fill="#00ff41" opacity="0.3"/>
+      <rect x="22" y="11" width="25" height="4" rx="1" fill="#00ff41" opacity="0.15"/>
+      <text x="0" y="30" fill="#00ff41" font-size="7" opacity="0.5">Enterprise A</text>
+    </g>
+    <g transform="translate(85, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#00ff41"/>
+      <rect x="22" y="2" width="30" height="6" rx="2" fill="#00ff41" opacity="0.3"/>
+      <rect x="22" y="11" width="20" height="4" rx="1" fill="#00ff41" opacity="0.15"/>
+      <text x="0" y="30" fill="#00ff41" font-size="7" opacity="0.5">Enterprise B</text>
+    </g>
+    <g transform="translate(155, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#00ff41"/>
+      <rect x="22" y="2" width="28" height="6" rx="2" fill="#00ff41" opacity="0.3"/>
+      <rect x="22" y="11" width="22" height="4" rx="1" fill="#00ff41" opacity="0.15"/>
+      <text x="0" y="30" fill="#00ff41" font-size="7" opacity="0.5">Enterprise C</text>
+    </g>
+
+    <!-- Activity pulses -->
+    <circle cx="30" cy="42" r="4" fill="none" stroke="#00ff41" stroke-width="0.5" opacity="0">
+      <animate attributeName="r" values="4;12" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Europe Clients -->
+  <g transform="translate(325, 500)">
+    <rect x="0" y="0" width="230" height="90" rx="6" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.6" opacity="0.6"/>
+    <text x="115" y="18" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — EUROPE</text>
+
+    <g transform="translate(20, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#0080ff"/>
+      <rect x="22" y="2" width="35" height="6" rx="2" fill="#0080ff" opacity="0.3"/>
+      <rect x="22" y="11" width="25" height="4" rx="1" fill="#0080ff" opacity="0.15"/>
+      <text x="0" y="30" fill="#0080ff" font-size="7" opacity="0.5">Enterprise D</text>
+    </g>
+    <g transform="translate(85, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#0080ff"/>
+      <rect x="22" y="2" width="30" height="6" rx="2" fill="#0080ff" opacity="0.3"/>
+      <rect x="22" y="11" width="20" height="4" rx="1" fill="#0080ff" opacity="0.15"/>
+      <text x="0" y="30" fill="#0080ff" font-size="7" opacity="0.5">Enterprise E</text>
+    </g>
+    <g transform="translate(155, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#0080ff"/>
+      <rect x="22" y="2" width="28" height="6" rx="2" fill="#0080ff" opacity="0.3"/>
+      <rect x="22" y="11" width="22" height="4" rx="1" fill="#0080ff" opacity="0.15"/>
+      <text x="0" y="30" fill="#0080ff" font-size="7" opacity="0.5">Enterprise F</text>
+    </g>
+
+    <circle cx="30" cy="42" r="4" fill="none" stroke="#0080ff" stroke-width="0.5" opacity="0">
+      <animate attributeName="r" values="4;12" dur="2.3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="2.3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- APAC Clients -->
+  <g transform="translate(620, 500)">
+    <rect x="0" y="0" width="250" height="90" rx="6" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.6" opacity="0.6"/>
+    <text x="125" y="18" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — APAC</text>
+
+    <g transform="translate(25, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#ff4081"/>
+      <rect x="22" y="2" width="35" height="6" rx="2" fill="#ff4081" opacity="0.3"/>
+      <rect x="22" y="11" width="25" height="4" rx="1" fill="#ff4081" opacity="0.15"/>
+      <text x="0" y="30" fill="#ff4081" font-size="7" opacity="0.5">Enterprise G</text>
+    </g>
+    <g transform="translate(95, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#ff4081"/>
+      <rect x="22" y="2" width="30" height="6" rx="2" fill="#ff4081" opacity="0.3"/>
+      <rect x="22" y="11" width="20" height="4" rx="1" fill="#ff4081" opacity="0.15"/>
+      <text x="0" y="30" fill="#ff4081" font-size="7" opacity="0.5">Enterprise H</text>
+    </g>
+    <g transform="translate(170, 30)">
+      <use href="#user-icon" x="0" y="0" width="18" height="18" color="#ff4081"/>
+      <rect x="22" y="2" width="28" height="6" rx="2" fill="#ff4081" opacity="0.3"/>
+      <rect x="22" y="11" width="22" height="4" rx="1" fill="#ff4081" opacity="0.15"/>
+      <text x="0" y="30" fill="#ff4081" font-size="7" opacity="0.5">Enterprise I</text>
+    </g>
+
+    <circle cx="35" cy="42" r="4" fill="none" stroke="#ff4081" stroke-width="0.5" opacity="0">
+      <animate attributeName="r" values="4;12" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- ==================== FOOTER STATUS BAR ==================== -->
+  <rect x="0" y="602" width="900" height="18" fill="rgba(0,255,65,0.05)"/>
+  <text x="15" y="614" fill="#00ff41" font-size="9" opacity="0.5">
+    > GLOBAL STATUS: ALL SYSTEMS OPERATIONAL | REGIONS: 3/3 ACTIVE | UPTIME: 99.97% | CUSTOMERS: 1,247 ACTIVE
+    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
+  </text>
+</svg>
