@@ -209,6 +209,11 @@
   <button class="tool-btn" data-tool="rect">Rect</button>
   <button class="tool-btn" data-tool="circle">Circle</button>
   <button class="tool-btn" data-tool="ellipse">Ellipse</button>
+  <label>HISTORY</label>
+  <div style="display:flex;gap:4px;">
+    <button class="tool-btn" id="btn-undo" style="flex:1">Undo</button>
+    <button class="tool-btn" id="btn-redo" style="flex:1">Redo</button>
+  </div>
   <label>COLOR</label>
   <input type="color" id="draw-color" value="#ff4081">
   <label>WIDTH</label>
@@ -1191,6 +1196,27 @@ var drawMode = false;
 var drawTool = 'free';
 var startX, startY;
 var snapshot; // to restore canvas when previewing shapes
+var undoStack = [];
+var redoStack = [];
+var MAX_UNDO = 50;
+
+function saveUndoState() {
+  undoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack = [];
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  redoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+  drawCtx.putImageData(undoStack.pop(), 0, 0);
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  undoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+  drawCtx.putImageData(redoStack.pop(), 0, 0);
+}
 
 function resizeDrawCanvas() {
   var img = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
@@ -1242,6 +1268,7 @@ document.querySelectorAll('.tool-btn[data-tool]').forEach(function(btn) {
 drawCanvas.addEventListener('mousedown', function(e) {
   if (!drawMode) return;
   e.stopPropagation(); e.preventDefault();
+  saveUndoState();
   drawing = true;
   startX = e.offsetX;
   startY = e.offsetY;
@@ -1312,6 +1339,7 @@ function touchPos(e) {
 drawCanvas.addEventListener('touchstart', function(e) {
   if (!drawMode) return;
   e.preventDefault();
+  saveUndoState();
   var p = touchPos(e);
   drawing = true;
   startX = p.x; startY = p.y;
@@ -1389,8 +1417,12 @@ document.getElementById('btn-draw').addEventListener('click', function() {
 });
 
 document.getElementById('btn-clear').addEventListener('click', function() {
+  saveUndoState();
   drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
 });
+
+document.getElementById('btn-undo').addEventListener('click', function() { undo(); });
+document.getElementById('btn-redo').addEventListener('click', function() { redo(); });
 
 // Export SVG of current tab
 document.getElementById('btn-svg').addEventListener('click', function() {
@@ -1405,7 +1437,9 @@ document.getElementById('btn-svg').addEventListener('click', function() {
 });
 
 document.addEventListener('keydown', function(ev) {
-  if (ev.key==='p'||ev.key==='P') toggleAnim();
+  if (drawMode && ev.ctrlKey && ev.key === 'z') { ev.preventDefault(); undo(); }
+  else if (drawMode && ev.ctrlKey && ev.key === 'y') { ev.preventDefault(); redo(); }
+  else if (ev.key==='p'||ev.key==='P') toggleAnim();
   else if (ev.key==='1') document.querySelector('[data-tab="saas"]').click();
   else if (ev.key==='2') document.querySelector('[data-tab="paas"]').click();
   else if (ev.key==='3') document.querySelector('[data-tab="paas-hybrid"]').click();
