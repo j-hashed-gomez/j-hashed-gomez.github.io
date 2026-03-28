@@ -70,6 +70,7 @@
       cursor: crosshair;
     }
     #draw-overlay.active { pointer-events: auto; }
+    #cy-container.drawing-mode > *:not(#draw-overlay) { pointer-events: none !important; }
     .ctrl-btn.draw-active {
       color: #ff4081 !important;
       border-color: #ff4081 !important;
@@ -1140,15 +1141,11 @@ drawCanvas.addEventListener('touchend', function() { drawing = false; });
 
 document.getElementById('btn-draw').addEventListener('click', function() {
   drawMode = !drawMode;
+  drawing = false;
   drawCanvas.classList.toggle('active', drawMode);
+  document.getElementById('cy-container').classList.toggle('drawing-mode', drawMode);
   this.classList.toggle('draw-active', drawMode);
   this.textContent = drawMode ? 'DRAW ON' : 'DRAW';
-  if (cy) {
-    cy.userPanningEnabled(!drawMode);
-    cy.userZoomingEnabled(!drawMode);
-    cy.boxSelectionEnabled(!drawMode);
-    cy.autoungrabify(drawMode);
-  }
 });
 
 document.getElementById('btn-clear').addEventListener('click', function() {
