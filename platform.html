@@ -551,7 +551,7 @@ paasHybridNodes.forEach(function(nd) {
 // Add VPN gateway node
 paasHybridNodes.push(
   n('vpn', 'VPN GATEWAY\nSite-to-Site IPSec', 'vpn'),
-  n('dc-dublin', 'DATACENTER DUBLIN\nVirtuozzo Platform\nOn-Premises', 'dc-onprem')
+  n('dc-dublin', 'DATACENTER DUBLIN\nVirtuozzo Platform\nOn-Premises', 'dc', { region: 'eu' })
 );
 
 var paasHybridEdges = JSON.parse(JSON.stringify(paasEdges));
@@ -601,12 +601,31 @@ paasHybrid1Edges.push(
 
 // VPN connects directly to dc-dublin (which is inside the Virtuozzo Europe region)
 
+// Remove inet-a node (Internet Artifact Pull)
+paasHybrid1Nodes = paasHybrid1Nodes.filter(function(nd) {
+  return nd.data.id !== 'inet-a';
+});
+
+// Remove edges involving inet-a, and replace with new artifact pull path:
+// Azure regions -> artif (commercerndci) -> vpn -> dc-dublin
+paasHybrid1Edges = paasHybrid1Edges.filter(function(ed) {
+  return ed.data.source !== 'inet-a' && ed.data.target !== 'inet-a';
+});
+
+// New artifact pull edges: regions pull from dc-dublin via commercerndci & vpn
+paasHybrid1Edges.push(
+  e('rg-us', 'artif', B, 'artifact-pull'),
+  e('rg-eu', 'artif', B, 'artifact-pull'),
+  e('rg-ap', 'artif', B, 'artifact-pull')
+);
+
+// Move jfrog position near dc-dublin
 var paasHybrid1Pos = JSON.parse(JSON.stringify(paasHybridPos));
 paasHybrid1Pos['virtuozzo'] = {x:-921, y:50};
 paasHybrid1Pos['rg-vz-eu'] = {x:-921, y:226};
 paasHybrid1Pos['dc-dublin'] = {x:-921, y:226};
 paasHybrid1Pos['vpn'] = {x:-555, y:225};
-paasHybrid1Pos['jfrog'] = {x:-270, y:155};
+paasHybrid1Pos['jfrog'] = {x:-921, y:310};
 
 // ============================================================
 // CYTOSCAPE
