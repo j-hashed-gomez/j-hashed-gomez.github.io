@@ -77,7 +77,8 @@
 
 <div class="controls">
   <div class="tab active" data-tab="saas">SaaS</div>
-  <div class="tab" data-tab="paas">PaaS</div>
+  <div class="tab" data-tab="paas">PaaS (Now)</div>
+  <div class="tab" data-tab="paas-hybrid">PaaS (Hybrid OnPrem)</div>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-fit">FIT</button>
   <button class="ctrl-btn" id="btn-reset">RESET</button>
@@ -445,6 +446,13 @@ var paasPos = {
 };
 
 // ============================================================
+// PAAS HYBRID ONPREM DATA (copy of PaaS for now)
+// ============================================================
+var paasHybridNodes = JSON.parse(JSON.stringify(paasNodes));
+var paasHybridEdges = JSON.parse(JSON.stringify(paasEdges));
+var paasHybridPos = JSON.parse(JSON.stringify(paasPos));
+
+// ============================================================
 // CYTOSCAPE
 // ============================================================
 var cy = null;
@@ -464,9 +472,15 @@ function loadPos() {
 
 function initGraph(tab) {
   currentTab = tab;
-  var nodes = tab === 'saas' ? saasNodes : paasNodes;
-  var edges = tab === 'saas' ? saasEdges : paasEdges;
-  var defPos = tab === 'saas' ? saasPos : paasPos;
+  var tabData = {
+    'saas': { nodes: saasNodes, edges: saasEdges, pos: saasPos },
+    'paas': { nodes: paasNodes, edges: paasEdges, pos: paasPos },
+    'paas-hybrid': { nodes: paasHybridNodes, edges: paasHybridEdges, pos: paasHybridPos },
+  };
+  var d = tabData[tab] || tabData['saas'];
+  var nodes = d.nodes;
+  var edges = d.edges;
+  var defPos = d.pos;
   var saved = loadPos();
   var positions = saved || defPos;
 
@@ -688,6 +702,7 @@ document.getElementById('btn-fit').addEventListener('click', function() {
 document.getElementById('btn-reset').addEventListener('click', function() {
   localStorage.removeItem('cy-pos-saas');
   localStorage.removeItem('cy-pos-paas');
+  localStorage.removeItem('cy-pos-paas-hybrid');
   animPaused = false;
   document.getElementById('btn-anim').textContent = 'PAUSE';
   initGraph(currentTab);
