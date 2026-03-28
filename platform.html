@@ -266,6 +266,22 @@ var cyStyle = [
     }
   },
   {
+    selector: 'node[type="artifactory"][region="us"]',
+    style: {
+      'background-color': '#050a05',
+      'border-color': G,
+      'color': G,
+    }
+  },
+  {
+    selector: 'node[type="artifactory"][region="ap"]',
+    style: {
+      'background-color': '#0a0508',
+      'border-color': P,
+      'color': P,
+    }
+  },
+  {
     selector: 'node[type="artifact-child"]',
     style: {
       'background-color': '#0a0a12',
@@ -635,7 +651,33 @@ paasHybrid1Pos['jfrog'] = {x:-1013, y:191};
 // ============================================================
 var paasHybrid2Nodes = JSON.parse(JSON.stringify(paasHybrid1Nodes));
 var paasHybrid2Edges = JSON.parse(JSON.stringify(paasHybrid1Edges));
+
+// Add regional commercerndci subs for Americas and APAC
+paasHybrid2Nodes.push(
+  n('artif-us', 'SUB: commercerndci\nAmericas', 'artifactory', { region: 'us' }),
+  n('artif-ap', 'SUB: commercerndci\nAPAC', 'artifactory', { region: 'ap' })
+);
+
+// Remove old artifact-pull edges (regions -> artif EU)
+paasHybrid2Edges = paasHybrid2Edges.filter(function(ed) {
+  return ed.data.type !== 'artifact-pull';
+});
+
+// New flow: each Azure region -> its regional commercerndci -> commercerndci EU -> VPN -> Dublin
+paasHybrid2Edges.push(
+  // Azure regions -> regional commercerndci
+  e('rg-us', 'artif-us', G, 'flow'),
+  e('rg-eu', 'artif', B, 'flow'),
+  e('rg-ap', 'artif-ap', P, 'flow'),
+  // Regional commercerndci -> commercerndci EU (West Europe)
+  e('artif-us', 'artif', G, 'artifact-pull'),
+  e('artif-ap', 'artif', P, 'artifact-pull')
+);
+
 var paasHybrid2Pos = JSON.parse(JSON.stringify(paasHybrid1Pos));
+paasHybrid2Pos['artif-us'] = {x:473, y:600};
+paasHybrid2Pos['artif-ap'] = {x:800, y:600};
+paasHybrid2Pos['artif'] = {x:150, y:600};
 
 // ============================================================
 // CYTOSCAPE
