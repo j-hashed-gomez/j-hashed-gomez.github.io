@@ -79,6 +79,7 @@
   <div class="tab active" data-tab="saas">SaaS</div>
   <div class="tab" data-tab="paas">PaaS (Now)</div>
   <div class="tab" data-tab="paas-hybrid">PaaS (Hybrid OnPrem Stage 0)</div>
+  <div class="tab" data-tab="paas-hybrid-1">PaaS (Hybrid OnPrem Stage 1)</div>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-fit">FIT</button>
   <button class="ctrl-btn" id="btn-reset">RESET</button>
@@ -514,6 +515,13 @@ var paasHybridPos = {
 };
 
 // ============================================================
+// PAAS HYBRID ONPREM STAGE 1 (copy of Stage 0)
+// ============================================================
+var paasHybrid1Nodes = JSON.parse(JSON.stringify(paasHybridNodes));
+var paasHybrid1Edges = JSON.parse(JSON.stringify(paasHybridEdges));
+var paasHybrid1Pos = JSON.parse(JSON.stringify(paasHybridPos));
+
+// ============================================================
 // CYTOSCAPE
 // ============================================================
 var cy = null;
@@ -537,6 +545,7 @@ function initGraph(tab) {
     'saas': { nodes: saasNodes, edges: saasEdges, pos: saasPos },
     'paas': { nodes: paasNodes, edges: paasEdges, pos: paasPos },
     'paas-hybrid': { nodes: paasHybridNodes, edges: paasHybridEdges, pos: paasHybridPos },
+    'paas-hybrid-1': { nodes: paasHybrid1Nodes, edges: paasHybrid1Edges, pos: paasHybrid1Pos },
   };
   var d = tabData[tab] || tabData['saas'];
   var nodes = d.nodes;
@@ -764,6 +773,7 @@ document.getElementById('btn-reset').addEventListener('click', function() {
   localStorage.removeItem('cy-pos-saas');
   localStorage.removeItem('cy-pos-paas');
   localStorage.removeItem('cy-pos-paas-hybrid');
+  localStorage.removeItem('cy-pos-paas-hybrid-1');
   animPaused = false;
   document.getElementById('btn-anim').textContent = 'PAUSE';
   initGraph(currentTab);
