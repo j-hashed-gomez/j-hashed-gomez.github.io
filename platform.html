@@ -62,9 +62,9 @@
       height: calc(100vh - 50px);
     }
     #draw-overlay {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 100vw; height: 100vh;
       pointer-events: none;
       z-index: 900;
       cursor: crosshair;
@@ -131,9 +131,8 @@
 </div>
 
 
-<div id="cy-container" style="position:relative;">
-  <canvas id="draw-overlay"></canvas>
-</div>
+<div id="cy-container" style="position:relative;"></div>
+<canvas id="draw-overlay"></canvas>
 
 <div class="footer-info">
   Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause | D=draw
@@ -1104,9 +1103,8 @@ var drawing = false;
 var drawMode = false;
 
 function resizeDrawCanvas() {
-  var container = document.getElementById('cy-container');
-  drawCanvas.width = container.offsetWidth;
-  drawCanvas.height = container.offsetHeight;
+  drawCanvas.width = window.innerWidth;
+  drawCanvas.height = window.innerHeight;
 }
 resizeDrawCanvas();
 window.addEventListener('resize', resizeDrawCanvas);
@@ -1210,6 +1208,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
-<div class="version-badge">v1.2.1 ⚡</div>
+<div class="version-badge">v1.2.2 ⚡</div>
 </body>
 </html>
