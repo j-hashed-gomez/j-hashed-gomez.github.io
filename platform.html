@@ -282,6 +282,38 @@ var cyStyle = [
     style: { 'border-color': CY, 'color': B }
   },
   {
+    selector: 'node[type="cloud-onprem"]',
+    style: {
+      'background-color': '#100a00',
+      'border-color': O,
+      'border-width': 2.5,
+      'color': O,
+      'font-size': 14,
+      'font-weight': 'bold',
+      'width': 260,
+      'height': 80,
+      'shape': 'ellipse',
+      'text-outline-color': '#100a00',
+      'text-outline-width': 1,
+    }
+  },
+  {
+    selector: 'node[type="region-onprem"]',
+    style: {
+      'background-color': '#080808',
+      'background-opacity': 0.6,
+      'border-width': 1.5,
+      'border-style': 'dashed',
+      'border-color': O,
+      'color': O,
+      'font-size': 14,
+      'font-weight': 'bold',
+      'text-valign': 'top',
+      'text-margin-y': 12,
+      'padding': 30,
+    }
+  },
+  {
     selector: 'node[type="customer"][region="ap"]',
     style: { 'border-color': CY, 'color': P }
   },
@@ -528,11 +560,42 @@ var paasHybridPos = {
 };
 
 // ============================================================
-// PAAS HYBRID ONPREM STAGE 1 (copy of Stage 0)
+// PAAS HYBRID ONPREM STAGE 1
 // ============================================================
 var paasHybrid1Nodes = JSON.parse(JSON.stringify(paasHybridNodes));
 var paasHybrid1Edges = JSON.parse(JSON.stringify(paasHybridEdges));
+
+// Add OnPrem Cloud Platform (Virtuozzo) provider
+paasHybrid1Nodes.push(
+  n('virtuozzo', 'ONPREM CLOUD PLATFORM\n(Virtuozzo)', 'cloud-onprem'),
+  n('rg-vz-eu', 'EUROPE', 'region-onprem', { region: 'eu' })
+);
+
+// Move dc-dublin inside the Virtuozzo Europe region
+paasHybrid1Nodes.forEach(function(nd) {
+  if (nd.data.id === 'dc-dublin') nd.data.parent = 'rg-vz-eu';
+});
+
+// Connect Virtuozzo provider to its Europe region
+paasHybrid1Edges.push(
+  e('virtuozzo', 'rg-vz-eu', O, 'flow')
+);
+
+// VPN connects to Virtuozzo provider
+paasHybrid1Edges.forEach(function(ed) {
+  if (ed.data.source === 'vpn' && ed.data.target === 'dc-dublin') {
+    ed.data.target = 'virtuozzo';
+  }
+});
+// Add edge from Virtuozzo region to Dublin (already child, but explicit connection)
+paasHybrid1Edges.push(
+  e('rg-vz-eu', 'dc-dublin', O, 'flow')
+);
+
 var paasHybrid1Pos = JSON.parse(JSON.stringify(paasHybridPos));
+paasHybrid1Pos['virtuozzo'] = {x:-921, y:50};
+paasHybrid1Pos['rg-vz-eu'] = {x:-921, y:226};
+paasHybrid1Pos['dc-dublin'] = {x:-921, y:226};
 
 // ============================================================
 // CYTOSCAPE
