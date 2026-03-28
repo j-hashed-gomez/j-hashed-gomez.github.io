@@ -81,12 +81,14 @@
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-fit">FIT</button>
   <button class="ctrl-btn" id="btn-reset">RESET</button>
+  <span class="sep">|</span>
+  <button class="ctrl-btn" id="btn-anim">PAUSE</button>
 </div>
 
 <div id="cy-container"></div>
 
 <div class="footer-info">
-  Drag nodes | Scroll zoom | 1/2=tabs | F=fit | R=reset
+  Drag nodes | Scroll zoom | 1/2=tabs | F=fit | R=reset | P=pause
 </div>
 
 <script>
@@ -490,6 +492,7 @@ function initGraph(tab) {
 // ANIMATIONS
 // ============================================================
 var animFrameId = null;
+var animPaused = false;
 
 function startAnimations() {
   if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -633,12 +636,30 @@ function startAnimations() {
 
   // Animation loop
   function loop() {
+    if (animPaused) {
+      animFrameId = requestAnimationFrame(loop);
+      return;
+    }
     animateEdges();
     animateNodes();
     drawPackets();
     animFrameId = requestAnimationFrame(loop);
   }
   loop();
+}
+
+function toggleAnim() {
+  animPaused = !animPaused;
+  var btn = document.getElementById('btn-anim');
+  btn.textContent = animPaused ? 'PLAY' : 'PAUSE';
+  if (animPaused) {
+    // Clear packet canvas
+    var canvas = document.getElementById('packet-canvas');
+    if (canvas) {
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
 }
 
 // ============================================================
@@ -661,11 +682,16 @@ document.getElementById('btn-fit').addEventListener('click', function() {
 document.getElementById('btn-reset').addEventListener('click', function() {
   localStorage.removeItem('cy-pos-saas');
   localStorage.removeItem('cy-pos-paas');
+  animPaused = false;
+  document.getElementById('btn-anim').textContent = 'PAUSE';
   initGraph(currentTab);
 });
 
+document.getElementById('btn-anim').addEventListener('click', toggleAnim);
+
 document.addEventListener('keydown', function(ev) {
-  if (ev.key==='1') document.querySelector('[data-tab="saas"]').click();
+  if (ev.key==='p'||ev.key==='P') toggleAnim();
+  else if (ev.key==='1') document.querySelector('[data-tab="saas"]').click();
   else if (ev.key==='2') document.querySelector('[data-tab="paas"]').click();
   else if (ev.key==='f'||ev.key==='F') document.getElementById('btn-fit').click();
   else if (ev.key==='r'||ev.key==='R') document.getElementById('btn-reset').click();
