@@ -71,7 +71,7 @@
   </text>
 
   <!-- ==================== AZURE CLOUD ==================== -->
-  <g transform="translate(480, 95)">
+  <g transform="translate(480, 95)" data-drag="azure-cloud">
     <ellipse cx="0" cy="0" rx="150" ry="42" fill="url(#azure-grad)" opacity="0.12" stroke="#0078d4" stroke-width="1.5">
       <animate attributeName="ry" values="42;46;42" dur="4s" repeatCount="indefinite"/>
     </ellipse>
@@ -124,7 +124,7 @@
   <rect x="15" y="210" width="295" height="500" rx="6" fill="url(#rg-us)" stroke="#00ff41" stroke-width="0.4" stroke-dasharray="8,4" opacity="0.5"/>
 
   <!-- SUB: PaaS TechCorp -->
-  <g transform="translate(25, 220)">
+  <g transform="translate(25, 220)" data-drag="sub-techcorp">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,255,65,0.04)" stroke="#00ff41" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#00ff41" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#00ff41" opacity="0.1"/>
@@ -157,7 +157,7 @@
   </g>
 
   <!-- SUB: PaaS GlobalNet -->
-  <g transform="translate(25, 370)">
+  <g transform="translate(25, 370)" data-drag="sub-globalnet">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,255,65,0.04)" stroke="#00ff41" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#00ff41" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#00ff41" opacity="0.1"/>
@@ -189,7 +189,7 @@
   </g>
 
   <!-- SUB: PaaS MegaStore -->
-  <g transform="translate(25, 520)">
+  <g transform="translate(25, 520)" data-drag="sub-megastore">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,255,65,0.04)" stroke="#00ff41" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#00ff41" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#00ff41" opacity="0.1"/>
@@ -230,7 +230,7 @@
   <rect x="333" y="210" width="295" height="500" rx="6" fill="url(#rg-eu)" stroke="#0080ff" stroke-width="0.4" stroke-dasharray="8,4" opacity="0.5"/>
 
   <!-- SUB: PaaS EuroTel -->
-  <g transform="translate(343, 220)">
+  <g transform="translate(343, 220)" data-drag="sub-eurotel">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,128,255,0.04)" stroke="#0080ff" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#0080ff" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#0080ff" opacity="0.1"/>
@@ -265,7 +265,7 @@
   </g>
 
   <!-- SUB: PaaS NordicCloud -->
-  <g transform="translate(343, 370)">
+  <g transform="translate(343, 370)" data-drag="sub-nordiccloud">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,128,255,0.04)" stroke="#0080ff" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#0080ff" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#0080ff" opacity="0.1"/>
@@ -298,7 +298,7 @@
   </g>
 
   <!-- SUB: PaaS DACH-Systems -->
-  <g transform="translate(343, 520)">
+  <g transform="translate(343, 520)" data-drag="sub-dach">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(0,128,255,0.04)" stroke="#0080ff" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#0080ff" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#0080ff" opacity="0.1"/>
@@ -337,7 +337,7 @@
   <rect x="651" y="210" width="295" height="500" rx="6" fill="url(#rg-ap)" stroke="#ff4081" stroke-width="0.4" stroke-dasharray="8,4" opacity="0.5"/>
 
   <!-- SUB: PaaS TokyoMart -->
-  <g transform="translate(661, 220)">
+  <g transform="translate(661, 220)" data-drag="sub-tokyomart">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(255,64,129,0.04)" stroke="#ff4081" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#ff4081" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#ff4081" opacity="0.1"/>
@@ -370,7 +370,7 @@
   </g>
 
   <!-- SUB: PaaS SingaporeTech -->
-  <g transform="translate(661, 370)">
+  <g transform="translate(661, 370)" data-drag="sub-singaporetech">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(255,64,129,0.04)" stroke="#ff4081" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#ff4081" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#ff4081" opacity="0.1"/>
@@ -404,7 +404,7 @@
   </g>
 
   <!-- SUB: PaaS IndiaConnect -->
-  <g transform="translate(661, 520)">
+  <g transform="translate(661, 520)" data-drag="sub-indiaconnect">
     <rect x="0" y="0" width="275" height="130" rx="5" fill="rgba(255,64,129,0.04)" stroke="#ff4081" stroke-width="1"/>
     <rect x="0" y="0" width="275" height="24" rx="5" fill="#ff4081" opacity="0.1"/>
     <rect x="0" y="12" width="275" height="12" fill="#ff4081" opacity="0.1"/>
@@ -441,7 +441,7 @@
   <!-- ====================================================================== -->
   <!-- ==================== COMMERCERNDCI (Artifactory) ===================== -->
   <!-- ====================================================================== -->
-  <g transform="translate(250, 750)">
+  <g transform="translate(250, 750)" data-drag="sub-commercerndci">
     <rect x="0" y="0" width="460" height="130" rx="8" fill="rgba(255,165,0,0.06)" stroke="#ffaa00" stroke-width="1.5"/>
     <!-- Header -->
     <rect x="0" y="0" width="460" height="28" rx="8" fill="#ffaa00" opacity="0.15"/>
@@ -570,7 +570,7 @@
   <!-- ====================================================================== -->
 
   <!-- Americas Clients -->
-  <g transform="translate(25, 1115)">
+  <g transform="translate(25, 1115)" data-drag="customers-americas">
     <rect x="0" y="0" width="275" height="85" rx="5" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.5" opacity="0.6"/>
     <text x="137" y="16" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — AMERICAS</text>
 
@@ -605,7 +605,7 @@
   </circle>
 
   <!-- Europe Clients -->
-  <g transform="translate(340, 1115)">
+  <g transform="translate(340, 1115)" data-drag="customers-europe">
     <rect x="0" y="0" width="275" height="85" rx="5" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.5" opacity="0.6"/>
     <text x="137" y="16" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — EUROPE</text>
 
@@ -640,7 +640,7 @@
   </circle>
 
   <!-- APAC Clients -->
-  <g transform="translate(655, 1115)">
+  <g transform="translate(655, 1115)" data-drag="customers-apac">
     <rect x="0" y="0" width="275" height="85" rx="5" fill="rgba(0,255,255,0.03)" stroke="#00ffff" stroke-width="0.5" opacity="0.6"/>
     <text x="137" y="16" text-anchor="middle" fill="#00ffff" font-size="10" opacity="0.8">CUSTOMERS — APAC</text>
 
@@ -681,4 +681,138 @@
     > GLOBAL: ALL OPERATIONAL | SUBS: 10 (9 PaaS + 1 commercerndci) | AKS: 28 nodes | ARTIFACTORY: 12,450 artifacts | ORDERS: 21,350/day | UPTIME: 99.99%
     <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
   </text>
+  <script type="text/javascript"><![CDATA[
+    (function() {
+      var STORAGE_KEY = 'paas-platform-positions';
+      var svg = document.documentElement;
+      var dragging = null;
+      var offset = { x: 0, y: 0 };
+      var origTranslate = { x: 0, y: 0 };
+
+      function getSVGPoint(evt) {
+        var pt = svg.createSVGPoint();
+        pt.x = evt.clientX;
+        pt.y = evt.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      function parseTranslate(el) {
+        var t = el.getAttribute('transform');
+        var m = t.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+        return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 0, y: 0 };
+      }
+
+      function setTranslate(el, x, y) {
+        el.setAttribute('transform', 'translate(' + x + ', ' + y + ')');
+      }
+
+      function savePositions() {
+        var positions = {};
+        var els = svg.querySelectorAll('[data-drag]');
+        for (var i = 0; i < els.length; i++) {
+          var el = els[i];
+          var pos = parseTranslate(el);
+          positions[el.getAttribute('data-drag')] = pos;
+        }
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(positions)); } catch(e) {}
+      }
+
+      function loadPositions() {
+        try {
+          var data = localStorage.getItem(STORAGE_KEY);
+          if (!data) return;
+          var positions = JSON.parse(data);
+          var els = svg.querySelectorAll('[data-drag]');
+          for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            var id = el.getAttribute('data-drag');
+            if (positions[id]) {
+              setTranslate(el, positions[id].x, positions[id].y);
+            }
+          }
+        } catch(e) {}
+      }
+
+      svg.addEventListener('mousedown', function(evt) {
+        var target = evt.target;
+        while (target && target !== svg) {
+          if (target.hasAttribute && target.hasAttribute('data-drag')) {
+            dragging = target;
+            var pt = getSVGPoint(evt);
+            origTranslate = parseTranslate(dragging);
+            offset.x = pt.x - origTranslate.x;
+            offset.y = pt.y - origTranslate.y;
+            dragging.style.cursor = 'grabbing';
+            evt.preventDefault();
+            return;
+          }
+          target = target.parentNode;
+        }
+      });
+
+      svg.addEventListener('mousemove', function(evt) {
+        if (!dragging) return;
+        evt.preventDefault();
+        var pt = getSVGPoint(evt);
+        setTranslate(dragging, pt.x - offset.x, pt.y - offset.y);
+      });
+
+      svg.addEventListener('mouseup', function() {
+        if (dragging) {
+          dragging.style.cursor = '';
+          dragging = null;
+          savePositions();
+        }
+      });
+
+      svg.addEventListener('mouseleave', function() {
+        if (dragging) {
+          dragging.style.cursor = '';
+          dragging = null;
+          savePositions();
+        }
+      });
+
+      // Touch support
+      svg.addEventListener('touchstart', function(evt) {
+        var touch = evt.touches[0];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        while (target && target !== svg) {
+          if (target.hasAttribute && target.hasAttribute('data-drag')) {
+            dragging = target;
+            var pt = getSVGPoint(touch);
+            origTranslate = parseTranslate(dragging);
+            offset.x = pt.x - origTranslate.x;
+            offset.y = pt.y - origTranslate.y;
+            evt.preventDefault();
+            return;
+          }
+          target = target.parentNode;
+        }
+      }, { passive: false });
+
+      svg.addEventListener('touchmove', function(evt) {
+        if (!dragging) return;
+        evt.preventDefault();
+        var pt = getSVGPoint(evt.touches[0]);
+        setTranslate(dragging, pt.x - offset.x, pt.y - offset.y);
+      }, { passive: false });
+
+      svg.addEventListener('touchend', function() {
+        if (dragging) {
+          dragging = null;
+          savePositions();
+        }
+      });
+
+      // Set cursor on draggable elements
+      var els = svg.querySelectorAll('[data-drag]');
+      for (var i = 0; i < els.length; i++) {
+        els[i].style.cursor = 'grab';
+      }
+
+      // Load saved positions
+      loadPositions();
+    })();
+  ]]></script>
 </svg>

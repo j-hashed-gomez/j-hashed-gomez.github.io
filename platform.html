@@ -219,7 +219,6 @@
     .tab-content object {
       width: 100%;
       display: block;
-      pointer-events: none;
     }
 
     /* Loading state */
@@ -310,6 +309,8 @@
     <span class="zoom-level" id="zoom-level">100%</span>
     <button class="zoom-btn" id="zoom-in" title="Zoom in (+)">+</button>
     <button class="zoom-btn zoom-btn-fit" id="zoom-fit" title="Fit to screen (0)">FIT</button>
+    <span style="color:rgba(255,255,255,0.15); margin: 0 0.3rem;">|</span>
+    <button class="zoom-btn zoom-btn-fit" id="reset-positions" title="Reset element positions (R)">RESET</button>
   </div>
 
   <div class="content-area" id="content-area">
@@ -393,6 +394,18 @@
       }
     }, { passive: false });
 
+    // Reset positions
+    document.getElementById('reset-positions').addEventListener('click', function() {
+      localStorage.removeItem('saas-platform-positions');
+      localStorage.removeItem('paas-platform-positions');
+      // Reload SVGs to restore original positions
+      document.querySelectorAll('.tab-content object').forEach(function(obj) {
+        var src = obj.getAttribute('data');
+        obj.setAttribute('data', '');
+        setTimeout(function() { obj.setAttribute('data', src); }, 50);
+      });
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if (e.key === '1') {
@@ -405,6 +418,8 @@
         document.getElementById('zoom-out').click();
       } else if (e.key === '0') {
         document.getElementById('zoom-fit').click();
+      } else if (e.key === 'r' || e.key === 'R') {
+        document.getElementById('reset-positions').click();
       }
     });
   </script>
