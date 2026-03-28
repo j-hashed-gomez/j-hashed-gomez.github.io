@@ -83,7 +83,13 @@
   <button class="ctrl-btn" id="btn-reset">RESET</button>
   <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-anim">PAUSE</button>
+  <span class="sep">|</span>
+  <button class="ctrl-btn" id="btn-export">EXPORT</button>
+  <button class="ctrl-btn" id="btn-import">IMPORT</button>
 </div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="import-file" accept=".json" style="display:none">
 
 <div id="cy-container"></div>
 
@@ -688,6 +694,55 @@ document.getElementById('btn-reset').addEventListener('click', function() {
 });
 
 document.getElementById('btn-anim').addEventListener('click', toggleAnim);
+
+// Export positions as JSON file
+document.getElementById('btn-export').addEventListener('click', function() {
+  var data = {
+    tab: currentTab,
+    positions: {}
+  };
+  cy.nodes().forEach(function(nd) {
+    if (!nd.isParent()) data.positions[nd.id()] = nd.position();
+  });
+  var json = JSON.stringify(data, null, 2);
+  var blob = new Blob([json], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'layout-' + currentTab + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Import positions from JSON file
+document.getElementById('btn-import').addEventListener('click', function() {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', function(ev) {
+  var file = ev.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (data.positions) {
+        // Switch tab if needed
+        if (data.tab && data.tab !== currentTab) {
+          document.querySelector('[data-tab="' + data.tab + '"]').click();
+        }
+        // Save and reload
+        localStorage.setItem('cy-pos-' + (data.tab || currentTab), JSON.stringify(data.positions));
+        initGraph(data.tab || currentTab);
+      }
+    } catch(err) {
+      alert('Invalid JSON file');
+    }
+  };
+  reader.readAsText(file);
+  // Reset input so same file can be re-imported
+  ev.target.value = '';
+});
 
 document.addEventListener('keydown', function(ev) {
   if (ev.key==='p'||ev.key==='P') toggleAnim();
