@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Architecture — SaaS & PaaS</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;500;600;700;800;900&display=swap">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-green: #00ff41;
+      --secondary-blue: #0080ff;
+      --tertiary-pink: #ff4081;
+      --bg-dark: #0a0a0a;
+      --bg-darker: #050505;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --border-glow: rgba(0, 255, 65, 0.3);
+      --shadow-glow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    body {
+      font-family: 'VT323', monospace;
+      background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 50%, #0a0f1a 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* CRT Scanlines */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.5;
+    }
+
+    /* Header */
+    .header {
+      padding: 1.5rem 2rem 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary-green), var(--secondary-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs-container {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 1.5rem 2rem 0;
+    }
+
+    .tab {
+      background: rgba(15, 15, 15, 0.8);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-bottom: none;
+      padding: 0.8rem 2.5rem;
+      cursor: pointer;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+      position: relative;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .tab:hover {
+      color: var(--primary-green);
+      background: rgba(0, 255, 65, 0.05);
+    }
+
+    .tab.active {
+      color: var(--primary-green);
+      background: rgba(0, 255, 65, 0.08);
+      border-color: var(--primary-green);
+      text-shadow: 0 0 8px var(--primary-green);
+    }
+
+    .tab.active::before {
+      content: '> ';
+      color: var(--primary-green);
+    }
+
+    .tab.active::after {
+      content: '_';
+      animation: blink 1s infinite;
+      color: var(--primary-green);
+    }
+
+    .tab-indicator {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .tab[data-tab="saas"] .tab-indicator {
+      background: var(--primary-green);
+      box-shadow: 0 0 6px var(--primary-green);
+    }
+
+    .tab[data-tab="paas"] .tab-indicator {
+      background: var(--secondary-blue);
+      box-shadow: 0 0 6px var(--secondary-blue);
+    }
+
+    /* Content area */
+    .content-area {
+      margin: 0 2rem 2rem;
+      border: 1px solid var(--border-glow);
+      border-radius: 0 8px 8px 8px;
+      background: rgba(10, 10, 10, 0.9);
+      box-shadow: var(--shadow-glow);
+      overflow: hidden;
+      min-height: 60vh;
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content object {
+      width: 100%;
+      display: block;
+    }
+
+    /* Loading state */
+    .tab-content .loading {
+      text-align: center;
+      padding: 4rem;
+      color: var(--primary-green);
+      font-size: 1.2rem;
+    }
+
+    .loading-cursor {
+      display: inline-block;
+      animation: blink 0.8s infinite;
+    }
+
+    /* Footer */
+    .footer-info {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      font-size: 0.8rem;
+      color: #b0b0b0;
+      background: rgba(10, 10, 10, 0.95);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      box-shadow: var(--shadow-glow);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs-container {
+        padding: 1rem;
+      }
+
+      .tab {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+      }
+
+      .content-area {
+        margin: 0 1rem 1rem;
+      }
+
+      .header h1 {
+        font-size: 1rem;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Platform Architecture</h1>
+  </div>
+
+  <div class="tabs-container">
+    <div class="tab active" data-tab="saas">
+      <span class="tab-indicator"></span>SaaS
+    </div>
+    <div class="tab" data-tab="paas">
+      <span class="tab-indicator"></span>PaaS
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div id="tab-saas" class="tab-content active">
+      <object type="image/svg+xml" data="saas-platform.svg">SaaS Platform Diagram</object>
+    </div>
+    <div id="tab-paas" class="tab-content">
+      <object type="image/svg+xml" data="paas-platform.svg">PaaS Platform Diagram</object>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    > Platform Architecture Diagrams | SRE & DevOps<br>
+    > Powered by pure HTML/CSS/JS
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        // Remove active from all tabs
+        document.querySelectorAll('.tab').forEach(function(t) {
+          t.classList.remove('active');
+        });
+        // Remove active from all content
+        document.querySelectorAll('.tab-content').forEach(function(c) {
+          c.classList.remove('active');
+        });
+
+        // Activate clicked tab
+        this.classList.add('active');
+        var target = this.getAttribute('data-tab');
+        document.getElementById('tab-' + target).classList.add('active');
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '1') {
+        document.querySelector('[data-tab="saas"]').click();
+      } else if (e.key === '2') {
+        document.querySelector('[data-tab="paas"]').click();
+      }
+    });
+  </script>
+
+</body>
+</html>
