@@ -1095,6 +1095,7 @@ window.addEventListener('resize', resizeDrawCanvas);
 
 drawCanvas.addEventListener('mousedown', function(e) {
   if (!drawMode) return;
+  e.stopPropagation(); e.preventDefault();
   drawing = true;
   drawCtx.beginPath();
   drawCtx.moveTo(e.offsetX, e.offsetY);
@@ -1106,12 +1107,14 @@ drawCanvas.addEventListener('mousedown', function(e) {
 
 drawCanvas.addEventListener('mousemove', function(e) {
   if (!drawing) return;
+  e.stopPropagation(); e.preventDefault();
   drawCtx.lineTo(e.offsetX, e.offsetY);
   drawCtx.stroke();
 });
 
-drawCanvas.addEventListener('mouseup', function() { drawing = false; });
-drawCanvas.addEventListener('mouseleave', function() { drawing = false; });
+drawCanvas.addEventListener('mouseup', function(e) { e.stopPropagation(); drawing = false; });
+drawCanvas.addEventListener('mouseleave', function(e) { drawing = false; });
+drawCanvas.addEventListener('wheel', function(e) { if (drawMode) { e.stopPropagation(); e.preventDefault(); } }, { passive: false });
 
 // Touch support
 drawCanvas.addEventListener('touchstart', function(e) {
@@ -1139,13 +1142,25 @@ drawCanvas.addEventListener('touchmove', function(e) {
 
 drawCanvas.addEventListener('touchend', function() { drawing = false; });
 
-document.getElementById('btn-draw').addEventListener('click', function() {
-  drawMode = !drawMode;
+function setDrawMode(on) {
+  drawMode = on;
   drawing = false;
   drawCanvas.classList.toggle('active', drawMode);
   document.getElementById('cy-container').classList.toggle('drawing-mode', drawMode);
-  this.classList.toggle('draw-active', drawMode);
-  this.textContent = drawMode ? 'DRAW ON' : 'DRAW';
+  var btn = document.getElementById('btn-draw');
+  btn.classList.toggle('draw-active', drawMode);
+  btn.textContent = drawMode ? 'DRAW ON' : 'DRAW';
+  if (cy) {
+    cy.userPanningEnabled(!drawMode);
+    cy.userZoomingEnabled(!drawMode);
+    cy.boxSelectionEnabled(!drawMode);
+    cy.nodes().ungrabify();
+    if (!drawMode) cy.nodes().grabify();
+  }
+}
+
+document.getElementById('btn-draw').addEventListener('click', function() {
+  setDrawMode(!drawMode);
 });
 
 document.getElementById('btn-clear').addEventListener('click', function() {
