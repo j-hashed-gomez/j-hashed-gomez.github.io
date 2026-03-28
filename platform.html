@@ -9,343 +9,93 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.4/cytoscape.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --primary-green: #00ff41;
-      --secondary-blue: #0080ff;
-      --tertiary-pink: #ff4081;
-      --bg-dark: #0a0a0a;
-      --bg-darker: #050505;
-      --text-primary: #ffffff;
-      --text-secondary: #b0b0b0;
-      --border-glow: rgba(0, 255, 65, 0.3);
-      --shadow-glow: 0 0 20px rgba(0, 255, 65, 0.3);
-      --orange: #ffaa00;
-      --purple: #c084fc;
-      --cyan: #00ffff;
-    }
-
     body {
       font-family: 'VT323', monospace;
-      background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 50%, #0a0f1a 100%);
+      background: #050508;
       min-height: 100vh;
-      color: var(--text-primary);
+      color: #fff;
       overflow: hidden;
     }
-
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12) 1px, transparent 1px, transparent 2px);
-      pointer-events: none;
-      z-index: 9998;
-      opacity: 0.5;
-    }
-
-    .header {
-      padding: 0.8rem 2rem 0;
-      text-align: center;
-    }
-
-    .header h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      background: linear-gradient(45deg, var(--primary-green), var(--secondary-blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
     .controls {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 2rem 0.3rem;
-      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: rgba(10,10,10,0.95);
+      border-bottom: 1px solid rgba(0,255,65,0.2);
     }
-
     .tab {
-      background: rgba(15, 15, 15, 0.8);
-      border: 1px solid rgba(0, 255, 65, 0.2);
-      padding: 0.4rem 1.5rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(0,255,65,0.25);
+      padding: 0.35rem 1.5rem;
       cursor: pointer;
       font-family: 'VT323', monospace;
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      transition: all 0.3s ease;
-      border-radius: 6px;
+      font-size: 1.15rem;
+      color: #888;
+      border-radius: 5px;
+      transition: all 0.2s;
     }
-
-    .tab:hover { color: var(--primary-green); background: rgba(0, 255, 65, 0.05); }
-
+    .tab:hover { color: #00ff41; }
     .tab.active {
-      color: var(--primary-green);
-      background: rgba(0, 255, 65, 0.08);
-      border-color: var(--primary-green);
-      text-shadow: 0 0 8px var(--primary-green);
+      color: #00ff41;
+      border-color: #00ff41;
+      text-shadow: 0 0 10px #00ff41;
+      background: rgba(0,255,65,0.06);
     }
-
-    .tab-indicator {
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
-    .tab[data-tab="saas"] .tab-indicator { background: var(--primary-green); box-shadow: 0 0 6px var(--primary-green); }
-    .tab[data-tab="paas"] .tab-indicator { background: var(--secondary-blue); box-shadow: 0 0 6px var(--secondary-blue); }
-
-    .sep { color: rgba(255,255,255,0.12); margin: 0 0.2rem; }
-
+    .sep { color: rgba(255,255,255,0.1); margin: 0 0.2rem; }
     .ctrl-btn {
-      background: rgba(15, 15, 15, 0.9);
-      border: 1px solid rgba(0, 255, 65, 0.3);
-      color: var(--primary-green);
-      padding: 0.3rem 0.7rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(0,255,65,0.25);
+      color: #00ff41;
+      padding: 0.3rem 0.8rem;
       border-radius: 5px;
       cursor: pointer;
       font-family: 'VT323', monospace;
       font-size: 0.95rem;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
-
-    .ctrl-btn:hover { background: rgba(0, 255, 65, 0.1); box-shadow: 0 0 8px rgba(0, 255, 65, 0.3); }
-
+    .ctrl-btn:hover { background: rgba(0,255,65,0.08); box-shadow: 0 0 8px rgba(0,255,65,0.2); }
     #cy-container {
-      margin: 0.3rem 1rem 0;
-      border: 1px solid var(--border-glow);
-      border-radius: 8px;
-      background: rgba(5, 5, 5, 0.95);
-      box-shadow: var(--shadow-glow);
-      height: calc(100vh - 100px);
+      width: 100%;
+      height: calc(100vh - 50px);
     }
-
     .footer-info {
       position: fixed;
-      bottom: 10px; left: 10px;
-      font-size: 0.75rem;
-      color: #b0b0b0;
-      background: rgba(10, 10, 10, 0.95);
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-glow);
-      backdrop-filter: blur(10px);
+      bottom: 8px; left: 8px;
+      font-size: 0.7rem;
+      color: #666;
+      background: rgba(5,5,5,0.9);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,255,65,0.15);
       z-index: 2000;
-      box-shadow: var(--shadow-glow);
     }
-
-    @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
   </style>
 </head>
 <body>
 
-  <div class="header"><h1>Platform Architecture</h1></div>
+<div class="controls">
+  <div class="tab active" data-tab="saas">SaaS</div>
+  <div class="tab" data-tab="paas">PaaS</div>
+  <span class="sep">|</span>
+  <button class="ctrl-btn" id="btn-fit">FIT</button>
+  <button class="ctrl-btn" id="btn-reset">RESET</button>
+</div>
 
-  <div class="controls">
-    <div class="tab active" data-tab="saas"><span class="tab-indicator"></span>SaaS</div>
-    <div class="tab" data-tab="paas"><span class="tab-indicator"></span>PaaS</div>
-    <span class="sep">|</span>
-    <button class="ctrl-btn" id="btn-fit" title="Fit (F)">FIT</button>
-    <button class="ctrl-btn" id="btn-reset" title="Reset positions (R)">RESET</button>
-  </div>
+<div id="cy-container"></div>
 
-  <div id="cy-container"></div>
-
-  <div class="footer-info">
-    > Platform Architecture | Cytoscape.js | Drag nodes, scroll to zoom<br>
-    > Keys: 1=SaaS, 2=PaaS, F=Fit, R=Reset
-  </div>
+<div class="footer-info">
+  Drag nodes | Scroll zoom | 1/2=tabs | F=fit | R=reset
+</div>
 
 <script>
-// ============================================================
-// COLOR PALETTE
-// ============================================================
-var C = {
-  green: '#00ff41', greenDim: 'rgba(0,255,65,0.15)', greenBorder: 'rgba(0,255,65,0.5)',
-  blue: '#0080ff', blueDim: 'rgba(0,128,255,0.15)', blueBorder: 'rgba(0,128,255,0.5)',
-  pink: '#ff4081', pinkDim: 'rgba(255,64,129,0.15)', pinkBorder: 'rgba(255,64,129,0.5)',
-  orange: '#ffaa00', orangeDim: 'rgba(255,170,0,0.12)', orangeBorder: 'rgba(255,170,0,0.5)',
-  purple: '#c084fc', purpleDim: 'rgba(192,132,252,0.12)', purpleBorder: 'rgba(192,132,252,0.5)',
-  cyan: '#00ffff', cyanDim: 'rgba(0,255,255,0.1)', cyanBorder: 'rgba(0,255,255,0.4)',
-  azure: '#00bcf2', azureDim: 'rgba(0,188,242,0.12)', azureBorder: 'rgba(0,120,212,0.6)',
-  bg: '#0a0a0a', bgLight: '#111', text: '#ffffff', textDim: '#888'
-};
+var G = '#00ff41', B = '#0080ff', P = '#ff4081', O = '#ffaa00', PR = '#c084fc', CY = '#00ffff', AZ = '#00bcf2';
 
 // ============================================================
-// SAAS DATA
+// STYLES
 // ============================================================
-var saasNodes = [
-  // Azure
-  { data: { id: 'azure', label: 'AZURE\nCLOUD PLATFORM', type: 'cloud' }},
-
-  // Region groups (compound parents)
-  { data: { id: 'rg-americas', label: 'AMERICAS', type: 'region', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'rg-europe', label: 'EUROPE', type: 'region', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'rg-apac', label: 'APAC', type: 'region', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-
-  // Americas subs
-  { data: { id: 's-marketplace-us', label: 'SUB: MARKETPLACE\nAKS 3 nodes | East US\nAPI GW, CosmosDB, Redis', parent: 'rg-americas', type: 'sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 's-shared-us', label: 'SUB: SHARED SVCS\nDNS/LB, Key Vault\nMonitor, Log Analytics', parent: 'rg-americas', type: 'sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 's-conn-us', label: 'SUB: CONNECTIVITY\nvNet Hub, Firewall\nPeering, NSGs', parent: 'rg-americas', type: 'sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-
-  // Europe subs
-  { data: { id: 's-marketplace-eu', label: 'SUB: MARKETPLACE\nAKS 3 nodes | West EU\nAPI GW, CosmosDB, Redis', parent: 'rg-europe', type: 'sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 's-shared-eu', label: 'SUB: SHARED SVCS\nDNS/LB, Key Vault\nMonitor, Log Analytics', parent: 'rg-europe', type: 'sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 's-conn-eu', label: 'SUB: CONNECTIVITY\nvNet Hub, Firewall\nPeering, NSGs', parent: 'rg-europe', type: 'sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-
-  // APAC subs
-  { data: { id: 's-marketplace-ap', label: 'SUB: MARKETPLACE\nAKS 3 nodes | SE Asia\nAPI GW, CosmosDB, Redis', parent: 'rg-apac', type: 'sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-  { data: { id: 's-shared-ap', label: 'SUB: SHARED SVCS\nDNS/LB, Key Vault\nMonitor, Log Analytics', parent: 'rg-apac', type: 'sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-  { data: { id: 's-conn-ap', label: 'SUB: CONNECTIVITY\nvNet Hub, Firewall\nPeering, NSGs', parent: 'rg-apac', type: 'sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-
-  // Tentpoles
-  { data: { id: 'tp-us', label: 'TENTPOLE\nAMERICAS', type: 'tentpole' }},
-  { data: { id: 'tp-eu', label: 'TENTPOLE\nEUROPE', type: 'tentpole' }},
-  { data: { id: 'tp-ap', label: 'TENTPOLE\nAPAC', type: 'tentpole' }},
-
-  // ExpressRoute
-  { data: { id: 'er', label: 'EXPRESSROUTE\nPRIVATE PEERING', type: 'expressroute' }},
-
-  // Datacenters
-  { data: { id: 'dc-us1', label: 'DC-US-01\nVirginia\n4 racks | 200 nodes', type: 'dc', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'dc-us2', label: 'DC-US-02\nOregon\n3 racks | 150 nodes', type: 'dc', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'dc-eu1', label: 'DC-EU-01\nAmsterdam\n5 racks | 280 nodes', type: 'dc', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'dc-eu2', label: 'DC-EU-02\nFrankfurt\n4 racks | 220 nodes', type: 'dc', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'dc-ap1', label: 'DC-AP-01\nSingapore\n3 racks | 160 nodes', type: 'dc', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-  { data: { id: 'dc-ap2', label: 'DC-AP-02\nTokyo\n2 racks | 120 nodes', type: 'dc', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-
-  // Internet
-  { data: { id: 'internet', label: 'INTERNET', type: 'internet' }},
-
-  // Customers
-  { data: { id: 'cust-us', label: 'CUSTOMERS — AMERICAS\nReseller Corp | LatAm Distrib\nCanada Tel', type: 'customer', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'cust-eu', label: 'CUSTOMERS — EUROPE\nEMEA Partners | UK Wholesale\nDACH Region', type: 'customer', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'cust-ap', label: 'CUSTOMERS — APAC\nJP Enterprise | ANZ Distrib\nIndia Cloud', type: 'customer', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-];
-
-var saasEdges = [
-  // Azure -> Regions
-  { data: { source: 'azure', target: 'rg-americas', type: 'flow', color: C.green }},
-  { data: { source: 'azure', target: 'rg-europe', type: 'flow', color: C.blue }},
-  { data: { source: 'azure', target: 'rg-apac', type: 'flow', color: C.pink }},
-
-  // Regions -> Tentpoles
-  { data: { source: 'rg-americas', target: 'tp-us', type: 'flow', color: C.purple }},
-  { data: { source: 'rg-europe', target: 'tp-eu', type: 'flow', color: C.purple }},
-  { data: { source: 'rg-apac', target: 'tp-ap', type: 'flow', color: C.purple }},
-
-  // Tentpoles -> ExpressRoute
-  { data: { source: 'tp-us', target: 'er', type: 'flow', color: C.orange }},
-  { data: { source: 'tp-eu', target: 'er', type: 'flow', color: C.orange }},
-  { data: { source: 'tp-ap', target: 'er', type: 'flow', color: C.orange }},
-
-  // ExpressRoute -> DCs
-  { data: { source: 'er', target: 'dc-us1', type: 'flow', color: C.orange }},
-  { data: { source: 'er', target: 'dc-us2', type: 'flow', color: C.orange }},
-  { data: { source: 'er', target: 'dc-eu1', type: 'flow', color: C.orange }},
-  { data: { source: 'er', target: 'dc-eu2', type: 'flow', color: C.orange }},
-  { data: { source: 'er', target: 'dc-ap1', type: 'flow', color: C.orange }},
-  { data: { source: 'er', target: 'dc-ap2', type: 'flow', color: C.orange }},
-
-  // DC Mesh
-  { data: { source: 'dc-us1', target: 'dc-us2', type: 'mesh', color: C.orange }},
-  { data: { source: 'dc-eu1', target: 'dc-eu2', type: 'mesh', color: C.orange }},
-  { data: { source: 'dc-ap1', target: 'dc-ap2', type: 'mesh', color: C.orange }},
-  { data: { source: 'dc-us2', target: 'dc-eu1', type: 'mesh', color: C.orange }},
-  { data: { source: 'dc-eu2', target: 'dc-ap1', type: 'mesh', color: C.orange }},
-  { data: { source: 'dc-us1', target: 'dc-ap2', type: 'mesh', color: C.orange }},
-
-  // Regions -> Internet
-  { data: { source: 'rg-americas', target: 'internet', type: 'flow', color: C.cyan }},
-  { data: { source: 'rg-europe', target: 'internet', type: 'flow', color: C.cyan }},
-  { data: { source: 'rg-apac', target: 'internet', type: 'flow', color: C.cyan }},
-
-  // Internet -> Customers
-  { data: { source: 'internet', target: 'cust-us', type: 'flow', color: C.cyan }},
-  { data: { source: 'internet', target: 'cust-eu', type: 'flow', color: C.cyan }},
-  { data: { source: 'internet', target: 'cust-ap', type: 'flow', color: C.cyan }},
-];
-
-// ============================================================
-// PAAS DATA
-// ============================================================
-var paasNodes = [
-  { data: { id: 'azure', label: 'AZURE\nCLOUD PLATFORM', type: 'cloud' }},
-
-  // Region groups
-  { data: { id: 'rg-americas', label: 'AMERICAS', type: 'region', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'rg-europe', label: 'EUROPE', type: 'region', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'rg-apac', label: 'APAC', type: 'region', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-
-  // Americas PaaS subs
-  { data: { id: 'p-techcorp', label: 'PaaS TechCorp\nAKS 3 nodes | East US\nSQL DB, Redis, Storage, App GW\n> 2,340 orders/day', parent: 'rg-americas', type: 'paas-sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'p-globalnet', label: 'PaaS GlobalNet\nAKS 2 nodes | West US\nSQL DB, Redis, Storage, App GW\n> 1,120 orders/day', parent: 'rg-americas', type: 'paas-sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'p-megastore', label: 'PaaS MegaStore\nAKS 4 nodes | Brazil S\nCosmosDB, Redis, Blob, Front Door\n> 3,780 orders/day', parent: 'rg-americas', type: 'paas-sub', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-
-  // Europe PaaS subs
-  { data: { id: 'p-eurotel', label: 'PaaS EuroTel\nAKS 5 nodes | West EU\nSQL DB, Redis, Storage, App GW\n> 4,560 orders/day', parent: 'rg-europe', type: 'paas-sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'p-nordic', label: 'PaaS NordicCloud\nAKS 3 nodes | North EU\nPostgreSQL, Redis, Storage, CDN\n> 1,870 orders/day', parent: 'rg-europe', type: 'paas-sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'p-dach', label: 'PaaS DACH-Systems\nAKS 2 nodes | Germany WC\nSQL DB, Key Vault, Storage, App GW\n> 2,950 orders/day', parent: 'rg-europe', type: 'paas-sub', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-
-  // APAC PaaS subs
-  { data: { id: 'p-tokyo', label: 'PaaS TokyoMart\nAKS 3 nodes | Japan East\nCosmosDB, Redis, Blob, App GW\n> 2,100 orders/day', parent: 'rg-apac', type: 'paas-sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-  { data: { id: 'p-singapore', label: 'PaaS SingaporeTech\nAKS 4 nodes | SE Asia\nSQL DB, Redis, Storage, Front Door\n> 1,650 orders/day', parent: 'rg-apac', type: 'paas-sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-  { data: { id: 'p-india', label: 'PaaS IndiaConnect\nAKS 2 nodes | Central IN\nSQL DB, Redis, Storage, App GW\n> 980 orders/day', parent: 'rg-apac', type: 'paas-sub', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-
-  // Commercerndci
-  { data: { id: 'commercerndci', label: 'SUB: commercerndci\nWest Europe\n\nJFrog Artifactory\nDocker, Helm, Maven, npm, PyPI\n> 12,450 artifacts | 2.8 TB | 45K pulls/day', type: 'artifactory' }},
-
-  // Internet layers
-  { data: { id: 'inet-artifacts', label: 'INTERNET — ARTIFACT PULL', type: 'internet-artifact' }},
-  { data: { id: 'inet-customers', label: 'INTERNET — CUSTOMER TRAFFIC', type: 'internet' }},
-
-  // Customers
-  { data: { id: 'cust-us', label: 'CUSTOMERS — AMERICAS\nTechCorp Inc -> PaaS TechCorp\nGlobalNet LLC -> PaaS GlobalNet\nMegaStore BR -> PaaS MegaStore', type: 'customer', color: C.green, bg: C.greenDim, border: C.greenBorder }},
-  { data: { id: 'cust-eu', label: 'CUSTOMERS — EUROPE\nEuroTel GmbH -> PaaS EuroTel\nNordicCloud AB -> PaaS NordicCloud\nDACH-Systems AG -> PaaS DACH', type: 'customer', color: C.blue, bg: C.blueDim, border: C.blueBorder }},
-  { data: { id: 'cust-ap', label: 'CUSTOMERS — APAC\nTokyoMart Co -> PaaS TokyoMart\nSingaporeTech -> PaaS Singapore\nIndiaConnect -> PaaS IndiaConnect', type: 'customer', color: C.pink, bg: C.pinkDim, border: C.pinkBorder }},
-];
-
-var paasEdges = [
-  // Azure -> Regions
-  { data: { source: 'azure', target: 'rg-americas', type: 'flow', color: C.green }},
-  { data: { source: 'azure', target: 'rg-europe', type: 'flow', color: C.blue }},
-  { data: { source: 'azure', target: 'rg-apac', type: 'flow', color: C.pink }},
-
-  // Azure -> commercerndci
-  { data: { source: 'azure', target: 'commercerndci', type: 'flow', color: C.orange }},
-
-  // commercerndci -> internet artifact
-  { data: { source: 'commercerndci', target: 'inet-artifacts', type: 'flow', color: C.orange }},
-
-  // Internet artifact -> regions (pull)
-  { data: { source: 'inet-artifacts', target: 'rg-americas', type: 'artifact-pull', color: C.orange }},
-  { data: { source: 'inet-artifacts', target: 'rg-europe', type: 'artifact-pull', color: C.orange }},
-  { data: { source: 'inet-artifacts', target: 'rg-apac', type: 'artifact-pull', color: C.orange }},
-
-  // Regions -> Customer internet
-  { data: { source: 'rg-americas', target: 'inet-customers', type: 'flow', color: C.cyan }},
-  { data: { source: 'rg-europe', target: 'inet-customers', type: 'flow', color: C.cyan }},
-  { data: { source: 'rg-apac', target: 'inet-customers', type: 'flow', color: C.cyan }},
-
-  // Customer internet -> Customers
-  { data: { source: 'inet-customers', target: 'cust-us', type: 'flow', color: C.cyan }},
-  { data: { source: 'inet-customers', target: 'cust-eu', type: 'flow', color: C.cyan }},
-  { data: { source: 'inet-customers', target: 'cust-ap', type: 'flow', color: C.cyan }},
-];
-
-// ============================================================
-// SHARED STYLES
-// ============================================================
-var sharedStyle = [
-  // Default node
+var cyStyle = [
   {
     selector: 'node',
     style: {
@@ -353,175 +103,171 @@ var sharedStyle = [
       'text-wrap': 'wrap',
       'text-valign': 'center',
       'text-halign': 'center',
-      'font-family': '"Courier New", monospace',
-      'font-size': '10px',
-      'color': '#ffffff',
-      'text-outline-width': 0,
-      'background-color': C.bgLight,
+      'font-family': 'Courier New, monospace',
+      'font-size': 11,
+      'color': '#e0e0e0',
+      'background-color': '#0d0d0d',
       'border-width': 1.5,
-      'border-color': C.green,
-      'border-style': 'solid',
+      'border-color': '#333',
       'shape': 'round-rectangle',
-      'width': 200,
-      'height': 80,
-      'padding': '15px',
-      'text-max-width': '190px',
+      'width': 220,
+      'height': 90,
+      'text-max-width': 210,
+      'padding': 20,
     }
   },
-  // Cloud
   {
     selector: 'node[type="cloud"]',
     style: {
-      'background-color': C.azureDim,
-      'border-color': C.azure,
-      'border-width': 2,
-      'color': C.azure,
-      'font-size': '14px',
+      'background-color': '#060d18',
+      'border-color': AZ,
+      'border-width': 2.5,
+      'color': AZ,
+      'font-size': 16,
       'font-weight': 'bold',
-      'width': 220,
-      'height': 70,
+      'width': 250,
+      'height': 80,
       'shape': 'ellipse',
+      'text-outline-color': '#060d18',
+      'text-outline-width': 1,
     }
   },
-  // Region (compound parent)
   {
     selector: 'node[type="region"]',
     style: {
-      'background-color': 'data(bg)',
-      'border-color': 'data(border)',
+      'background-color': '#080808',
+      'background-opacity': 0.6,
       'border-width': 1.5,
       'border-style': 'dashed',
-      'color': 'data(color)',
-      'font-size': '13px',
+      'font-size': 14,
       'font-weight': 'bold',
       'text-valign': 'top',
-      'text-margin-y': 10,
-      'padding': '25px',
-      'width': 'label',
-      'height': 'label',
+      'text-margin-y': 12,
+      'padding': 30,
     }
   },
-  // Sub (inside region)
   {
-    selector: 'node[type="sub"]',
-    style: {
-      'background-color': 'data(bg)',
-      'border-color': 'data(border)',
-      'color': 'data(color)',
-      'font-size': '9px',
-      'width': 190,
-      'height': 65,
-    }
+    selector: 'node[type="region"][region="us"]',
+    style: { 'border-color': G, 'color': G }
   },
-  // PaaS sub
   {
-    selector: 'node[type="paas-sub"]',
-    style: {
-      'background-color': 'data(bg)',
-      'border-color': 'data(border)',
-      'color': 'data(color)',
-      'font-size': '9px',
-      'width': 210,
-      'height': 80,
-    }
+    selector: 'node[type="region"][region="eu"]',
+    style: { 'border-color': B, 'color': B }
   },
-  // Tentpole
+  {
+    selector: 'node[type="region"][region="ap"]',
+    style: { 'border-color': P, 'color': P }
+  },
+  {
+    selector: 'node[region="us"]:childless',
+    style: { 'border-color': G, 'color': G, 'background-color': '#050a05' }
+  },
+  {
+    selector: 'node[region="eu"]:childless',
+    style: { 'border-color': B, 'color': B, 'background-color': '#050508' }
+  },
+  {
+    selector: 'node[region="ap"]:childless',
+    style: { 'border-color': P, 'color': P, 'background-color': '#0a0508' }
+  },
   {
     selector: 'node[type="tentpole"]',
     style: {
-      'background-color': C.purpleDim,
-      'border-color': C.purpleBorder,
+      'background-color': '#0a0610',
+      'border-color': PR,
       'border-width': 2,
-      'color': C.purple,
-      'font-size': '10px',
+      'color': PR,
+      'font-size': 11,
       'font-weight': 'bold',
       'shape': 'hexagon',
-      'width': 110,
-      'height': 60,
+      'width': 130,
+      'height': 70,
     }
   },
-  // ExpressRoute
   {
     selector: 'node[type="expressroute"]',
     style: {
-      'background-color': C.orangeDim,
-      'border-color': C.orangeBorder,
+      'background-color': '#100a00',
+      'border-color': O,
       'border-width': 2,
-      'color': C.orange,
-      'font-size': '11px',
+      'color': O,
+      'font-size': 12,
       'font-weight': 'bold',
-      'width': 260,
-      'height': 40,
-      'shape': 'round-rectangle',
+      'width': 300,
+      'height': 45,
     }
   },
-  // Datacenter
   {
     selector: 'node[type="dc"]',
     style: {
-      'background-color': 'data(bg)',
-      'border-color': 'data(border)',
-      'color': 'data(color)',
-      'font-size': '9px',
-      'width': 130,
-      'height': 60,
+      'font-size': 10,
+      'width': 150,
+      'height': 70,
     }
   },
-  // Internet
   {
     selector: 'node[type="internet"]',
     style: {
-      'background-color': C.cyanDim,
-      'border-color': C.cyanBorder,
+      'background-color': '#040a0a',
+      'border-color': CY,
       'border-width': 2,
-      'color': C.cyan,
-      'font-size': '12px',
+      'color': CY,
+      'font-size': 13,
       'font-weight': 'bold',
-      'width': 280,
-      'height': 35,
+      'width': 320,
+      'height': 40,
     }
   },
   {
     selector: 'node[type="internet-artifact"]',
     style: {
-      'background-color': C.orangeDim,
-      'border-color': C.orangeBorder,
+      'background-color': '#100a00',
+      'border-color': O,
       'border-width': 1.5,
       'border-style': 'dashed',
-      'color': C.orange,
-      'font-size': '11px',
+      'color': O,
+      'font-size': 12,
       'font-weight': 'bold',
-      'width': 260,
-      'height': 35,
+      'width': 300,
+      'height': 40,
     }
   },
-  // Artifactory
   {
     selector: 'node[type="artifactory"]',
     style: {
-      'background-color': C.orangeDim,
-      'border-color': C.orange,
-      'border-width': 2,
-      'color': C.orange,
-      'font-size': '9px',
-      'width': 280,
-      'height': 110,
+      'background-color': '#100a00',
+      'border-color': O,
+      'border-width': 2.5,
+      'color': O,
+      'font-size': 10,
+      'width': 300,
+      'height': 120,
     }
   },
-  // Customer
   {
     selector: 'node[type="customer"]',
     style: {
-      'background-color': 'data(bg)',
-      'border-color': 'data(border)',
       'border-style': 'dashed',
-      'color': 'data(color)',
-      'font-size': '9px',
-      'width': 210,
-      'height': 75,
+      'border-width': 1,
+      'font-size': 10,
+      'width': 230,
+      'height': 85,
+      'background-color': '#080808',
     }
   },
-  // Default edge
+  {
+    selector: 'node[type="customer"][region="us"]',
+    style: { 'border-color': CY, 'color': G }
+  },
+  {
+    selector: 'node[type="customer"][region="eu"]',
+    style: { 'border-color': CY, 'color': B }
+  },
+  {
+    selector: 'node[type="customer"][region="ap"]',
+    style: { 'border-color': CY, 'color': P }
+  },
+  // Edges
   {
     selector: 'edge',
     style: {
@@ -529,173 +275,219 @@ var sharedStyle = [
       'line-color': 'data(color)',
       'target-arrow-color': 'data(color)',
       'target-arrow-shape': 'triangle',
-      'arrow-scale': 0.8,
+      'arrow-scale': 0.7,
       'curve-style': 'bezier',
       'line-style': 'dashed',
-      'line-dash-pattern': [8, 4],
-      'opacity': 0.6,
+      'line-dash-pattern': [8, 5],
+      'opacity': 0.55,
     }
   },
   {
     selector: 'edge[type="mesh"]',
     style: {
       'line-style': 'dotted',
-      'line-dash-pattern': [3, 3],
+      'line-dash-pattern': [3, 4],
       'target-arrow-shape': 'none',
-      'opacity': 0.35,
+      'opacity': 0.3,
       'curve-style': 'unbundled-bezier',
     }
   },
   {
     selector: 'edge[type="artifact-pull"]',
     style: {
-      'line-style': 'dashed',
       'line-dash-pattern': [6, 4],
-      'opacity': 0.45,
+      'opacity': 0.4,
       'curve-style': 'unbundled-bezier',
     }
   },
-  // Hover
-  {
-    selector: 'node:active',
-    style: { 'overlay-opacity': 0.1, 'overlay-color': C.green }
-  },
   {
     selector: 'node:grabbed',
-    style: { 'border-width': 3 }
+    style: { 'border-width': 3, 'overlay-opacity': 0.05, 'overlay-color': '#00ff41' }
   },
 ];
 
 // ============================================================
-// LAYOUT PRESETS
+// SAAS DATA
 // ============================================================
-var saasPositions = {
-  'azure':        { x: 480, y: 50 },
-  'rg-americas':  { x: 160, y: 230 },
-  'rg-europe':    { x: 480, y: 230 },
-  'rg-apac':      { x: 800, y: 230 },
-  's-marketplace-us': { x: 120, y: 200 },
-  's-shared-us':  { x: 220, y: 200 },
-  's-conn-us':    { x: 160, y: 290 },
-  's-marketplace-eu': { x: 440, y: 200 },
-  's-shared-eu':  { x: 540, y: 200 },
-  's-conn-eu':    { x: 480, y: 290 },
-  's-marketplace-ap': { x: 760, y: 200 },
-  's-shared-ap':  { x: 860, y: 200 },
-  's-conn-ap':    { x: 800, y: 290 },
-  'tp-us':        { x: 160, y: 420 },
-  'tp-eu':        { x: 480, y: 420 },
-  'tp-ap':        { x: 800, y: 420 },
-  'er':           { x: 480, y: 510 },
-  'dc-us1':       { x: 100, y: 600 },
-  'dc-us2':       { x: 260, y: 600 },
-  'dc-eu1':       { x: 400, y: 600 },
-  'dc-eu2':       { x: 560, y: 600 },
-  'dc-ap1':       { x: 700, y: 600 },
-  'dc-ap2':       { x: 860, y: 600 },
-  'internet':     { x: 480, y: 720 },
-  'cust-us':      { x: 160, y: 810 },
-  'cust-eu':      { x: 480, y: 810 },
-  'cust-ap':      { x: 800, y: 810 },
+function n(id, label, type, extra) {
+  var d = { id: id, label: label, type: type };
+  if (extra) for (var k in extra) d[k] = extra[k];
+  return { data: d };
+}
+function e(src, tgt, color, type) {
+  return { data: { source: src, target: tgt, color: color, type: type || 'flow' }};
+}
+
+var saasNodes = [
+  n('azure', 'AZURE\nCLOUD PLATFORM', 'cloud'),
+
+  n('rg-us', 'AMERICAS', 'region', { region: 'us' }),
+  n('rg-eu', 'EUROPE', 'region', { region: 'eu' }),
+  n('rg-ap', 'APAC', 'region', { region: 'ap' }),
+
+  n('s-mkt-us', 'MARKETPLACE\nAKS 3 nodes | East US\nAPI GW · CosmosDB · Redis', 'sub', { parent: 'rg-us', region: 'us' }),
+  n('s-shr-us', 'SHARED SERVICES\nDNS/LB · Key Vault\nMonitor · Log Analytics', 'sub', { parent: 'rg-us', region: 'us' }),
+  n('s-con-us', 'CONNECTIVITY\nvNet Hub · Firewall\nPeering · NSGs', 'sub', { parent: 'rg-us', region: 'us' }),
+
+  n('s-mkt-eu', 'MARKETPLACE\nAKS 3 nodes | West EU\nAPI GW · CosmosDB · Redis', 'sub', { parent: 'rg-eu', region: 'eu' }),
+  n('s-shr-eu', 'SHARED SERVICES\nDNS/LB · Key Vault\nMonitor · Log Analytics', 'sub', { parent: 'rg-eu', region: 'eu' }),
+  n('s-con-eu', 'CONNECTIVITY\nvNet Hub · Firewall\nPeering · NSGs', 'sub', { parent: 'rg-eu', region: 'eu' }),
+
+  n('s-mkt-ap', 'MARKETPLACE\nAKS 3 nodes | SE Asia\nAPI GW · CosmosDB · Redis', 'sub', { parent: 'rg-ap', region: 'ap' }),
+  n('s-shr-ap', 'SHARED SERVICES\nDNS/LB · Key Vault\nMonitor · Log Analytics', 'sub', { parent: 'rg-ap', region: 'ap' }),
+  n('s-con-ap', 'CONNECTIVITY\nvNet Hub · Firewall\nPeering · NSGs', 'sub', { parent: 'rg-ap', region: 'ap' }),
+
+  n('tp-us', 'TENTPOLE\nAMERICAS', 'tentpole'),
+  n('tp-eu', 'TENTPOLE\nEUROPE', 'tentpole'),
+  n('tp-ap', 'TENTPOLE\nAPAC', 'tentpole'),
+
+  n('er', 'EXPRESSROUTE — PRIVATE PEERING', 'expressroute'),
+
+  n('dc-us1', 'DC-US-01\nVirginia\n4 racks · 200 nodes', 'dc', { region: 'us' }),
+  n('dc-us2', 'DC-US-02\nOregon\n3 racks · 150 nodes', 'dc', { region: 'us' }),
+  n('dc-eu1', 'DC-EU-01\nAmsterdam\n5 racks · 280 nodes', 'dc', { region: 'eu' }),
+  n('dc-eu2', 'DC-EU-02\nFrankfurt\n4 racks · 220 nodes', 'dc', { region: 'eu' }),
+  n('dc-ap1', 'DC-AP-01\nSingapore\n3 racks · 160 nodes', 'dc', { region: 'ap' }),
+  n('dc-ap2', 'DC-AP-02\nTokyo\n2 racks · 120 nodes', 'dc', { region: 'ap' }),
+
+  n('inet', 'INTERNET', 'internet'),
+
+  n('c-us', 'CUSTOMERS — AMERICAS\nReseller Corp · LatAm Distrib\nCanada Tel', 'customer', { region: 'us' }),
+  n('c-eu', 'CUSTOMERS — EUROPE\nEMEA Partners · UK Wholesale\nDACH Region', 'customer', { region: 'eu' }),
+  n('c-ap', 'CUSTOMERS — APAC\nJP Enterprise · ANZ Distrib\nIndia Cloud', 'customer', { region: 'ap' }),
+];
+
+var saasEdges = [
+  e('azure','rg-us',G), e('azure','rg-eu',B), e('azure','rg-ap',P),
+  e('rg-us','tp-us',PR), e('rg-eu','tp-eu',PR), e('rg-ap','tp-ap',PR),
+  e('tp-us','er',O), e('tp-eu','er',O), e('tp-ap','er',O),
+  e('er','dc-us1',O), e('er','dc-us2',O), e('er','dc-eu1',O), e('er','dc-eu2',O), e('er','dc-ap1',O), e('er','dc-ap2',O),
+  e('dc-us1','dc-us2',O,'mesh'), e('dc-eu1','dc-eu2',O,'mesh'), e('dc-ap1','dc-ap2',O,'mesh'),
+  e('dc-us2','dc-eu1',O,'mesh'), e('dc-eu2','dc-ap1',O,'mesh'), e('dc-us1','dc-ap2',O,'mesh'),
+  e('rg-us','inet',CY), e('rg-eu','inet',CY), e('rg-ap','inet',CY),
+  e('inet','c-us',CY), e('inet','c-eu',CY), e('inet','c-ap',CY),
+];
+
+var saasPos = {
+  'azure':    {x:480,y:50},
+  'rg-us':    {x:160,y:240}, 'rg-eu':    {x:480,y:240}, 'rg-ap':    {x:800,y:240},
+  's-mkt-us': {x:110,y:210}, 's-shr-us': {x:240,y:210}, 's-con-us': {x:160,y:310},
+  's-mkt-eu': {x:430,y:210}, 's-shr-eu': {x:560,y:210}, 's-con-eu': {x:480,y:310},
+  's-mkt-ap': {x:750,y:210}, 's-shr-ap': {x:880,y:210}, 's-con-ap': {x:800,y:310},
+  'tp-us':    {x:160,y:440}, 'tp-eu':    {x:480,y:440}, 'tp-ap':    {x:800,y:440},
+  'er':       {x:480,y:540},
+  'dc-us1':   {x:80,y:650}, 'dc-us2': {x:250,y:650},
+  'dc-eu1':   {x:400,y:650}, 'dc-eu2': {x:570,y:650},
+  'dc-ap1':   {x:720,y:650}, 'dc-ap2': {x:890,y:650},
+  'inet':     {x:480,y:770},
+  'c-us':     {x:160,y:870}, 'c-eu': {x:480,y:870}, 'c-ap': {x:800,y:870},
 };
 
-var paasPositions = {
-  'azure':          { x: 480, y: 50 },
-  'rg-americas':    { x: 160, y: 260 },
-  'rg-europe':      { x: 480, y: 260 },
-  'rg-apac':        { x: 800, y: 260 },
-  'p-techcorp':     { x: 160, y: 210 },
-  'p-globalnet':    { x: 160, y: 300 },
-  'p-megastore':    { x: 160, y: 390 },
-  'p-eurotel':      { x: 480, y: 210 },
-  'p-nordic':       { x: 480, y: 300 },
-  'p-dach':         { x: 480, y: 390 },
-  'p-tokyo':        { x: 800, y: 210 },
-  'p-singapore':    { x: 800, y: 300 },
-  'p-india':        { x: 800, y: 390 },
-  'commercerndci':  { x: 480, y: 540 },
-  'inet-artifacts': { x: 480, y: 650 },
-  'inet-customers': { x: 480, y: 770 },
-  'cust-us':        { x: 160, y: 860 },
-  'cust-eu':        { x: 480, y: 860 },
-  'cust-ap':        { x: 800, y: 860 },
+// ============================================================
+// PAAS DATA
+// ============================================================
+var paasNodes = [
+  n('azure', 'AZURE\nCLOUD PLATFORM', 'cloud'),
+
+  n('rg-us', 'AMERICAS', 'region', { region: 'us' }),
+  n('rg-eu', 'EUROPE', 'region', { region: 'eu' }),
+  n('rg-ap', 'APAC', 'region', { region: 'ap' }),
+
+  n('p-tech', 'PaaS TechCorp\nAKS 3 nodes · East US\nSQL DB · Redis · Storage · App GW\n2,340 orders/day', 'paas-sub', { parent: 'rg-us', region: 'us' }),
+  n('p-glob', 'PaaS GlobalNet\nAKS 2 nodes · West US\nSQL DB · Redis · Storage · App GW\n1,120 orders/day', 'paas-sub', { parent: 'rg-us', region: 'us' }),
+  n('p-mega', 'PaaS MegaStore\nAKS 4 nodes · Brazil S\nCosmosDB · Redis · Blob · Front Door\n3,780 orders/day', 'paas-sub', { parent: 'rg-us', region: 'us' }),
+
+  n('p-euro', 'PaaS EuroTel\nAKS 5 nodes · West EU\nSQL DB · Redis · Storage · App GW\n4,560 orders/day', 'paas-sub', { parent: 'rg-eu', region: 'eu' }),
+  n('p-nord', 'PaaS NordicCloud\nAKS 3 nodes · North EU\nPostgreSQL · Redis · Storage · CDN\n1,870 orders/day', 'paas-sub', { parent: 'rg-eu', region: 'eu' }),
+  n('p-dach', 'PaaS DACH-Systems\nAKS 2 nodes · Germany WC\nSQL DB · Key Vault · Storage · App GW\n2,950 orders/day', 'paas-sub', { parent: 'rg-eu', region: 'eu' }),
+
+  n('p-toky', 'PaaS TokyoMart\nAKS 3 nodes · Japan East\nCosmosDB · Redis · Blob · App GW\n2,100 orders/day', 'paas-sub', { parent: 'rg-ap', region: 'ap' }),
+  n('p-sing', 'PaaS SingaporeTech\nAKS 4 nodes · SE Asia\nSQL DB · Redis · Storage · Front Door\n1,650 orders/day', 'paas-sub', { parent: 'rg-ap', region: 'ap' }),
+  n('p-indi', 'PaaS IndiaConnect\nAKS 2 nodes · Central IN\nSQL DB · Redis · Storage · App GW\n980 orders/day', 'paas-sub', { parent: 'rg-ap', region: 'ap' }),
+
+  n('artif', 'SUB: commercerndci · West Europe\n\nJFrog Artifactory\nDocker · Helm · Maven · npm · PyPI\n12,450 artifacts · 2.8 TB · 45K pulls/day', 'artifactory'),
+
+  n('inet-a', 'INTERNET — ARTIFACT PULL', 'internet-artifact'),
+  n('inet-c', 'INTERNET — CUSTOMER TRAFFIC', 'internet'),
+
+  n('c-us', 'CUSTOMERS — AMERICAS\nTechCorp → PaaS TechCorp\nGlobalNet → PaaS GlobalNet\nMegaStore → PaaS MegaStore', 'customer', { region: 'us' }),
+  n('c-eu', 'CUSTOMERS — EUROPE\nEuroTel → PaaS EuroTel\nNordicCloud → PaaS NordicCloud\nDACH-Systems → PaaS DACH', 'customer', { region: 'eu' }),
+  n('c-ap', 'CUSTOMERS — APAC\nTokyoMart → PaaS TokyoMart\nSingaporeTech → PaaS Singapore\nIndiaConnect → PaaS India', 'customer', { region: 'ap' }),
+];
+
+var paasEdges = [
+  e('azure','rg-us',G), e('azure','rg-eu',B), e('azure','rg-ap',P),
+  e('azure','artif',O),
+  e('artif','inet-a',O),
+  e('inet-a','rg-us',O,'artifact-pull'), e('inet-a','rg-eu',O,'artifact-pull'), e('inet-a','rg-ap',O,'artifact-pull'),
+  e('rg-us','inet-c',CY), e('rg-eu','inet-c',CY), e('rg-ap','inet-c',CY),
+  e('inet-c','c-us',CY), e('inet-c','c-eu',CY), e('inet-c','c-ap',CY),
+];
+
+var paasPos = {
+  'azure':  {x:480,y:50},
+  'rg-us':  {x:160,y:300}, 'rg-eu':  {x:480,y:300}, 'rg-ap':  {x:800,y:300},
+  'p-tech': {x:160,y:240}, 'p-glob': {x:160,y:340}, 'p-mega': {x:160,y:440},
+  'p-euro': {x:480,y:240}, 'p-nord': {x:480,y:340}, 'p-dach': {x:480,y:440},
+  'p-toky': {x:800,y:240}, 'p-sing': {x:800,y:340}, 'p-indi': {x:800,y:440},
+  'artif':  {x:480,y:600},
+  'inet-a': {x:480,y:730},
+  'inet-c': {x:480,y:850},
+  'c-us':   {x:160,y:950}, 'c-eu': {x:480,y:950}, 'c-ap': {x:800,y:950},
 };
 
 // ============================================================
-// CYTOSCAPE INSTANCE
+// CYTOSCAPE
 // ============================================================
 var cy = null;
 var currentTab = 'saas';
 
-function getStorageKey() {
-  return 'cy-positions-' + currentTab;
+function storageKey() { return 'cy-pos-' + currentTab; }
+
+function savePos() {
+  var pos = {};
+  cy.nodes().forEach(function(nd) { if (!nd.isParent()) pos[nd.id()] = nd.position(); });
+  try { localStorage.setItem(storageKey(), JSON.stringify(pos)); } catch(e) {}
 }
 
-function savePositions() {
-  var positions = {};
-  cy.nodes().forEach(function(n) {
-    if (!n.isParent()) {
-      positions[n.id()] = n.position();
-    }
-  });
-  try { localStorage.setItem(getStorageKey(), JSON.stringify(positions)); } catch(e) {}
-}
-
-function loadSavedPositions() {
-  try {
-    var data = localStorage.getItem(getStorageKey());
-    if (!data) return null;
-    return JSON.parse(data);
-  } catch(e) { return null; }
+function loadPos() {
+  try { var d = localStorage.getItem(storageKey()); return d ? JSON.parse(d) : null; } catch(e) { return null; }
 }
 
 function initGraph(tab) {
   currentTab = tab;
   var nodes = tab === 'saas' ? saasNodes : paasNodes;
   var edges = tab === 'saas' ? saasEdges : paasEdges;
-  var defaultPos = tab === 'saas' ? saasPositions : paasPositions;
-  var savedPos = loadSavedPositions();
-  var positions = savedPos || defaultPos;
+  var defPos = tab === 'saas' ? saasPos : paasPos;
+  var saved = loadPos();
+  var positions = saved || defPos;
 
   if (cy) cy.destroy();
 
   cy = cytoscape({
     container: document.getElementById('cy-container'),
     elements: { nodes: nodes, edges: edges },
-    style: sharedStyle,
+    style: cyStyle,
     layout: {
       name: 'preset',
-      positions: function(node) {
-        return positions[node.id()] || { x: 480, y: 400 };
-      },
-      fit: !savedPos,
-      padding: 40,
+      positions: function(node) { return positions[node.id()] || {x:480,y:400}; },
+      fit: true,
+      padding: 50,
     },
-    minZoom: 0.3,
-    maxZoom: 3,
-    wheelSensitivity: 0.3,
+    minZoom: 0.2,
+    maxZoom: 4,
+    wheelSensitivity: 0.25,
     boxSelectionEnabled: false,
   });
 
-  // Save on drag
-  cy.on('dragfree', 'node', function() {
-    savePositions();
-  });
-
-  // Fit if first load
-  if (!savedPos) {
-    cy.fit(undefined, 40);
-  }
+  cy.on('dragfree', 'node', savePos);
 }
 
 // ============================================================
-// INIT & EVENTS
+// EVENTS
 // ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-  initGraph('saas');
-});
+document.addEventListener('DOMContentLoaded', function() { initGraph('saas'); });
 
-// Tabs
 document.querySelectorAll('.tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -704,26 +496,22 @@ document.querySelectorAll('.tab').forEach(function(tab) {
   });
 });
 
-// Fit
 document.getElementById('btn-fit').addEventListener('click', function() {
-  if (cy) cy.animate({ fit: { eles: cy.elements(), padding: 40 }}, { duration: 400 });
+  if (cy) cy.animate({ fit: { eles: cy.elements(), padding: 50 }}, { duration: 300 });
 });
 
-// Reset
 document.getElementById('btn-reset').addEventListener('click', function() {
-  localStorage.removeItem('cy-positions-saas');
-  localStorage.removeItem('cy-positions-paas');
+  localStorage.removeItem('cy-pos-saas');
+  localStorage.removeItem('cy-pos-paas');
   initGraph(currentTab);
 });
 
-// Keyboard
-document.addEventListener('keydown', function(e) {
-  if (e.key === '1') document.querySelector('[data-tab="saas"]').click();
-  else if (e.key === '2') document.querySelector('[data-tab="paas"]').click();
-  else if (e.key === 'f' || e.key === 'F') document.getElementById('btn-fit').click();
-  else if (e.key === 'r' || e.key === 'R') document.getElementById('btn-reset').click();
+document.addEventListener('keydown', function(ev) {
+  if (ev.key==='1') document.querySelector('[data-tab="saas"]').click();
+  else if (ev.key==='2') document.querySelector('[data-tab="paas"]').click();
+  else if (ev.key==='f'||ev.key==='F') document.getElementById('btn-fit').click();
+  else if (ev.key==='r'||ev.key==='R') document.getElementById('btn-reset').click();
 });
 </script>
-
 </body>
 </html>
