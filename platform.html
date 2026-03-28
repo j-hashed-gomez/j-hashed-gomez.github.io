@@ -632,7 +632,7 @@ paasHybrid1Nodes.forEach(function(nd) {
 
 // Connect Virtuozzo provider to its Europe region
 paasHybrid1Edges.push(
-  e('virtuozzo', 'rg-vz-eu', O, 'flow')
+  e('virtuozzo', 'rg-vz-eu', B, 'flow')
 );
 
 // VPN connects directly to dc-dublin (which is inside the Virtuozzo Europe region)
@@ -734,8 +734,8 @@ paasFutureEdges.push(
   e('artif-ap', 'vpn-ap', P, 'vpn'),
   e('vpn-ap', 'dc-singapore', P, 'vpn'),
   // Virtuozzo provider connects to all its regions
-  e('virtuozzo', 'rg-vz-us', O, 'flow'),
-  e('virtuozzo', 'rg-vz-ap', O, 'flow')
+  e('virtuozzo', 'rg-vz-us', G, 'flow'),
+  e('virtuozzo', 'rg-vz-ap', P, 'flow')
 );
 
 // Add Jenkins and Databases nodes per region
