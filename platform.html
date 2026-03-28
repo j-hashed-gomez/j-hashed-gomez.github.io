@@ -1143,6 +1143,12 @@ document.getElementById('btn-draw').addEventListener('click', function() {
   drawCanvas.classList.toggle('active', drawMode);
   this.classList.toggle('draw-active', drawMode);
   this.textContent = drawMode ? 'DRAW ON' : 'DRAW';
+  if (cy) {
+    cy.userPanningEnabled(!drawMode);
+    cy.userZoomingEnabled(!drawMode);
+    cy.boxSelectionEnabled(!drawMode);
+    cy.autoungrabify(drawMode);
+  }
 });
 
 document.getElementById('btn-clear').addEventListener('click', function() {
