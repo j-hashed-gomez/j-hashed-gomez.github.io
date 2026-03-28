@@ -1,4 +1,4 @@
-/* ULTRA-MODERN CV STYLES v1.2.2 - 2025 */
+/* ULTRA-MODERN CV STYLES v1.2.3 - 2025 */
 @import url('https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 :root {
@@ -463,7 +463,7 @@ pre {
 
 .version-badge {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   background: linear-gradient(45deg, var(--primary-green), var(--secondary-blue));
   color: var(--bg-darker);
