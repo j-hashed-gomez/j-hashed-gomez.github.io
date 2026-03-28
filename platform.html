@@ -310,6 +310,41 @@ var cyStyle = [
     }
   },
   {
+    selector: 'node[type="vpn"]',
+    style: {
+      'background-color': '#0a0610',
+      'border-color': PR,
+      'border-width': 2,
+      'color': PR,
+      'font-size': 11,
+      'font-weight': 'bold',
+      'shape': 'diamond',
+      'width': 150,
+      'height': 65,
+    }
+  },
+  {
+    selector: 'node[type="dc-onprem"]',
+    style: {
+      'background-color': '#100a00',
+      'border-color': O,
+      'border-width': 2.5,
+      'color': O,
+      'font-size': 11,
+      'width': 200,
+      'height': 75,
+    }
+  },
+  {
+    selector: 'edge[type="vpn"]',
+    style: {
+      'line-style': 'dashed',
+      'line-dash-pattern': [10, 5],
+      'width': 2,
+      'opacity': 0.6,
+    }
+  },
+  {
     selector: 'node:grabbed',
     style: { 'border-width': 3, 'overlay-opacity': 0.05, 'overlay-color': '#00ff41' }
   },
@@ -446,11 +481,27 @@ var paasPos = {
 };
 
 // ============================================================
-// PAAS HYBRID ONPREM DATA (copy of PaaS for now)
+// PAAS HYBRID ONPREM DATA
 // ============================================================
 var paasHybridNodes = JSON.parse(JSON.stringify(paasNodes));
+
+// Add VPN gateway node
+paasHybridNodes.push(
+  n('vpn', 'VPN GATEWAY\nSite-to-Site IPSec', 'vpn'),
+  n('dc-dublin', 'DATACENTER DUBLIN\nVirtuozzo Platform\nOn-Premises', 'dc-onprem')
+);
+
 var paasHybridEdges = JSON.parse(JSON.stringify(paasEdges));
+
+// Add VPN connection: commercerndci -> VPN -> Dublin DC
+paasHybridEdges.push(
+  e('artif', 'vpn', PR, 'vpn'),
+  e('vpn', 'dc-dublin', PR, 'vpn')
+);
+
 var paasHybridPos = JSON.parse(JSON.stringify(paasPos));
+paasHybridPos['vpn'] = {x:-213, y:450};
+paasHybridPos['dc-dublin'] = {x:-213, y:620};
 
 // ============================================================
 // CYTOSCAPE
