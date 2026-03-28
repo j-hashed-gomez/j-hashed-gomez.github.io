@@ -72,6 +72,19 @@
       cursor: crosshair;
     }
     #draw-overlay.active { pointer-events: auto; }
+    #text-input {
+      position: fixed;
+      display: none;
+      background: rgba(10,10,10,0.9);
+      border: 1px solid #ff4081;
+      color: #ff4081;
+      font-family: 'VT323', monospace;
+      padding: 4px 6px;
+      border-radius: 4px;
+      outline: none;
+      z-index: 1002;
+      min-width: 60px;
+    }
     #cy-container.drawing-mode > *:not(#draw-overlay) { pointer-events: none !important; }
     .ctrl-btn.draw-active {
       color: #ff4081 !important;
@@ -200,6 +213,7 @@
 
 <div id="cy-container" style="position:relative;"></div>
 <canvas id="draw-overlay"></canvas>
+<input type="text" id="text-input" placeholder="Type...">
 
 <div id="draw-toolbar">
   <label>TOOL</label>
@@ -209,6 +223,9 @@
   <button class="tool-btn" data-tool="rect">Rect</button>
   <button class="tool-btn" data-tool="circle">Circle</button>
   <button class="tool-btn" data-tool="ellipse">Ellipse</button>
+  <button class="tool-btn" data-tool="text">Text</button>
+  <label>FONT SIZE</label>
+  <input type="range" id="draw-fontsize" min="12" max="48" value="18">
   <label>HISTORY</label>
   <div style="display:flex;gap:4px;">
     <button class="tool-btn" id="btn-undo" style="flex:1">Undo</button>
@@ -1255,6 +1272,32 @@ function drawArrowHead(ctx, fromX, fromY, toX, toY, size) {
   ctx.stroke();
 }
 
+// Text tool
+var textInput = document.getElementById('text-input');
+var textX, textY;
+
+function commitText() {
+  var val = textInput.value.trim();
+  if (val) {
+    saveUndoState();
+    var style = getDrawStyle();
+    var fontSize = parseInt(document.getElementById('draw-fontsize').value);
+    drawCtx.font = fontSize + 'px VT323, monospace';
+    drawCtx.fillStyle = style.color;
+    drawCtx.fillText(val, textX, textY);
+  }
+  textInput.style.display = 'none';
+  textInput.value = '';
+}
+
+textInput.addEventListener('keydown', function(e) {
+  e.stopPropagation();
+  if (e.key === 'Enter') { commitText(); }
+  else if (e.key === 'Escape') { textInput.style.display = 'none'; textInput.value = ''; }
+});
+
+textInput.addEventListener('blur', function() { commitText(); });
+
 // Tool buttons
 document.querySelectorAll('.tool-btn[data-tool]').forEach(function(btn) {
   btn.addEventListener('click', function() {
@@ -1268,6 +1311,18 @@ document.querySelectorAll('.tool-btn[data-tool]').forEach(function(btn) {
 drawCanvas.addEventListener('mousedown', function(e) {
   if (!drawMode) return;
   e.stopPropagation(); e.preventDefault();
+  if (drawTool === 'text') {
+    var fontSize = parseInt(document.getElementById('draw-fontsize').value);
+    textX = e.offsetX;
+    textY = e.offsetY;
+    textInput.style.left = e.clientX + 'px';
+    textInput.style.top = (e.clientY - fontSize) + 'px';
+    textInput.style.fontSize = fontSize + 'px';
+    textInput.style.color = document.getElementById('draw-color').value;
+    textInput.style.display = 'block';
+    textInput.focus();
+    return;
+  }
   saveUndoState();
   drawing = true;
   startX = e.offsetX;
@@ -1339,8 +1394,21 @@ function touchPos(e) {
 drawCanvas.addEventListener('touchstart', function(e) {
   if (!drawMode) return;
   e.preventDefault();
-  saveUndoState();
   var p = touchPos(e);
+  if (drawTool === 'text') {
+    var fontSize = parseInt(document.getElementById('draw-fontsize').value);
+    textX = p.x;
+    textY = p.y;
+    var t = e.touches[0];
+    textInput.style.left = t.clientX + 'px';
+    textInput.style.top = (t.clientY - fontSize) + 'px';
+    textInput.style.fontSize = fontSize + 'px';
+    textInput.style.color = document.getElementById('draw-color').value;
+    textInput.style.display = 'block';
+    textInput.focus();
+    return;
+  }
+  saveUndoState();
   drawing = true;
   startX = p.x; startY = p.y;
   var style = getDrawStyle();
