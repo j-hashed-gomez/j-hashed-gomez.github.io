@@ -135,6 +135,57 @@
       box-shadow: 0 0 6px var(--secondary-blue);
     }
 
+    /* Zoom controls */
+    .zoom-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 2rem 0;
+    }
+
+    .zoom-btn {
+      background: rgba(15, 15, 15, 0.9);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      color: var(--primary-green);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(0, 255, 65, 0.1);
+      border-color: var(--primary-green);
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+
+    .zoom-btn:active {
+      transform: scale(0.95);
+    }
+
+    .zoom-level {
+      color: var(--primary-green);
+      font-size: 1rem;
+      min-width: 50px;
+      text-align: center;
+      opacity: 0.7;
+      text-shadow: 0 0 5px var(--primary-green);
+    }
+
+    .zoom-btn-fit {
+      width: auto;
+      padding: 0 10px;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
+    }
+
     /* Content area */
     .content-area {
       margin: 0 2rem 2rem;
@@ -142,14 +193,23 @@
       border-radius: 0 8px 8px 8px;
       background: rgba(10, 10, 10, 0.9);
       box-shadow: var(--shadow-glow);
-      overflow: hidden;
+      overflow: auto;
       min-height: 60vh;
+      max-height: 80vh;
+      cursor: grab;
+      position: relative;
+    }
+
+    .content-area:active {
+      cursor: grabbing;
     }
 
     .tab-content {
       display: none;
       width: 100%;
       animation: fadeIn 0.4s ease-out;
+      transform-origin: 0 0;
+      transition: transform 0.2s ease;
     }
 
     .tab-content.active {
@@ -159,6 +219,7 @@
     .tab-content object {
       width: 100%;
       display: block;
+      pointer-events: none;
     }
 
     /* Loading state */
@@ -244,7 +305,14 @@
     </div>
   </div>
 
-  <div class="content-area">
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoom-out" title="Zoom out (-)">-</button>
+    <span class="zoom-level" id="zoom-level">100%</span>
+    <button class="zoom-btn" id="zoom-in" title="Zoom in (+)">+</button>
+    <button class="zoom-btn zoom-btn-fit" id="zoom-fit" title="Fit to screen (0)">FIT</button>
+  </div>
+
+  <div class="content-area" id="content-area">
     <div id="tab-saas" class="tab-content active">
       <object type="image/svg+xml" data="saas-platform.svg">SaaS Platform Diagram</object>
     </div>
@@ -277,12 +345,66 @@
       });
     });
 
+    // Zoom functionality
+    var zoomLevel = 100;
+    var minZoom = 50;
+    var maxZoom = 300;
+    var zoomStep = 25;
+
+    function applyZoom() {
+      var scale = zoomLevel / 100;
+      document.querySelectorAll('.tab-content').forEach(function(c) {
+        c.style.transform = 'scale(' + scale + ')';
+        c.style.width = (100 / scale) + '%';
+      });
+      document.getElementById('zoom-level').textContent = zoomLevel + '%';
+    }
+
+    document.getElementById('zoom-in').addEventListener('click', function() {
+      if (zoomLevel < maxZoom) {
+        zoomLevel += zoomStep;
+        applyZoom();
+      }
+    });
+
+    document.getElementById('zoom-out').addEventListener('click', function() {
+      if (zoomLevel > minZoom) {
+        zoomLevel -= zoomStep;
+        applyZoom();
+      }
+    });
+
+    document.getElementById('zoom-fit').addEventListener('click', function() {
+      zoomLevel = 100;
+      applyZoom();
+      document.getElementById('content-area').scrollTo(0, 0);
+    });
+
+    // Mouse wheel zoom
+    document.getElementById('content-area').addEventListener('wheel', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (e.deltaY < 0 && zoomLevel < maxZoom) {
+          zoomLevel += zoomStep;
+        } else if (e.deltaY > 0 && zoomLevel > minZoom) {
+          zoomLevel -= zoomStep;
+        }
+        applyZoom();
+      }
+    }, { passive: false });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if (e.key === '1') {
         document.querySelector('[data-tab="saas"]').click();
       } else if (e.key === '2') {
         document.querySelector('[data-tab="paas"]').click();
+      } else if (e.key === '+' || e.key === '=') {
+        document.getElementById('zoom-in').click();
+      } else if (e.key === '-') {
+        document.getElementById('zoom-out').click();
+      } else if (e.key === '0') {
+        document.getElementById('zoom-fit').click();
       }
     });
   </script>
