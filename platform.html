@@ -200,8 +200,6 @@
   <div class="tab" data-tab="paas-hybrid-2">PaaS (Hybrid OnPrem Stage 2)</div>
   <div class="tab" data-tab="paas-future">PaaS (Hybrid OnPrem Future)</div>
   <span class="sep">|</span>
-  <div class="tab" data-tab="aks-infra">AKS Infra</div>
-  <span class="sep">|</span>
   <button class="ctrl-btn" id="btn-fit">FIT</button>
   <button class="ctrl-btn" id="btn-reset">RESET</button>
   <span class="sep">|</span>
@@ -248,7 +246,7 @@
 </div>
 
 <div class="footer-info">
-  Drag nodes | Scroll zoom | 1-7=tabs | F=fit | R=reset | P=pause | D=draw
+  Drag nodes | Scroll zoom | 1-6=tabs | F=fit | R=reset | P=pause | D=draw
 </div>
 
 <script>
@@ -924,129 +922,6 @@ paasFuturePos['jenkins-ap'] = {x:-1013, y:680};
 paasFuturePos['db-ap'] = {x:-1013, y:720};
 
 // ============================================================
-// AKS INFRA DATA — cb-com-infra-mwe1-sf-aks
-// ============================================================
-var aksNodes = [
-  // Cluster
-  n('aks', 'AZURE AKS\ncb-com-infra-mwe1-sf-aks\nK8s v1.33.6 · West Europe', 'cloud'),
-
-  // Node Pools
-  n('np-sys', 'SYSTEM POOL · 1 node', 'region', { region: 'eu' }),
-  n('nd-sys', 'aks-systempool-000004\n10.170.129.234\nUbuntu 22.04 · Age 8d', 'dc', { parent: 'np-sys', region: 'eu' }),
-
-  n('np-spot', 'INFRA SPOT POOL · 3 nodes', 'region', { region: 'us' }),
-  n('nd-s0', 'infraspot-0002dy\n10.170.128.52\nSpot · 7h', 'dc', { parent: 'np-spot', region: 'us' }),
-  n('nd-s1', 'infraspot-0002e0\n10.170.129.232\nSpot · 5h', 'dc', { parent: 'np-spot', region: 'us' }),
-  n('nd-s2', 'infraspot-0002e1\n10.170.128.100\nSpot · 4h', 'dc', { parent: 'np-spot', region: 'us' }),
-
-  // Observability — ns:infrastructure
-  n('ns-obs', 'OBSERVABILITY', 'region', { region: 'eu' }),
-  n('prom', 'PROMETHEUS STACK\nPrometheus · Alertmanager\nBlackbox · Node-Exporter\nKarma · MSTeams', null, { parent: 'ns-obs', region: 'eu' }),
-  n('thanos', 'THANOS\nQuery · Frontend · Receive\nStoreGateway · Compactor\nBucketWeb', null, { parent: 'ns-obs', region: 'eu' }),
-  n('grafana', 'GRAFANA\nMaster · Dev\nOperator Grafana', null, { parent: 'ns-obs', region: 'eu' }),
-
-  // Logging — ns:infrastructure
-  n('ns-log', 'LOGGING', 'region', { region: 'eu' }),
-  n('elk', 'ELASTICSEARCH x3\nKibana · Memcached\nStatefulSet', null, { parent: 'ns-log', region: 'eu' }),
-  n('logpipe', 'LOG PIPELINE\nFluentBit (DS) → Fluentd (DS)\nEvents Exporter', null, { parent: 'ns-log', region: 'eu' }),
-
-  // Security & Compliance
-  n('ns-sec', 'SECURITY & COMPLIANCE', 'region', { region: 'ap' }),
-  n('anchore', 'ANCHORE ENGINE\nImage Scanning\nAPI · Analyzer · Catalog\nPolicy · Queue · PostgreSQL', null, { parent: 'ns-sec', region: 'ap' }),
-  n('dtrack', 'DEPENDENCY TRACK\nSBOM / SCA\nAPI · Frontend x2\nPostgreSQL', null, { parent: 'ns-sec', region: 'ap' }),
-  n('certmgr', 'CERT MANAGER\nTLS Automation\nWebhook · CAInjector\nCert-Exporter', null, { parent: 'ns-sec', region: 'ap' }),
-
-  // Networking & Identity — ns:infrastructure + calico-system
-  n('ns-net', 'NETWORKING & IDENTITY', 'region', { region: 'eu' }),
-  n('calico', 'CALICO CNI\nNode (DS) · Typha\nTigera Operator', null, { parent: 'ns-net', region: 'eu' }),
-  n('aadid', 'AAD POD IDENTITY\nMIC x2 · NMI (DS)\nAzure AD Integration', null, { parent: 'ns-net', region: 'eu' }),
-  n('extdns', 'EXTERNAL DNS\nAzure DNS\nIntegration', null, { parent: 'ns-net', region: 'eu' }),
-
-  // Artifact Management — ns:jfrog
-  n('ns-jfrog', 'ARTIFACT MANAGEMENT', 'region', { region: 'us' }),
-  n('jfrog', 'ARTIFACTORY\n13 containers · StatefulSet\nrepo.cloudblue.io', null, { parent: 'ns-jfrog', region: 'us' }),
-  n('jfrog-pg', 'POSTGRESQL\nArtifactory DB\nStatefulSet', null, { parent: 'ns-jfrog', region: 'us' }),
-
-  // Documentation — ns:cb-docs-portal
-  n('ns-docs', 'DOCUMENTATION', 'region', { region: 'us' }),
-  n('docs', 'DOCS PORTAL\ndocs.cloudblue.com\n5 replicas · MariaDB\nNFS Provisioner', null, { parent: 'ns-docs', region: 'us' }),
-
-  // Cloudflare Tunnel — ns:cloudflare-tunnel
-  n('cftunnel', 'CLOUDFLARE TUNNEL\n2 replicas · HPA 2→4', 'tentpole'),
-
-  // Ingress Layer — ns:infrastructure
-  n('ing-ext', 'NGINX EXTERNAL INGRESS\n48.222.240.216 · 1 replica\ndocs · repo · apidocs', 'expressroute'),
-  n('ing-int', 'NGINX INTERNAL INGRESS\n10.170.129.149 · 3 replicas\n*.com.int.zone', 'expressroute'),
-
-  // Internet
-  n('inet', 'INTERNET', 'internet'),
-
-  // Users
-  n('usr-ext', 'EXTERNAL USERS\ndocs.cloudblue.com\napidocs.cloud.im\nrepo.cloudblue.io', 'customer', { region: 'us' }),
-  n('usr-int', 'INTERNAL USERS\nGrafana · Kibana · Prometheus\nThanos · Anchore · DTrack\nArtifactory · Karma', 'customer', { region: 'eu' }),
-];
-
-var aksEdges = [
-  // Cluster → Node Pools
-  e('aks', 'np-sys', B),
-  e('aks', 'np-spot', G),
-
-  // Internal data flows
-  e('prom', 'thanos', B),
-  e('logpipe', 'elk', B),
-  e('jfrog', 'jfrog-pg', G),
-
-  // Namespace groups → Ingress (service exposure)
-  e('ns-obs', 'ing-int', B),
-  e('ns-log', 'ing-int', B),
-  e('ns-sec', 'ing-int', P),
-  e('ns-jfrog', 'ing-int', G),
-  e('ns-jfrog', 'ing-ext', G),
-  e('ns-docs', 'ing-ext', G),
-
-  // Cloudflare tunnel path
-  e('cftunnel', 'ing-int', PR),
-  e('inet', 'cftunnel', CY),
-
-  // Ingress → Internet
-  e('ing-ext', 'inet', CY),
-
-  // Internet → External Users
-  e('inet', 'usr-ext', CY),
-
-  // Internal Ingress → Internal Users
-  e('ing-int', 'usr-int', B),
-];
-
-var aksPos = {
-  'aks':      {x:700, y:0},
-  // System pool (1 node)
-  'nd-sys':   {x:150, y:250},
-  // Spot pool (3 nodes, 300px apart)
-  'nd-s0':    {x:750, y:210}, 'nd-s1': {x:1050, y:270}, 'nd-s2': {x:1350, y:210},
-  // Row 2: Observability (300px apart)
-  'prom':     {x:-300, y:580}, 'thanos': {x:0, y:580}, 'grafana': {x:300, y:580},
-  // Row 2: Logging (300px apart)
-  'elk':      {x:700, y:580}, 'logpipe': {x:1000, y:580},
-  // Row 2: Security (300px apart)
-  'anchore':  {x:1400, y:580}, 'dtrack': {x:1700, y:580}, 'certmgr': {x:2000, y:580},
-  // Row 3: Networking (300px apart)
-  'calico':   {x:-300, y:920}, 'aadid': {x:0, y:920}, 'extdns': {x:300, y:920},
-  // Row 3: JFrog (300px apart)
-  'jfrog':    {x:700, y:920}, 'jfrog-pg': {x:1000, y:920},
-  // Row 3: Docs
-  'docs':     {x:1400, y:920},
-  // Row 3: Cloudflare
-  'cftunnel': {x:1850, y:920},
-  // Row 4: Ingress (600px apart)
-  'ing-int':  {x:400, y:1250}, 'ing-ext': {x:1200, y:1250},
-  // Row 5: Internet
-  'inet':     {x:800, y:1520},
-  // Row 6: Users (800px apart)
-  'usr-int':  {x:350, y:1800}, 'usr-ext': {x:1250, y:1800},
-};
-
-// ============================================================
 // CYTOSCAPE
 // ============================================================
 var cy = null;
@@ -1073,7 +948,6 @@ function initGraph(tab) {
     'paas-hybrid-1': { nodes: paasHybrid1Nodes, edges: paasHybrid1Edges, pos: paasHybrid1Pos },
     'paas-hybrid-2': { nodes: paasHybrid2Nodes, edges: paasHybrid2Edges, pos: paasHybrid2Pos },
     'paas-future': { nodes: paasFutureNodes, edges: paasFutureEdges, pos: paasFuturePos },
-    'aks-infra': { nodes: aksNodes, edges: aksEdges, pos: aksPos },
   };
   var d = tabData[tab] || tabData['saas'];
   var nodes = d.nodes;
@@ -1358,7 +1232,6 @@ document.getElementById('btn-reset').addEventListener('click', function() {
   localStorage.removeItem('cy-pos-paas-hybrid-1');
   localStorage.removeItem('cy-pos-paas-hybrid-2');
   localStorage.removeItem('cy-pos-paas-future');
-  localStorage.removeItem('cy-pos-aks-infra');
   animPaused = false;
   document.getElementById('btn-anim').textContent = 'PAUSE';
   initGraph(currentTab);
@@ -1697,7 +1570,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='4') document.querySelector('[data-tab="paas-hybrid-1"]').click();
   else if (ev.key==='5') document.querySelector('[data-tab="paas-hybrid-2"]').click();
   else if (ev.key==='6') document.querySelector('[data-tab="paas-future"]').click();
-  else if (ev.key==='7') document.querySelector('[data-tab="aks-infra"]').click();
   else if (ev.key==='f'||ev.key==='F') document.getElementById('btn-fit').click();
   else if (ev.key==='r'||ev.key==='R') document.getElementById('btn-reset').click();
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
