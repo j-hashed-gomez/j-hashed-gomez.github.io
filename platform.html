@@ -1078,13 +1078,6 @@ function startAnimations() {
     return weights;
   }
 
-  function isCustomerTrafficEdge(edge) {
-    var srcType = edge.source().data('type');
-    var tgtType = edge.target().data('type');
-    return srcType === 'internet' || tgtType === 'internet' ||
-           srcType === 'customer' || tgtType === 'customer';
-  }
-
   function initPackets() {
     packets = [];
     var weights = computeFlowWeights();
@@ -1104,20 +1097,18 @@ function startAnimations() {
           reverse: false,
         });
       }
-      // Bidirectional packets for customer traffic edges
-      if (isCustomerTrafficEdge(edge)) {
-        var revColor = edge.target().style('border-color');
-        var revCount = Math.max(1, Math.floor(count * 0.7));
-        for (var j = 0; j < revCount; j++) {
-          packets.push({
-            edge: edge,
-            t: Math.random(),
-            speed: 0.002 + Math.random() * 0.003,
-            color: revColor,
-            size: 2,
-            reverse: true,
-          });
-        }
+      // Bidirectional: reverse packets on all edges
+      var revColor = edge.target().style('border-color');
+      var revCount = Math.max(1, Math.floor(count * 0.7));
+      for (var j = 0; j < revCount; j++) {
+        packets.push({
+          edge: edge,
+          t: Math.random(),
+          speed: 0.002 + Math.random() * 0.003,
+          color: revColor,
+          size: 2,
+          reverse: true,
+        });
       }
     });
   }
@@ -1584,6 +1575,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
-<div class="version-badge">v1.2.8 ⚡</div>
+<div class="version-badge">v1.2.9 ⚡</div>
 </body>
 </html>
