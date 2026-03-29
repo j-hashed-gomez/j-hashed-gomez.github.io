@@ -1019,31 +1019,31 @@ var aksEdges = [
 ];
 
 var aksPos = {
-  'aks':      {x:650, y:50},
-  // System pool
-  'nd-sys':   {x:200, y:220},
-  // Spot pool
-  'nd-s0':    {x:700, y:180}, 'nd-s1': {x:980, y:220}, 'nd-s2': {x:1260, y:180},
-  // Observability
-  'prom':     {x:-200, y:460}, 'thanos': {x:100, y:460}, 'grafana': {x:400, y:460},
-  // Logging
-  'elk':      {x:720, y:460}, 'logpipe': {x:1020, y:460},
-  // Security
-  'anchore':  {x:1340, y:460}, 'dtrack': {x:1640, y:460}, 'certmgr': {x:1940, y:460},
-  // Networking
-  'calico':   {x:-200, y:740}, 'aadid': {x:100, y:740}, 'extdns': {x:400, y:740},
-  // JFrog
-  'jfrog':    {x:720, y:740}, 'jfrog-pg': {x:1020, y:740},
-  // Docs
-  'docs':     {x:1340, y:740},
-  // Cloudflare
-  'cftunnel': {x:1700, y:740},
-  // Ingress
-  'ing-int':  {x:500, y:1000}, 'ing-ext': {x:1100, y:1000},
-  // Internet
-  'inet':     {x:800, y:1200},
-  // Users
-  'usr-int':  {x:400, y:1420}, 'usr-ext': {x:1200, y:1420},
+  'aks':      {x:700, y:0},
+  // System pool (1 node)
+  'nd-sys':   {x:150, y:250},
+  // Spot pool (3 nodes, 300px apart)
+  'nd-s0':    {x:750, y:210}, 'nd-s1': {x:1050, y:270}, 'nd-s2': {x:1350, y:210},
+  // Row 2: Observability (300px apart)
+  'prom':     {x:-300, y:580}, 'thanos': {x:0, y:580}, 'grafana': {x:300, y:580},
+  // Row 2: Logging (300px apart)
+  'elk':      {x:700, y:580}, 'logpipe': {x:1000, y:580},
+  // Row 2: Security (300px apart)
+  'anchore':  {x:1400, y:580}, 'dtrack': {x:1700, y:580}, 'certmgr': {x:2000, y:580},
+  // Row 3: Networking (300px apart)
+  'calico':   {x:-300, y:920}, 'aadid': {x:0, y:920}, 'extdns': {x:300, y:920},
+  // Row 3: JFrog (300px apart)
+  'jfrog':    {x:700, y:920}, 'jfrog-pg': {x:1000, y:920},
+  // Row 3: Docs
+  'docs':     {x:1400, y:920},
+  // Row 3: Cloudflare
+  'cftunnel': {x:1850, y:920},
+  // Row 4: Ingress (600px apart)
+  'ing-int':  {x:400, y:1250}, 'ing-ext': {x:1200, y:1250},
+  // Row 5: Internet
+  'inet':     {x:800, y:1520},
+  // Row 6: Users (800px apart)
+  'usr-int':  {x:350, y:1800}, 'usr-ext': {x:1250, y:1800},
 };
 
 // ============================================================
