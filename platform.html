@@ -1044,18 +1044,53 @@ function startAnimations() {
 
   // Packet pool
   var packets = [];
+
+  // Compute upstream flow weight for each node (how many leaf paths feed into it)
+  function computeFlowWeights() {
+    var weights = {};
+    var visited = {};
+    var nodes = cy.nodes();
+    var edges = cy.edges().filter(function(e) { return e.data('type') !== 'mesh'; });
+
+    // Find leaf sources: nodes with no incoming non-mesh edges
+    nodes.forEach(function(nd) {
+      var incoming = edges.filter(function(e) { return e.data('target') === nd.id(); });
+      if (incoming.length === 0 && !nd.isParent()) {
+        weights[nd.id()] = 1;
+      }
+    });
+
+    // BFS propagation: accumulate weights through the graph
+    var changed = true;
+    var maxIter = 20;
+    while (changed && maxIter-- > 0) {
+      changed = false;
+      edges.forEach(function(e) {
+        var srcId = e.data('source');
+        var tgtId = e.data('target');
+        if (weights[srcId] && !visited[e.id()]) {
+          weights[tgtId] = (weights[tgtId] || 0) + weights[srcId];
+          visited[e.id()] = true;
+          changed = true;
+        }
+      });
+    }
+    return weights;
+  }
+
   function initPackets() {
     packets = [];
+    var weights = computeFlowWeights();
     cy.edges().forEach(function(edge) {
       var type = edge.data('type');
-      if (type === 'mesh') return; // no packets on mesh
+      if (type === 'mesh') return;
       var color = edge.source().style('border-color');
-      // 1-2 packets per edge at different phases
-      var count = (type === 'artifact-pull') ? 1 : 2;
+      var srcWeight = weights[edge.data('source')] || 1;
+      var count = Math.max(1, Math.min(srcWeight, 6));
       for (var i = 0; i < count; i++) {
         packets.push({
           edge: edge,
-          t: Math.random(), // position along edge 0..1
+          t: Math.random(),
           speed: 0.002 + Math.random() * 0.003,
           color: color,
           size: (type === 'artifact-pull') ? 3 : 2.5,
@@ -1525,6 +1560,6 @@ document.addEventListener('keydown', function(ev) {
   else if (ev.key==='d'||ev.key==='D') document.getElementById('btn-draw').click();
 });
 </script>
-<div class="version-badge">v1.2.6 ⚡</div>
+<div class="version-badge">v1.2.7 ⚡</div>
 </body>
 </html>
