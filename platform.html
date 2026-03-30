@@ -688,7 +688,7 @@ var paasNodes = [
   n('p-sing', 'PaaS SingaporeTech\nAKS 4 nodes · SE Asia\nSQL DB · Redis · Storage · Front Door\n1,650 orders/day', 'paas-sub', { parent: 'rg-ap', region: 'ap' }),
   n('p-indi', 'PaaS IndiaConnect\nAKS 2 nodes · Central IN\nSQL DB · Redis · Storage · App GW\n980 orders/day', 'paas-sub', { parent: 'rg-ap', region: 'ap' }),
 
-  n('artif', 'SUB: commercerndci\nWest Europe', 'artifactory', { region: 'eu' }),
+  n('artif', 'SUB: CommerceRndInfra\nWest Europe', 'artifactory', { region: 'eu' }),
   n('jfrog', 'Artifactory', 'artifact-child', { region: 'eu' }),
 
   n('inet-a', 'INTERNET — ARTIFACT PULL', 'internet-artifact'),
@@ -726,7 +726,7 @@ var paasPos = {
 // ============================================================
 var paasHybridNodes = JSON.parse(JSON.stringify(paasNodes));
 
-// Restyle commercerndci to Europe color
+// Restyle CommerceRndInfra to Europe color
 paasHybridNodes.forEach(function(nd) {
   if (nd.data.id === 'artif') nd.data.region = 'eu';
 });
@@ -739,7 +739,7 @@ paasHybridNodes.push(
 
 var paasHybridEdges = JSON.parse(JSON.stringify(paasEdges));
 
-// Add VPN connection: commercerndci -> VPN -> Dublin DC
+// Add VPN connection: CommerceRndInfra -> VPN -> Dublin DC
 paasHybridEdges.push(
   e('artif', 'vpn', PR, 'vpn'),
   e('vpn', 'dc-dublin', PR, 'vpn')
@@ -790,12 +790,12 @@ paasHybrid1Nodes = paasHybrid1Nodes.filter(function(nd) {
 });
 
 // Remove edges involving inet-a, and replace with new artifact pull path:
-// Azure regions -> artif (commercerndci) -> vpn -> dc-dublin
+// Azure regions -> artif (CommerceRndInfra) -> vpn -> dc-dublin
 paasHybrid1Edges = paasHybrid1Edges.filter(function(ed) {
   return ed.data.source !== 'inet-a' && ed.data.target !== 'inet-a';
 });
 
-// New artifact pull edges: regions pull from dc-dublin via commercerndci & vpn
+// New artifact pull edges: regions pull from dc-dublin via CommerceRndInfra & vpn
 paasHybrid1Edges.push(
   e('rg-us', 'artif', B, 'artifact-pull'),
   e('rg-eu', 'artif', B, 'artifact-pull'),
@@ -816,10 +816,10 @@ paasHybrid1Pos['jfrog'] = {x:-1013, y:191};
 var paasHybrid2Nodes = JSON.parse(JSON.stringify(paasHybrid1Nodes));
 var paasHybrid2Edges = JSON.parse(JSON.stringify(paasHybrid1Edges));
 
-// Add regional commercerndci subs for Americas and APAC
+// Add regional CommerceRndInfra subs for Americas and APAC
 paasHybrid2Nodes.push(
-  n('artif-us', 'SUB: commercerndci\nAmericas', 'artifactory', { region: 'us' }),
-  n('artif-ap', 'SUB: commercerndci\nAPAC', 'artifactory', { region: 'ap' })
+  n('artif-us', 'SUB: CommerceRndInfra\nAmericas', 'artifactory', { region: 'us' }),
+  n('artif-ap', 'SUB: CommerceRndInfra\nAPAC', 'artifactory', { region: 'ap' })
 );
 
 // Remove old artifact-pull edges (regions -> artif EU)
@@ -827,13 +827,13 @@ paasHybrid2Edges = paasHybrid2Edges.filter(function(ed) {
   return ed.data.type !== 'artifact-pull';
 });
 
-// New flow: each Azure region -> its regional commercerndci -> commercerndci EU -> VPN -> Dublin
+// New flow: each Azure region -> its regional CommerceRndInfra -> CommerceRndInfra EU -> VPN -> Dublin
 paasHybrid2Edges.push(
-  // Azure regions -> regional commercerndci
+  // Azure regions -> regional CommerceRndInfra
   e('rg-us', 'artif-us', G, 'flow'),
   e('rg-eu', 'artif', B, 'flow'),
   e('rg-ap', 'artif-ap', P, 'flow'),
-  // Regional commercerndci -> commercerndci EU (West Europe)
+  // Regional CommerceRndInfra -> CommerceRndInfra EU (West Europe)
   e('artif-us', 'artif', G, 'artifact-pull'),
   e('artif-ap', 'artif', P, 'artifact-pull')
 );
@@ -867,17 +867,17 @@ paasFutureNodes.push(
 
 // Remove old edges: artif-us -> artif EU and artif-ap -> artif EU (no more cascading through EU)
 paasFutureEdges = paasFutureEdges.filter(function(ed) {
-  // Remove regional commercerndci -> EU commercerndci artifact-pull edges
+  // Remove regional CommerceRndInfra -> EU CommerceRndInfra artifact-pull edges
   if (ed.data.type === 'artifact-pull' && (ed.data.source === 'artif-us' || ed.data.source === 'artif-ap')) return false;
   return true;
 });
 
-// New edges: each regional commercerndci connects to its own VPN and DC
+// New edges: each regional CommerceRndInfra connects to its own VPN and DC
 paasFutureEdges.push(
-  // Americas: commercerndci-us -> vpn-us -> dc-virginia
+  // Americas: CommerceRndInfra-us -> vpn-us -> dc-virginia
   e('artif-us', 'vpn-us', G, 'vpn'),
   e('vpn-us', 'dc-virginia', G, 'vpn'),
-  // APAC: commercerndci-ap -> vpn-ap -> dc-singapore
+  // APAC: CommerceRndInfra-ap -> vpn-ap -> dc-singapore
   e('artif-ap', 'vpn-ap', P, 'vpn'),
   e('vpn-ap', 'dc-singapore', P, 'vpn'),
   // Virtuozzo provider connects to all its regions
