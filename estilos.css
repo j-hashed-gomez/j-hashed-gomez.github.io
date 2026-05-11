@@ -837,6 +837,48 @@ section.section {
   border-radius: 1px;
 }
 
+/* ===== integrations grid (Dani-style ledger of every career tech) ===== */
+.integ-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+  margin-top: 16px;
+}
+.integ-cell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid rgba(0,255,65,.2);
+  background: rgba(0,40,10,.3);
+  font-size: 12px;
+  font-family: var(--mono);
+  transition: all .15s ease;
+}
+.integ-cell:hover {
+  border-color: var(--green);
+  background: rgba(0,40,10,.55);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(0,255,65,.18);
+}
+.integ-cell .mark { font-size: 13px; line-height: 1; }
+.integ-cell .name {
+  color: var(--white);
+  letter-spacing: .02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.integ-cell .count {
+  font-size: 10px;
+  color: var(--green-dim);
+  letter-spacing: .04em;
+}
+.integ-cell.archived { opacity: .65; }
+.integ-cell.archived .name { color: var(--green-dim); }
+.integ-cell.archived .count { color: rgba(0,143,17,.6); }
+
 /* ============================================================================
    SECTION 04 skills.matrix
    ============================================================================ */
@@ -1314,6 +1356,12 @@ body[data-mode="static"] .chip,
 body[data-mode="static"] .orbital-fallback .chip { background: #f0f0f0 !important; color: #111 !important; border-color: #999 !important; }
 body[data-mode="static"] .orbital-legend { color: #555; }
 body[data-mode="static"] .orbital-legend .dot { background: #555 !important; box-shadow: none !important; }
+body[data-mode="static"] .integ-cell { background: #fff !important; color: #111 !important; border-color: #ccc !important; box-shadow: none !important; }
+body[data-mode="static"] .integ-cell .mark { color: #555 !important; text-shadow: none !important; }
+body[data-mode="static"] .integ-cell .name { color: #111 !important; }
+body[data-mode="static"] .integ-cell .count { color: #666 !important; }
+body[data-mode="static"] .integ-cell.archived { opacity: 1; }
+body[data-mode="static"] .integ-cell.archived .name { color: #888 !important; }
 body[data-mode="static"] .tele-row .val { color: #1565c0; text-shadow: none; }
 body[data-mode="static"] .tele-bar { background: #eee; }
 body[data-mode="static"] .tele-bar > i { background: #1565c0; }
@@ -1377,6 +1425,7 @@ body[data-mode="static"] .contact-card .v { color: #1565c0; }
   .topbar-btn { padding: 5px 8px; font-size: 10px; }
   .orbital-wrap { display: none; }
   .orbital-fallback { display: flex; }
+  .integ-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .contact-card { grid-template-columns: 100px 1fr; padding: 18px 16px; }
   /* Timeline collapses to a left-rail single column */
   .timeline { padding: 10px 0; }
