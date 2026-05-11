@@ -84,42 +84,34 @@
           <span class="badge"><span class="status active">● LIVE</span></span>
         </div>
         <div class="dashboard">
-          <article class="panel col-6" id="panel-timeline">
+          <article class="panel col-12" id="panel-timeline">
             <header class="panel-head">
               <span id="panel-01-label">PANEL_01: career_timeline.tsv</span>
-              <span class="status active">ACTIVE</span>
+              <span class="status active">SPAN: 2006 → 2026 · ● LIVE</span>
             </header>
-            <div id="timeline-content" class="timeline-bars"><!-- rendered by JS --></div>
+            <div id="timeline-content" class="career-timeline"><!-- rendered by JS --></div>
           </article>
 
-          <article class="panel col-6" id="panel-telemetry">
+          <article class="panel col-5" id="panel-telemetry">
             <header class="panel-head">
               <span id="panel-02-label">PANEL_02: telemetry.stream</span>
-              <span class="status active">STREAMING</span>
+              <span class="status" id="ts-clock">--:--:--</span>
             </header>
             <div id="telemetry-content" class="telemetry"><!-- rendered by JS --></div>
           </article>
 
-          <article class="panel col-12" id="panel-heatmap">
+          <article class="panel col-7" id="panel-heatmap">
             <header class="panel-head">
               <span id="panel-03-label">PANEL_03: stack_heatmap.matrix</span>
-              <span class="status">2006 → 2026</span>
+              <span class="status" id="heatmap-samples">SAMPLES: 0</span>
             </header>
             <div id="heatmap-content" class="heatmap"><!-- rendered by JS --></div>
-            <div class="heatmap-legend">
-              <span>less</span>
-              <span class="swatch"></span>
-              <span class="swatch lvl-1"></span>
-              <span class="swatch lvl-2"></span>
-              <span class="swatch lvl-3"></span>
-              <span>more</span>
-            </div>
           </article>
 
-          <article class="panel col-8" id="panel-neural">
+          <article class="panel col-5" id="panel-neural">
             <header class="panel-head">
               <span id="panel-04-label">PANEL_04: neural.graph · jobs ↔ stack</span>
-              <span class="status active">INTERACTIVE</span>
+              <span class="status active">drag · hover</span>
             </header>
             <div class="neural-wrap" id="neural-wrap">
               <canvas id="neural-canvas"></canvas>
@@ -127,10 +119,10 @@
             </div>
           </article>
 
-          <article class="panel col-4" id="panel-log">
+          <article class="panel col-12" id="panel-log">
             <header class="panel-head">
               <span id="panel-05-label">PANEL_05: now_playing.log</span>
-              <span class="status tailing">TAILING</span>
+              <span class="status tailing">● TAILING</span>
             </header>
             <div class="np" id="log-content"><!-- rendered by JS --></div>
           </article>

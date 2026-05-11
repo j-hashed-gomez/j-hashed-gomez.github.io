@@ -119,13 +119,18 @@
   const startedAt = Date.now();
   function startUptime() {
     const el = document.getElementById('sys-uptime');
-    if (!el) return;
+    const clockEl = document.getElementById('ts-clock');
     function tick() {
       const s = Math.floor((Date.now() - startedAt) / 1000);
-      const h = String(Math.floor(s / 3600)).padStart(2, '0');
-      const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-      const ss = String(s % 60).padStart(2, '0');
-      el.textContent = `${h}:${m}:${ss}`;
+      const pad2 = (n) => String(n).padStart(2, '0');
+      const h = pad2(Math.floor(s / 3600));
+      const m = pad2(Math.floor((s % 3600) / 60));
+      const ss = pad2(s % 60);
+      if (el) el.textContent = `${h}:${m}:${ss}`;
+      if (clockEl) {
+        const d = new Date();
+        clockEl.textContent = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+      }
     }
     tick(); setInterval(tick, 1000);
   }

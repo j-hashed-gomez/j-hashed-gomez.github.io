@@ -445,124 +445,137 @@ section.section {
 .col-12 { grid-column: span 12; }
 
 /* ============================================================================
-   PANEL_01 career_timeline
+   PANEL_01 career_timeline — absolute-positioned bars (e-dani-style)
    ============================================================================ */
-.timeline-bars { display: flex; flex-direction: column; gap: 7px; padding-top: 6px; }
-.timeline-row {
-  display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;
-  font-size: 11.5px;
-  color: var(--white);
+.career-timeline {
+  position: relative;
+  min-height: 300px;
+  padding-top: 6px;
 }
-.timeline-row .label { color: var(--green-dim); letter-spacing: .04em; }
-.timeline-track {
-  height: 22px; position: relative;
-  background: rgba(0,255,65,.04);
-  border: 1px solid rgba(0,255,65,.12);
-}
-.timeline-fill {
-  position: absolute; top: 0; bottom: 0;
-  background: rgba(0,255,65,.18);
+.career-timeline .bar {
+  position: absolute;
+  height: 22px;
   border: 1px solid var(--green);
-  display: flex; align-items: center;
-  padding: 0 8px;
-  color: var(--green);
-  font-size: 11px;
-  letter-spacing: .04em;
+  background: rgba(0,255,65,.12);
+  font-size: 10.5px;
+  padding: 3px 8px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--white);
 }
-.timeline-row.is-current .timeline-fill {
-  background: rgba(255,176,0,.2);
-  border-color: var(--amber);
-  color: var(--amber);
-  text-shadow: 0 0 6px rgba(255,176,0,.6);
-}
-.timeline-fill:hover {
+.career-timeline .bar:hover {
   background: rgba(0,255,65,.4);
   color: #000;
+  z-index: 5;
+  box-shadow: 0 0 10px var(--green);
 }
-.timeline-axis {
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  margin: 12px 0 0 120px;
+.career-timeline .bar .role {
+  color: var(--green-dim);
+  font-size: 10px;
+}
+.career-timeline .bar:hover .role { color: #001000; }
+.career-timeline .bar.curr {
+  background: rgba(255,176,0,.18);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.career-timeline .bar.curr:hover {
+  background: var(--amber);
+  color: #000;
+  box-shadow: 0 0 10px var(--amber);
+}
+.career-timeline .axis {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green-dim), transparent);
+}
+.career-timeline .ticks {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
   font-size: 10px;
   color: var(--green-dim);
   letter-spacing: .04em;
 }
-.timeline-axis span { text-align: left; border-left: 1px solid rgba(0,255,65,.15); padding-left: 4px; }
 
 /* ============================================================================
-   PANEL_02 telemetry
+   PANEL_02 telemetry — name / value / mini-bar (e-dani-style)
    ============================================================================ */
 .telemetry {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px 18px;
-  padding-top: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  padding-top: 4px;
 }
-.telemetry-cell {
-  display: flex; flex-direction: column; gap: 4px;
-  border-left: 1px dashed rgba(0,255,65,.2);
-  padding-left: 12px;
+.tele-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.telemetry-cell .label {
-  font-size: 10px; letter-spacing: .14em;
-  color: var(--green-dim); text-transform: uppercase;
+.tele-row .name {
+  font-size: 10px;
+  color: var(--green-dim);
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
-.telemetry-cell .value {
+.tele-row .val {
   font-family: var(--mono);
-  font-size: clamp(22px, 2.4vw, 36px);
-  font-weight: 600;
+  font-size: 18px;
   color: var(--cyan);
-  text-shadow: 0 0 8px rgba(0,229,255,.4);
+  text-shadow: 0 0 6px rgba(0,229,255,.4);
+}
+.tele-row .val.warn  { color: var(--amber); text-shadow: 0 0 6px rgba(255,176,0,.4); }
+.tele-row .val.alert { color: var(--red);   text-shadow: 0 0 6px rgba(255,0,60,.5); }
+.tele-bar {
+  height: 4px;
+  background: rgba(0,255,65,.1);
+  position: relative;
+  overflow: hidden;
+}
+.tele-bar > i {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--cyan);
+  transition: width .4s ease;
 }
 
 /* ============================================================================
-   PANEL_03 stack heatmap
+   PANEL_03 stack heatmap — label + cells (e-dani-style)
    ============================================================================ */
 .heatmap {
   display: grid;
-  grid-template-columns: 130px 1fr 50px;
-  gap: 4px 10px;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
   align-items: center;
-  padding-top: 6px;
 }
-.heatmap-row { display: contents; }
-.heatmap-row .tech {
+.heatmap .label {
   font-size: 11px;
-  color: var(--green-dim);
-  text-align: right;
-  letter-spacing: .04em;
+  color: var(--green);
+  white-space: nowrap;
 }
-.heatmap-cells {
+.heatmap .cells {
   display: grid;
   grid-template-columns: repeat(21, 1fr);
   gap: 3px;
 }
-.heatmap-cell {
+.heatmap .cell {
   height: 12px;
-  background: rgba(0,255,65,.04);
+  background: rgba(0,255,65,.05);
   border: 1px solid rgba(0,255,65,.1);
   transition: all .15s ease;
 }
-.heatmap-cell.lvl-1 { background: rgba(0,255,65,.22); }
-.heatmap-cell.lvl-2 { background: rgba(0,255,65,.45); }
-.heatmap-cell.lvl-3 { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.heatmap-cell:hover { transform: scale(1.4); z-index: 2; position: relative; }
-.heatmap-row .count {
-  font-size: 10px;
-  color: var(--cyan);
-  text-align: left;
-  letter-spacing: .06em;
-}
-.heatmap-legend {
-  display: flex; gap: 6px; align-items: center;
-  font-size: 10px; color: var(--green-dim);
-  margin-top: 12px;
-  justify-content: flex-end;
-}
-.heatmap-legend .swatch { display: inline-block; width: 12px; height: 10px; border: 1px solid rgba(0,255,65,.2); }
+.heatmap .cell.dim { background: var(--green-dim); }
+.heatmap .cell.on  { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.heatmap .cell:hover { transform: scale(1.4); z-index: 2; position: relative; }
 
 /* ============================================================================
    PANEL_04 neural graph
@@ -1281,11 +1294,14 @@ body[data-mode="static"] .tl-card .head { color: #555; }
 body[data-mode="static"] .timeline::before { background: #ccc; }
 body[data-mode="static"] .tl-row .node { background: #fff; border-color: #555; box-shadow: none; }
 body[data-mode="static"] .chip { background: #f0f0f0; color: #111; border-color: #999; }
-body[data-mode="static"] .telemetry-cell .value { color: #1565c0; }
-body[data-mode="static"] .heatmap-cell { border-color: #ddd; background: #f5f5f5; }
-body[data-mode="static"] .heatmap-cell.lvl-1 { background: #c8e6c9; }
-body[data-mode="static"] .heatmap-cell.lvl-2 { background: #66bb6a; }
-body[data-mode="static"] .heatmap-cell.lvl-3 { background: #2e7d32; }
+body[data-mode="static"] .tele-row .val { color: #1565c0; text-shadow: none; }
+body[data-mode="static"] .tele-bar { background: #eee; }
+body[data-mode="static"] .tele-bar > i { background: #1565c0; }
+body[data-mode="static"] .heatmap .cell { border-color: #ddd; background: #f5f5f5; }
+body[data-mode="static"] .heatmap .cell.dim { background: #c8e6c9; }
+body[data-mode="static"] .heatmap .cell.on  { background: #2e7d32; box-shadow: none; }
+body[data-mode="static"] .career-timeline .bar { background: #f5f5f5; border-color: #555; color: #111; }
+body[data-mode="static"] .career-timeline .bar.curr { background: #fff3e0; border-color: #ef6c00; color: #ef6c00; }
 body[data-mode="static"] .section-head,
 body[data-mode="static"] .panel-head,
 body[data-mode="static"] .ledger-row > *,
@@ -1332,9 +1348,9 @@ body[data-mode="static"] .contact-card .v { color: #1565c0; }
   .hero { padding: 90px 5vw 40px; min-height: auto; }
   .dashboard { grid-template-columns: 1fr; }
   .col-4, .col-5, .col-6, .col-7, .col-8 { grid-column: span 1; }
-  .telemetry { grid-template-columns: 1fr 1fr; }
-  .heatmap { grid-template-columns: 90px 1fr 30px; }
-  .heatmap-cells { grid-template-columns: repeat(11, 1fr); }
+  .telemetry { grid-template-columns: 1fr; }
+  .heatmap { grid-template-columns: 90px 1fr; }
+  .heatmap .cells { grid-template-columns: repeat(11, 1fr); }
   .skills-grid { grid-template-columns: 1fr; }
   .langs-wrap { grid-template-columns: 1fr 1fr; }
   .topbar { font-size: 10px; padding: 8px 12px; }
