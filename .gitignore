@@ -1,0 +1,6 @@
+CLAUDE.md
+.claude/settings.local.json
+docker-compose.lan.yml
+node_modules/
+.DS_Store
+*.log
