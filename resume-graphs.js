@@ -80,24 +80,33 @@
   }
 
   // -------------------------------------------------------------------------
-  // PANEL_01: career_timeline — absolute-positioned bars (e-dani layout)
+  // PANEL_01: career_timeline — absolute-positioned bars at month precision
   // -------------------------------------------------------------------------
   function renderTimeline(el, data, lang) {
     el.classList.remove('timeline-bars');
     el.classList.add('career-timeline');
-    const span = YEARS_END - YEARS_START + 1;        // 21 years inclusive
     const rowHeight = 28;
     const exps = [...data.experience].reverse();      // oldest first → top
+    const nowMonth = new Date().getFullYear() * 12 + new Date().getMonth();
+    const ENDM = (YEARS_END - YEARS_START + 1) * 12;  // exclusive month index for the right edge
+
     const bars = exps.map((e, i) => {
-      const ys = parseInt(e.start.slice(0, 4), 10);
-      const ye = e.end ? parseInt(e.end.slice(0, 4), 10) : YEARS_END;
-      const left  = Math.max(0, ((ys - YEARS_START) / span) * 100);
-      const width = Math.max(3, ((ye - ys + 1) / span) * 100);
+      const ms = monthIndex(e.start);                                       // [0 .. ENDM-1]
+      let me;
+      if (e.end) {
+        me = monthIndex(e.end);                                             // exclusive (== next job's start)
+      } else {
+        // Live job: stop at "now", capped to the timeline horizon.
+        me = Math.min(ENDM, Math.max(ms + 1, nowMonth - YEARS_START * 12 + 1));
+      }
+      const dm = Math.max(1, me - ms);                                      // duration in months
+      const left  = (ms / ENDM) * 100;
+      const width = (dm / ENDM) * 100;
       const top   = i * rowHeight;
       const company = e.company.replace(/\s*\(.+\)/, '');
       return `
         <div class="bar${e.live ? ' curr' : ''}"
-             style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;top:${top}px"
+             style="left:${left.toFixed(3)}%;width:${width.toFixed(3)}%;top:${top}px"
              title="${esc(e.period[lang])} — ${esc(e.company)}">
           <span>${esc(company)}</span>
           <span class="role">· ${esc(e.title[lang])}</span>
