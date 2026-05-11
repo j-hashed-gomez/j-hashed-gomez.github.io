@@ -617,51 +617,91 @@ section.section {
 .np-row .lvl-ERR  { color: var(--red); }
 
 /* ============================================================================
-   SECTION 02 experience.history
+   SECTION 02 experience.history — central rail timeline (alternating L/R)
    ============================================================================ */
-.exp-list { display: flex; flex-direction: column; gap: 26px; }
-.exp-item {
+.timeline {
   position: relative;
-  border-left: 2px solid var(--green-darker);
-  padding: 0 0 0 26px;
+  padding: 30px 0;
+  perspective: 1400px;
 }
-.exp-item::before {
-  content: ''; position: absolute; top: 8px; left: -7px;
-  width: 12px; height: 12px;
-  background: var(--bg-deep);
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(0,255,65,.45) 5%,
+    rgba(0,255,65,.45) 95%,
+    transparent);
+  transform: translateX(-.5px);
+  z-index: 1;
+}
+.tl-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  gap: 20px;
+  align-items: center;
+  min-height: 180px;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+}
+.tl-row .node {
+  width: 18px; height: 18px;
   border: 2px solid var(--green);
+  background: #000;
   border-radius: 50%;
+  grid-column: 2;
+  justify-self: center;
+  position: relative;
+  z-index: 2;
   box-shadow: 0 0 8px var(--green);
 }
-.exp-item.is-current::before {
-  background: var(--red);
-  border-color: var(--red);
-  box-shadow: 0 0 10px var(--red);
-  animation: pulse 1.6s ease-in-out infinite;
+.tl-row.curr .node {
+  background: var(--green);
+  animation: nodepulse 1.6s ease-in-out infinite;
 }
-.exp-head {
-  display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+.tl-card { position: relative; }
+.tl-row.left  .tl-card { grid-column: 1; text-align: right; }
+.tl-row.right .tl-card { grid-column: 3; text-align: left; }
+.tl-card .panel { padding: 16px 18px; }
+.tl-card .head {
+  display: flex; gap: 10px; align-items: baseline;
   margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--green-dim);
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
-.exp-period {
-  font-size: 11px; color: var(--green-dim);
-  letter-spacing: .1em; text-transform: uppercase;
-}
-.exp-title {
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 15px;
+.tl-row.left .tl-card .head { justify-content: flex-end; }
+.tl-card .head .id {
   color: var(--green);
+  font-weight: 700;
+}
+.tl-card h3 {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--green);
+  margin: 0 0 2px;
   text-shadow: 0 0 6px rgba(0,255,65,.4);
   letter-spacing: .02em;
 }
-.exp-company {
+.tl-card .role {
+  color: var(--cyan);
   font-size: 13px;
-  color: var(--red);
-  text-shadow: 0 0 6px rgba(255,0,60,.4);
-  letter-spacing: .02em;
+  margin-bottom: 4px;
+  text-shadow: 0 0 6px rgba(0,229,255,.3);
 }
-.exp-live-badge {
+.tl-card .dates {
+  color: var(--green-dim);
+  font-size: 11px;
+  letter-spacing: .06em;
+  margin-bottom: 12px;
+}
+.tl-card .live-badge {
   display: inline-block;
   border: 1px solid var(--red);
   color: var(--red);
@@ -670,17 +710,61 @@ section.section {
   padding: 2px 8px;
   background: rgba(255,0,60,.1);
   animation: blink 1.6s steps(2) infinite;
+  margin-left: 8px;
+  vertical-align: middle;
 }
-.exp-desc { color: var(--white); margin: 6px 0 10px; font-size: 13px; }
-.exp-bullets {
-  list-style: none; padding-left: 0;
-  margin: 0 0 12px;
-  display: flex; flex-direction: column; gap: 4px;
+.tl-card .tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.tl-row.left .tl-card .tags { justify-content: flex-end; }
+.tl-card ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
   font-size: 12.5px;
-  color: var(--white);
+  line-height: 1.6;
 }
-.exp-bullets li::before { content: '› '; color: var(--green); }
-.exp-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tl-row.left .tl-card ul { direction: rtl; }
+.tl-row.left .tl-card ul li { direction: ltr; text-align: right; padding-left: 0; padding-right: 18px; }
+.tl-row.left .tl-card ul li::before { left: auto; right: 0; }
+.tl-card ul li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 4px;
+  color: rgba(232,255,232,.85);
+}
+.tl-card ul li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+}
+.tl-card .expand {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--green-dim);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.tl-card .expand:hover { color: var(--green-bright); }
+.tl-card .log {
+  display: none;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: rgba(232,255,232,.7);
+  border-top: 1px dashed rgba(0,255,65,.2);
+  padding-top: 10px;
+}
+.tl-card.open .log { display: block; }
+
+@keyframes nodepulse {
+  0%,100% { box-shadow: 0 0 8px var(--green); }
+  50%     { box-shadow: 0 0 16px var(--green), 0 0 28px rgba(0,255,65,.5); }
+}
+
 .chip {
   font-size: 10.5px;
   padding: 4px 10px;
@@ -1190,11 +1274,12 @@ body[data-mode="static"] .profile-card::before, body[data-mode="static"] .profil
 body[data-mode="static"] .contact-card::before, body[data-mode="static"] .contact-card::after { border-color: #555; }
 body[data-mode="static"] .hero-name { color: #111; }
 body[data-mode="static"] .hero-name::before, body[data-mode="static"] .hero-name::after { display: none; }
-body[data-mode="static"] .exp-title { color: #111; }
-body[data-mode="static"] .exp-company { color: #b3261e; }
-body[data-mode="static"] .exp-period { color: #555; }
-body[data-mode="static"] .exp-item { border-left-color: #999; }
-body[data-mode="static"] .exp-item::before { background: #fff; border-color: #555; }
+body[data-mode="static"] .tl-card h3 { color: #111; }
+body[data-mode="static"] .tl-card .role { color: #1565c0; }
+body[data-mode="static"] .tl-card .dates,
+body[data-mode="static"] .tl-card .head { color: #555; }
+body[data-mode="static"] .timeline::before { background: #ccc; }
+body[data-mode="static"] .tl-row .node { background: #fff; border-color: #555; box-shadow: none; }
 body[data-mode="static"] .chip { background: #f0f0f0; color: #111; border-color: #999; }
 body[data-mode="static"] .telemetry-cell .value { color: #1565c0; }
 body[data-mode="static"] .heatmap-cell { border-color: #ddd; background: #f5f5f5; }
@@ -1257,6 +1342,18 @@ body[data-mode="static"] .contact-card .v { color: #1565c0; }
   .orbital-wrap { display: none; }
   .orbital-fallback { display: flex; }
   .contact-card { grid-template-columns: 100px 1fr; padding: 18px 16px; }
+  /* Timeline collapses to a left-rail single column */
+  .timeline { padding: 10px 0; }
+  .timeline::before { left: 15px; }
+  .tl-row { grid-template-columns: 30px 1fr; min-height: auto; margin-bottom: 18px; }
+  .tl-row .node { width: 14px; height: 14px; }
+  .tl-row.left  .tl-card,
+  .tl-row.right .tl-card { grid-column: 2; text-align: left; }
+  .tl-row.left .tl-card .head,
+  .tl-row.left .tl-card .tags { justify-content: flex-start; }
+  .tl-row.left .tl-card ul { direction: ltr; }
+  .tl-row.left .tl-card ul li { text-align: left; padding-left: 18px; padding-right: 0; }
+  .tl-row.left .tl-card ul li::before { left: 0; right: auto; }
 }
 @media (max-width: 480px) {
   .langs-wrap { grid-template-columns: 1fr; }

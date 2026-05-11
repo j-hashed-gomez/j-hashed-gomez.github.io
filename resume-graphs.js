@@ -192,28 +192,39 @@
   }
 
   // -------------------------------------------------------------------------
-  // SECTION 02: experience.history
+  // SECTION 02: experience.history — Dani-style central rail (alternating L/R)
   // -------------------------------------------------------------------------
   function renderExperience(el, data, lang) {
     const labels = data.ui_labels[lang];
-    el.innerHTML = data.experience.map((e) => {
-      const live = e.live ? `<span class="exp-live-badge">${esc(labels.live_badge)}</span>` : '';
+    el.classList.add('timeline');
+    el.classList.remove('exp-list');
+    const rows = data.experience.map((e, idx) => {
+      const side = idx % 2 === 0 ? 'right' : 'left';
+      const liveBadge = e.live ? `<span class="live-badge">${esc(labels.live_badge)}</span>` : '';
+      const id = `ROLE_${String(idx + 1).padStart(2, '0')}`;
       const bullets = (e.bullets[lang] || [])
         .map((b) => `<li>${esc(b)}</li>`).join('');
-      const stack = e.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
+      const tags = e.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
+      const desc = esc(e.description[lang]);
       return `
-        <article class="exp-item${e.live ? ' is-current' : ''}">
-          <div class="exp-head">
-            <span class="exp-period">${esc(e.period[lang])}</span>
-            <span class="exp-company">${esc(e.company)}</span>
-            ${live}
+        <div class="tl-row ${side}${e.live ? ' curr' : ''}">
+          <div class="node" aria-hidden="true"></div>
+          <div class="tl-card">
+            <article class="panel">
+              <div class="head">
+                <span class="id">[ ${id} ]</span>
+                <span>${esc(e.period[lang])}</span>
+              </div>
+              <h3>${esc(e.company)}${liveBadge}</h3>
+              <div class="role">${esc(e.title[lang])}</div>
+              <p style="font-size:12.5px;color:rgba(232,255,232,.85);margin:0 0 10px;">${desc}</p>
+              ${bullets ? `<ul>${bullets}</ul>` : ''}
+              <div class="tags">${tags}</div>
+            </article>
           </div>
-          <div class="exp-title">${esc(e.title[lang])}</div>
-          <div class="exp-desc">${esc(e.description[lang])}</div>
-          ${bullets ? `<ul class="exp-bullets">${bullets}</ul>` : ''}
-          <div class="exp-stack">${stack}</div>
-        </article>`;
+        </div>`;
     }).join('');
+    el.innerHTML = rows;
 
     const counter = document.getElementById('exp-count');
     if (counter) counter.textContent = `[ ${data.experience.length} ROLES ]`;
