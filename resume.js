@@ -86,8 +86,8 @@
     CV_GRAPHS.renderAbout(document.getElementById('about-content'), D, lang);
     CV_GRAPHS.renderContact(document.getElementById('contact-content'), D, lang);
     CV_GRAPHS.renderEotActions(document.getElementById('eot-actions'), D, lang);
-    CV_GRAPHS.renderOrbitalFallback(document.getElementById('orbital-fallback'), D, lang);
     CV_GRAPHS.renderOrbitalLegend(document.getElementById('orbital-legend'));
+    CV_GRAPHS.renderIntegrationsGrid(document.getElementById('integ-grid'), D);
 
     // EOT footer
     document.getElementById('eot-footer').innerHTML = lang === 'es'

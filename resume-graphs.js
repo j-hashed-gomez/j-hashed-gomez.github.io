@@ -418,9 +418,43 @@
   }
 
   function renderOrbitalFallback(el, data /*, lang */) {
+    if (!el) return;
     el.innerHTML = computeAllTechs(data).map((t) => {
       const c = categoryOf(t.tech);
       return `<span class="chip" data-cat="${c.id}" style="color:${c.color};border-color:${c.color}">${esc(t.tech)}</span>`;
+    }).join('');
+  }
+
+  // ---- Integrations grid (Dani-style ledger of all career techs) ---------
+  const ACTIVE_CUTOFF_YEAR = 2019;
+  function classifyActive(data) {
+    const active = new Set();
+    data.experience.forEach((e) => {
+      const ys = parseInt(e.start.slice(0, 4), 10);
+      const isLive = !!e.live;
+      const isRecent = ys >= ACTIVE_CUTOFF_YEAR;
+      if (isLive || isRecent) e.stack.forEach((s) => active.add(s));
+    });
+    return active;
+  }
+  function renderIntegrationsGrid(el, data) {
+    if (!el) return;
+    const all = computeAllTechs(data);
+    const active = classifyActive(data);
+    el.innerHTML = all.map((t) => {
+      const cat = categoryOf(t.tech);
+      const isActive = active.has(t.tech);
+      const cls = `integ-cell ${isActive ? 'active' : 'archived'}`;
+      const dotStyle = isActive
+        ? `color:${cat.color};text-shadow:0 0 6px ${cat.color}`
+        : `color:${cat.color};opacity:.55`;
+      return `
+        <div class="${cls}" data-cat="${cat.id}"
+             title="${esc(t.tech)} · ${cat.name} · ${t.count} job${t.count > 1 ? 's' : ''}${isActive ? '' : ' · archived'}">
+          <span class="mark" style="${dotStyle}">●</span>
+          <span class="name">${esc(t.tech)}</span>
+          <span class="count">×${t.count}</span>
+        </div>`;
     }).join('');
   }
 
@@ -908,6 +942,8 @@
     renderEotActions,
     renderOrbitalFallback,
     renderOrbitalLegend,
+    renderIntegrationsGrid,
+    classifyActive,
     categoryOf,
     CATEGORIES,
     initNeuralGraph,
