@@ -45,6 +45,15 @@ body {
 .fx-scanlines, .fx-vignette, .fx-noise, .fx-grid {
   position: fixed; inset: 0; pointer-events: none; z-index: 90;
 }
+/* Matrix rain canvas — scoped to the hero (placed inside <section class="hero">) */
+.fx-matrix {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .85;
+  mix-blend-mode: screen;
+}
 .fx-scanlines {
   background: repeating-linear-gradient(
     to bottom,
@@ -255,8 +264,11 @@ section.section {
   display: flex; flex-direction: column; justify-content: center;
   padding: 100px 6vw 60px;
   container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
-.hero-inner { width: min(1180px, 96%); margin: 0 auto; }
+.hero-inner { width: min(1180px, 96%); margin: 0 auto; position: relative; z-index: 2; }
 .hero-prompt {
   font-family: var(--mono);
   font-size: 12px;
@@ -351,10 +363,35 @@ section.section {
   border: 1px solid var(--panel-border);
   padding: 14px 16px 16px;
   position: relative;
-  transition: transform .18s ease, box-shadow .25s ease, border-color .25s ease;
+  transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s ease, border-color .25s ease;
   box-shadow:
     inset 0 0 0 1px rgba(0,255,65,.06),
     0 0 18px rgba(0,255,65,.06);
+  transform-style: preserve-3d;
+  will-change: transform;
+  --mx: 50%;
+  --my: 50%;
+}
+.panel::after {
+  z-index: 2;
+}
+.panel-glare {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx) var(--my),
+    rgba(0,255,65,.14) 0%,
+    rgba(0,229,255,.06) 35%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity .25s ease;
+  z-index: 1;
+  mix-blend-mode: screen;
+}
+.panel.tilt-active .panel-glare { opacity: 1; }
+.panel > * { position: relative; z-index: 2; transform: translateZ(0); }
+.dashboard, .langs-wrap, .skills-grid {
+  perspective: 1400px;
 }
 .panel::before,
 .panel::after {
@@ -1129,7 +1166,10 @@ body[data-mode="static"] .fx-scanlines,
 body[data-mode="static"] .fx-vignette,
 body[data-mode="static"] .fx-noise,
 body[data-mode="static"] .fx-grid,
+body[data-mode="static"] .fx-matrix,
+body[data-mode="static"] .panel-glare,
 body[data-mode="static"] .cursor-block { display: none !important; }
+body[data-mode="static"] .panel { transform: none !important; }
 body[data-mode="static"] * {
   text-shadow: none !important;
   box-shadow: none !important;
@@ -1174,11 +1214,13 @@ body[data-mode="static"] .contact-card .v { color: #1565c0; }
    ============================================================================ */
 @media print {
   body { background: #fff !important; color: #000; }
-  .fx-scanlines, .fx-vignette, .fx-noise, .fx-grid,
+  .fx-scanlines, .fx-vignette, .fx-noise, .fx-grid, .fx-matrix,
+  .panel-glare,
   .cursor-block, .topbar, .palette-overlay, .grant-overlay,
-  .contact-modal, .splash,
+  .contact-modal,
   .orbital-wrap, #neural-canvas, .neural-wrap,
   .scroll-hint, .eot-actions { display: none !important; }
+  .panel { transform: none !important; }
   body > * { animation: none !important; }
   .app { padding-top: 0; }
   section.section { padding: 16px 0; page-break-inside: avoid; }

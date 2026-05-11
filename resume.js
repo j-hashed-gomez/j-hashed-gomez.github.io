@@ -7,7 +7,7 @@
   'use strict';
 
   // ---- state ------------------------------------------------------------
-  let currentLang = 'es';
+  let currentLang = 'en';
   const COOKIE_KEY = 'selectedLanguage';
   const STATIC_KEY = 'staticMode';
 
@@ -20,24 +20,11 @@
     document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
   }
 
-  // ---- splash + boot ----------------------------------------------------
-  function bindSplashFlags() {
-    ['flag-es', 'flag-uk'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const handler = () => boot(el.dataset.lang);
-      el.addEventListener('click', handler);
-      el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); handler(); } });
-    });
-  }
-
+  // ---- boot --------------------------------------------------------------
   function boot(lang) {
     currentLang = lang;
     setCookie(COOKIE_KEY, lang);
     document.documentElement.lang = lang;
-    document.getElementById('splash').classList.add('hidden');
-    document.getElementById('topbar').classList.remove('hidden');
-    document.getElementById('app').classList.remove('hidden');
     render(lang);
     startUptime();
   }
@@ -616,14 +603,129 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // ---- matrix rain (scoped to the hero) --------------------------------
+  function initMatrixRain() {
+    const canvas = document.getElementById('fx-matrix');
+    const host = canvas && canvas.parentElement;
+    if (!canvas || !host) return;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    const charset = 'アァカサタナハマヤラワヲンｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&{}[]<>=+*';
+    const fontSize = 16;
+    let w = 0, h = 0, cols = 0, drops = [], speeds = [];
+
+    function setup() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const rect = host.getBoundingClientRect();
+      w = Math.max(320, rect.width);
+      h = Math.max(320, rect.height);
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(w / fontSize);
+      drops = new Array(cols).fill(0).map(() => Math.random() * h / fontSize);
+      speeds = new Array(cols).fill(0).map(() => 0.45 + Math.random() * 0.85);
+      // black wash baseline
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, w, h);
+    }
+    setup();
+    const ro = new ResizeObserver(setup); ro.observe(host);
+
+    let visible = true;
+    const io = new IntersectionObserver((entries) => {
+      visible = entries[0] && entries[0].isIntersecting;
+    }, { threshold: 0 });
+    io.observe(host);
+
+    function frame() {
+      if (visible) {
+        ctx.fillStyle = 'rgba(0,0,0,0.075)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.font = `${fontSize}px JetBrains Mono, VT323, monospace`;
+        for (let i = 0; i < cols; i++) {
+          const c = charset[(Math.random() * charset.length) | 0];
+          const x = i * fontSize;
+          const y = drops[i] * fontSize;
+          if (Math.random() < 0.02) {
+            ctx.fillStyle = '#E8FFE8';
+            ctx.shadowColor = '#00FF41'; ctx.shadowBlur = 8;
+          } else {
+            ctx.fillStyle = '#00FF41';
+            ctx.shadowBlur = 0;
+          }
+          ctx.fillText(c, x, y);
+          drops[i] += speeds[i];
+          if (y > h && Math.random() > 0.972) drops[i] = 0;
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---- panel tilt (3D) -------------------------------------------------
+  function initPanelTilt() {
+    const MAX = 8;        // max degrees
+    const NEAR_PX = 24;   // panel "near edge" pop
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!matchMedia('(pointer: fine)').matches) return;
+
+    function attach() {
+      document.querySelectorAll('.panel:not([data-tilt-bound])').forEach((panel) => {
+        panel.setAttribute('data-tilt-bound', '1');
+        // inject a glare overlay once
+        if (!panel.querySelector('.panel-glare')) {
+          const glare = document.createElement('div');
+          glare.className = 'panel-glare';
+          panel.insertBefore(glare, panel.firstChild);
+        }
+
+        let raf = null, pendingX = 0, pendingY = 0, pendingMX = 0, pendingMY = 0;
+
+        function onMove(ev) {
+          const r = panel.getBoundingClientRect();
+          const px = (ev.clientX - r.left) / r.width;   // 0..1
+          const py = (ev.clientY - r.top) / r.height;
+          const rx = (0.5 - py) * MAX * 2;              // rotateX
+          const ry = (px - 0.5) * MAX * 2;              // rotateY
+          pendingX = rx; pendingY = ry;
+          pendingMX = px * 100; pendingMY = py * 100;
+          if (!raf) raf = requestAnimationFrame(apply);
+        }
+        function apply() {
+          raf = null;
+          panel.style.transform =
+            `perspective(1100px) rotateX(${pendingX.toFixed(2)}deg) rotateY(${pendingY.toFixed(2)}deg) translateZ(${NEAR_PX}px)`;
+          panel.style.setProperty('--mx', pendingMX + '%');
+          panel.style.setProperty('--my', pendingMY + '%');
+        }
+        function onEnter() { panel.classList.add('tilt-active'); }
+        function onLeave() {
+          panel.classList.remove('tilt-active');
+          panel.style.transform = '';
+        }
+
+        panel.addEventListener('mouseenter', onEnter);
+        panel.addEventListener('mousemove', onMove);
+        panel.addEventListener('mouseleave', onLeave);
+      });
+    }
+    attach();
+    // re-attach when render() repaints sections
+    const obs = new MutationObserver(() => attach());
+    obs.observe(document.body, { subtree: true, childList: true });
+  }
+
   // ---- init ------------------------------------------------------------
   window.addEventListener('DOMContentLoaded', () => {
-    bindSplashFlags();
     bindTopbar();
     bindPalette();
     bindKonami();
     bindCursor();
     bindContactModal();
+    initMatrixRain();
 
     // Apply persisted static-mode preference
     try {
@@ -637,8 +739,10 @@
     } catch (_) {}
 
     const cookieLang = getCookie(COOKIE_KEY);
-    if (cookieLang === 'es' || cookieLang === 'en') {
-      boot(cookieLang);
-    }
+    const lang = (cookieLang === 'es' || cookieLang === 'en') ? cookieLang : 'en';
+    boot(lang);
+
+    // Tilt depends on .panel existing — run after first paint
+    requestAnimationFrame(() => initPanelTilt());
   });
 })();
