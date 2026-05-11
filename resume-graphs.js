@@ -80,53 +80,66 @@
   }
 
   // -------------------------------------------------------------------------
-  // PANEL_01: career_timeline
+  // PANEL_01: career_timeline — absolute-positioned bars (e-dani layout)
   // -------------------------------------------------------------------------
   function renderTimeline(el, data, lang) {
-    const exps = [...data.experience].reverse(); // oldest first
-    const rows = exps.map((e) => {
-      const startMonth = monthIndex(e.start);
-      const endMonth = e.end ? monthIndex(e.end) : totalMonths - 1;
-      const left = (startMonth / totalMonths) * 100;
-      const width = Math.max(2, ((endMonth - startMonth) / totalMonths) * 100);
-      const cls = e.live ? 'timeline-row is-current' : 'timeline-row';
+    el.classList.remove('timeline-bars');
+    el.classList.add('career-timeline');
+    const span = YEARS_END - YEARS_START + 1;        // 21 years inclusive
+    const rowHeight = 28;
+    const exps = [...data.experience].reverse();      // oldest first → top
+    const bars = exps.map((e, i) => {
+      const ys = parseInt(e.start.slice(0, 4), 10);
+      const ye = e.end ? parseInt(e.end.slice(0, 4), 10) : YEARS_END;
+      const left  = Math.max(0, ((ys - YEARS_START) / span) * 100);
+      const width = Math.max(3, ((ye - ys + 1) / span) * 100);
+      const top   = i * rowHeight;
       const company = e.company.replace(/\s*\(.+\)/, '');
       return `
-        <div class="${cls}" title="${esc(e.title[lang])} — ${esc(e.company)}">
-          <span class="label">${esc(company)}</span>
-          <div class="timeline-track">
-            <div class="timeline-fill" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%">${esc(e.title[lang])}</div>
-          </div>
+        <div class="bar${e.live ? ' curr' : ''}"
+             style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;top:${top}px"
+             title="${esc(e.period[lang])} — ${esc(e.company)}">
+          <span>${esc(company)}</span>
+          <span class="role">· ${esc(e.title[lang])}</span>
         </div>`;
     }).join('');
 
-    const axisCount = 11;
-    const axisStep = Math.round((YEARS_END - YEARS_START) / (axisCount - 1));
+    const tickStep = 2;
     const ticks = [];
-    for (let i = 0; i < axisCount; i++) {
-      ticks.push(YEARS_START + i * axisStep > YEARS_END ? YEARS_END : YEARS_START + i * axisStep);
-    }
+    for (let y = YEARS_START; y <= YEARS_END; y += tickStep) ticks.push(y);
+    if (ticks[ticks.length - 1] !== YEARS_END) ticks.push(YEARS_END);
 
-    el.innerHTML = rows + `
-      <div class="timeline-axis">${ticks.map((y) => `<span>${y}</span>`).join('')}</div>`;
+    el.style.minHeight = `${exps.length * rowHeight + 60}px`;
+    el.innerHTML = bars + `
+      <div class="axis"></div>
+      <div class="ticks">${ticks.map((y) => `<span>${y}</span>`).join('')}</div>`;
   }
 
   // -------------------------------------------------------------------------
-  // PANEL_02: telemetry (with count-up animation, triggered externally)
+  // PANEL_02: telemetry — name / val / mini-bar (e-dani layout)
   // -------------------------------------------------------------------------
+  const TELEMETRY_MAX = {
+    years: 30, roles: 15, companies: 12, certs: 15, trainings: 12, clouds: 10,
+  };
   function renderTelemetry(el, data, lang) {
     const stats = computeStats(data);
     const labels = data.telemetry[lang];
-    el.innerHTML = labels.map((m) => `
-      <div class="telemetry-cell">
-        <span class="label">${esc(m.label)}</span>
-        <span class="value" data-target="${stats[m.key] ?? 0}">0</span>
-      </div>
-    `).join('');
+    el.innerHTML = labels.map((m) => {
+      const v = stats[m.key] ?? 0;
+      const max = TELEMETRY_MAX[m.key] ?? 100;
+      const pct = Math.min(100, Math.round((v / max) * 100));
+      return `
+        <div class="tele-row">
+          <div class="name">${esc(m.label)}</div>
+          <div class="val" data-target="${v}">0</div>
+          <div class="tele-bar"><i style="width:0%" data-target-pct="${pct}"></i></div>
+        </div>`;
+    }).join('');
   }
 
   function animateCountUps(rootEl, duration = 1400) {
-    const values = rootEl.querySelectorAll('.telemetry .value');
+    const values = rootEl.querySelectorAll('.tele-row .val');
+    const bars   = rootEl.querySelectorAll('.tele-bar > i');
     const start = performance.now();
     function tick(now) {
       const t = Math.min(1, (now - start) / duration);
@@ -135,32 +148,38 @@
         const target = parseInt(v.getAttribute('data-target'), 10) || 0;
         v.textContent = Math.round(target * eased);
       });
+      bars.forEach((b) => {
+        const target = parseInt(b.getAttribute('data-target-pct'), 10) || 0;
+        b.style.width = (target * eased).toFixed(1) + '%';
+      });
       if (t < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
 
   // -------------------------------------------------------------------------
-  // PANEL_03: stack_heatmap.matrix
+  // PANEL_03: stack_heatmap.matrix — .heatmap > .label + .cells > .cell.on/.dim
   // -------------------------------------------------------------------------
   function renderHeatmap(el, data /*, lang */) {
     const matrix = computeHeatmap(data);
     const max = Math.max(1, ...matrix.flatMap((row) => row.cells));
+    let total = 0;
 
-    el.innerHTML = matrix.map((row) => {
+    const inner = matrix.map((row) => {
       const cells = row.cells.map((v) => {
-        if (v === 0) return `<div class="heatmap-cell" aria-hidden="true"></div>`;
-        const ratio = v / max;
-        const lvl = ratio > 0.66 ? 3 : ratio > 0.33 ? 2 : 1;
-        return `<div class="heatmap-cell lvl-${lvl}" aria-hidden="true"></div>`;
+        if (v === 0) return `<div class="cell" aria-hidden="true"></div>`;
+        total++;
+        const cls = v / max > 0.5 ? 'cell on' : 'cell dim';
+        return `<div class="${cls}" aria-hidden="true"></div>`;
       }).join('');
       return `
-        <div class="heatmap-row">
-          <span class="tech">${esc(row.tech)}</span>
-          <div class="heatmap-cells">${cells}</div>
-          <span class="count">${row.cells.reduce((a, b) => a + (b > 0 ? 1 : 0), 0)}y</span>
-        </div>`;
+        <div class="label">${esc(row.tech)}</div>
+        <div class="cells">${cells}</div>`;
     }).join('');
+
+    el.innerHTML = inner;
+    const sCount = document.getElementById('heatmap-samples');
+    if (sCount) sCount.textContent = `SAMPLES: ${total}`;
   }
 
   // -------------------------------------------------------------------------
