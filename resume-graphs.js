@@ -668,6 +668,54 @@
     while (scene.children.length) root.add(scene.children[0]);
     scene.add(root);
 
+    // ---- Packet stream: pulses travel from each orbital node toward the core ---
+    const packetGeo = new THREE.SphereGeometry(0.07, 10, 10);
+    const packets = [];
+    let coreFlash = 0;
+
+    function spawnPacket(nodeIdx) {
+      const node = nodes[nodeIdx];
+      if (!node) return;
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x39FF14,
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(packetGeo, mat);
+      // Start at the node's local position; the core sits at the origin of root.
+      mesh.position.copy(node.grp.position);
+      root.add(mesh);
+      packets.push({ mesh, mat, start: node.grp.position.clone(), t: 0 });
+    }
+    // Stagger the initial spawn so packets don't pulse in unison.
+    nodes.forEach((_, i) => setTimeout(() => spawnPacket(i), i * 220));
+
+    function updatePackets() {
+      // Periodically spawn new packets so the flow is continuous.
+      if (Math.random() < 0.18) spawnPacket((Math.random() * nodes.length) | 0);
+      for (let i = packets.length - 1; i >= 0; i--) {
+        const p = packets[i];
+        p.t += 0.022;
+        if (p.t >= 1) {
+          root.remove(p.mesh);
+          p.mat.dispose();
+          packets.splice(i, 1);
+          coreFlash = 1;
+          continue;
+        }
+        const e = Math.pow(p.t, 1.4);              // ease-in toward the core
+        p.mesh.position.x = p.start.x * (1 - e);
+        p.mesh.position.y = p.start.y * (1 - e);
+        p.mesh.position.z = p.start.z * (1 - e);
+        const closeness = 1 - p.t;
+        p.mat.opacity = 0.35 + 0.6 * closeness;     // brighter near the source
+        const s = 0.7 + 0.6 * closeness;            // shrink as it approaches
+        p.mesh.scale.setScalar(s);
+      }
+    }
+
     let isDown = false, lastX = 0, lastY = 0;
     let yaw = 0, pitch = 0, vYaw = 0.005, vPitch = 0.0025;
     canvas.addEventListener('mousedown', (ev) => { isDown = true; lastX = ev.clientX; lastY = ev.clientY; });
@@ -713,6 +761,17 @@
       core.rotation.y += 0.003;
       core.rotation.x += 0.001;
       inner.rotation.y -= 0.005;
+
+      // Packets stream into the core.
+      updatePackets();
+      // Core flashes briefly each time a packet lands.
+      coreFlash = Math.max(0, coreFlash - 0.05);
+      core.material.opacity = 0.5 + coreFlash * 0.45;
+      inner.material.opacity = 0.35 + coreFlash * 0.55;
+      const coreScale = 1 + coreFlash * 0.08;
+      core.scale.setScalar(coreScale);
+      inner.scale.setScalar(coreScale);
+
       nodes.forEach((n) => {
         const k = 1 + 0.18 * Math.sin(t * 0.003 + n.basePhase);
         n.halo.scale.setScalar(k);
