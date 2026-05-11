@@ -819,6 +819,23 @@ section.section {
   flex-wrap: wrap; gap: 8px; justify-content: center;
   padding: 30px;
 }
+.orbital-legend {
+  display: flex; flex-wrap: wrap; gap: 18px;
+  justify-content: center;
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--green-dim);
+}
+.orbital-legend .swatch {
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.orbital-legend .dot {
+  width: 10px; height: 10px;
+  display: inline-block;
+  border-radius: 1px;
+}
 
 /* ============================================================================
    SECTION 04 skills.matrix
@@ -1293,7 +1310,10 @@ body[data-mode="static"] .tl-card .dates,
 body[data-mode="static"] .tl-card .head { color: #555; }
 body[data-mode="static"] .timeline::before { background: #ccc; }
 body[data-mode="static"] .tl-row .node { background: #fff; border-color: #555; box-shadow: none; }
-body[data-mode="static"] .chip { background: #f0f0f0; color: #111; border-color: #999; }
+body[data-mode="static"] .chip,
+body[data-mode="static"] .orbital-fallback .chip { background: #f0f0f0 !important; color: #111 !important; border-color: #999 !important; }
+body[data-mode="static"] .orbital-legend { color: #555; }
+body[data-mode="static"] .orbital-legend .dot { background: #555 !important; box-shadow: none !important; }
 body[data-mode="static"] .tele-row .val { color: #1565c0; text-shadow: none; }
 body[data-mode="static"] .tele-bar { background: #eee; }
 body[data-mode="static"] .tele-bar > i { background: #1565c0; }

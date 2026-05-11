@@ -393,9 +393,44 @@
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([tech, count]) => ({ tech, count }));
   }
+
+  // Career tech categories. Each tech maps to exactly one bucket so that
+  // the orbital and fallback chips can colour-code by domain.
+  const CATEGORIES = [
+    { id: 'cloud',   name: 'Cloud',        color: '#00E5FF',
+      techs: new Set(['Azure','AWS','GCP','OpenShift','Virtuozzo','IBM Cloud Pak','Hybrid Cloud']) },
+    { id: 'devops',  name: 'DevOps & IaC', color: '#39FF14',
+      techs: new Set(['Kubernetes','Docker','CI/CD','Automation','App Architecture','SRE/DevOps',
+                      'IaC','Terraform','Ansible','Puppet','PowerShell']) },
+    { id: 'net',     name: 'Networking & Security', color: '#FFB000',
+      techs: new Set(['Cisco','Cisco Pix','Cisco AnyConnect','Juniper','Juniper SA4500','BigIP F5',
+                      'Enterasys','Fortinet','Checkpoint','Bluecoat','IPtables','IPS/IDS','WAF',
+                      'Contivity VPN','DNS']) },
+    { id: 'sys',     name: 'Sysadmin & OS', color: '#FF4081',
+      techs: new Set(['Linux','Red Hat','RHEL','Mainframe','MVS','zOS','VMware','CONTROL-M','OPCC']) },
+    { id: 'svc',     name: 'Services & Obs.', color: '#B388FF',
+      techs: new Set(['Apache','nginx','Bind','Sendmail','DataDog','Zabbix','Python']) },
+  ];
+  const CAT_DEFAULT = { id: 'misc', name: 'Misc', color: '#00FF41' };
+  function categoryOf(tech) {
+    for (const c of CATEGORIES) if (c.techs.has(tech)) return c;
+    return CAT_DEFAULT;
+  }
+
   function renderOrbitalFallback(el, data /*, lang */) {
-    el.innerHTML = computeAllTechs(data)
-      .map((t) => `<span class="chip">${esc(t.tech)}</span>`).join('');
+    el.innerHTML = computeAllTechs(data).map((t) => {
+      const c = categoryOf(t.tech);
+      return `<span class="chip" data-cat="${c.id}" style="color:${c.color};border-color:${c.color}">${esc(t.tech)}</span>`;
+    }).join('');
+  }
+
+  function renderOrbitalLegend(el) {
+    if (!el) return;
+    el.innerHTML = CATEGORIES.map((c) =>
+      `<span class="swatch" data-cat="${c.id}">
+         <span class="dot" style="background:${c.color};box-shadow:0 0 8px ${c.color}"></span>
+         <span>${esc(c.name)}</span>
+       </span>`).join('');
   }
 
   // -------------------------------------------------------------------------
@@ -684,9 +719,7 @@
         radius * Math.sin(theta) * Math.sin(phi),
         radius * Math.cos(phi)
       );
-      const color = it.count >= 4 ? '#00E5FF'
-                  : it.count >= 2 ? '#39FF14'
-                                  : '#008F11';
+      const color = categoryOf(it.tech).color;
       const sp = spriteForLabel(it.tech, color);
       sp.scale.set(scaleX, scaleY, 1);
       grp.add(sp);
@@ -874,6 +907,9 @@
     renderContact,
     renderEotActions,
     renderOrbitalFallback,
+    renderOrbitalLegend,
+    categoryOf,
+    CATEGORIES,
     initNeuralGraph,
     initOrbital,
     stopAll() {
