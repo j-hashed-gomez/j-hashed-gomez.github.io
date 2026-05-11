@@ -386,8 +386,16 @@
   // -------------------------------------------------------------------------
   // SECTION 03: orbital fallback (mobile-only chips)
   // -------------------------------------------------------------------------
+  function computeAllTechs(data) {
+    const counts = new Map();
+    data.experience.forEach((e) => e.stack.forEach((s) => counts.set(s, (counts.get(s) || 0) + 1)));
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([tech, count]) => ({ tech, count }));
+  }
   function renderOrbitalFallback(el, data /*, lang */) {
-    el.innerHTML = data.orbital.map((t) => `<span class="chip">${esc(t)}</span>`).join('');
+    el.innerHTML = computeAllTechs(data)
+      .map((t) => `<span class="chip">${esc(t.tech)}</span>`).join('');
   }
 
   // -------------------------------------------------------------------------
@@ -658,30 +666,40 @@
       return sp;
     }
 
-    const radius = 4;
-    const items = data.orbital;
+    // Items = every distinct tech used across the whole career, sorted by
+    // frequency. Color tier reflects how often it appears: cyan for the
+    // career core, bright green for recurring, dim green for singletons.
+    const items = computeAllTechs(data);
+    const N = items.length;
+    const radius = N > 30 ? 5.5 : N > 16 ? 4.6 : 4;
+    const scaleX = N > 30 ? 1.05 : 1.4;
+    const scaleY = N > 30 ? 0.28 : 0.36;
     const nodes = [];
-    items.forEach((label, i) => {
-      const phi = Math.acos(-1 + (2 * i) / items.length);
-      const theta = Math.sqrt(items.length * Math.PI) * phi;
+    items.forEach((it, i) => {
+      const phi = Math.acos(-1 + (2 * i) / N);
+      const theta = Math.sqrt(N * Math.PI) * phi;
       const grp = new THREE.Group();
       grp.position.set(
         radius * Math.cos(theta) * Math.sin(phi),
         radius * Math.sin(theta) * Math.sin(phi),
         radius * Math.cos(phi)
       );
-      const color = (i % 3 === 0) ? '#00E5FF' : '#00FF41';
-      const sp = spriteForLabel(label, color);
+      const color = it.count >= 4 ? '#00E5FF'
+                  : it.count >= 2 ? '#39FF14'
+                                  : '#008F11';
+      const sp = spriteForLabel(it.tech, color);
+      sp.scale.set(scaleX, scaleY, 1);
       grp.add(sp);
-      // halo
+      // halo (proportional to frequency, capped)
+      const haloR = 0.08 + Math.min(0.18, it.count * 0.04);
       const halo = new THREE.Mesh(
-        new THREE.SphereGeometry(0.12, 12, 12),
+        new THREE.SphereGeometry(haloR, 12, 12),
         new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.35 })
       );
-      halo.position.set(-0.85, 0, 0);
+      halo.position.set(-(scaleX * 0.5 + 0.08), 0, 0);
       grp.add(halo);
       scene.add(grp);
-      nodes.push({ grp, halo, basePhase: Math.random() * Math.PI * 2 });
+      nodes.push({ grp, halo, basePhase: Math.random() * Math.PI * 2, count: it.count });
     });
 
     // Orbit ring
@@ -718,11 +736,17 @@
       packets.push({ mesh, mat, start: node.grp.position.clone(), t: 0 });
     }
     // Stagger the initial spawn so packets don't pulse in unison.
-    nodes.forEach((_, i) => setTimeout(() => spawnPacket(i), i * 220));
+    // With many nodes, keep the burst under ~4 s so the orbital looks
+    // lived-in immediately instead of trickling for half a minute.
+    const initialDelayStep = Math.max(40, Math.min(220, 4000 / Math.max(1, nodes.length)));
+    nodes.forEach((_, i) => setTimeout(() => spawnPacket(i), i * initialDelayStep));
 
     function updatePackets() {
       // Periodically spawn new packets so the flow is continuous.
-      if (Math.random() < 0.18) spawnPacket((Math.random() * nodes.length) | 0);
+      // Scale down per-frame probability as node count grows, so the
+      // stream doesn't drown the scene with packets when we have 40+ techs.
+      const spawnProb = Math.min(0.18, 6 / Math.max(1, nodes.length));
+      if (Math.random() < spawnProb) spawnPacket((Math.random() * nodes.length) | 0);
       for (let i = packets.length - 1; i >= 0; i--) {
         const p = packets[i];
         p.t += 0.022;
@@ -835,6 +859,7 @@
     YEARS_START, YEARS_END,
     computeStats,
     computeHeatmap,
+    computeAllTechs,
     renderTimeline,
     renderTelemetry,
     animateCountUps,

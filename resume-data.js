@@ -265,12 +265,6 @@ window.CV_DATA = {
     ],
   },
 
-  /* Tag cloud used by `active_integrations.orbital`. Curated subset of the top techs. */
-  orbital: [
-    'Azure', 'AWS', 'GCP', 'Kubernetes', 'Docker', 'Terraform', 'Ansible',
-    'Python', 'CI/CD', 'OpenShift', 'DataDog', 'Linux',
-  ],
-
   /* Log lines for the now_playing.log panel (cycled). */
   log_lines: {
     es: [
