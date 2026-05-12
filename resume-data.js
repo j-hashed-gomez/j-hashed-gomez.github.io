@@ -19,7 +19,7 @@ window.CV_DATA = {
     location: 'Cantabria, Spain',
     remote: true,
     b2b: true,
-    linkedin: 'https://www.linkedin.com/in/jlgomez/',
+    linkedin: 'https://www.linkedin.com/in/jose-luis-gomez-marin/',
     github: 'https://github.com/j-hashed-gomez',
     status: {
       es: 'DISPONIBLE para liderazgo senior · DevOps / SRE / Tech Lead',
