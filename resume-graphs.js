@@ -282,7 +282,7 @@
       const tags = p.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
       const statusBadge = p.status ? `<span class="status-badge">${esc(p.status[lang])}</span>` : '';
       const titleHtml = p.link
-        ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.title[lang])} ↗</a>`
+        ? `<a href="${esc(p.link + (p.link.includes('?') ? '&' : '?') + 'lang=' + lang)}" target="_blank" rel="noopener">${esc(p.title[lang])} ↗</a>`
         : esc(p.title[lang]);
       return `
         <article class="panel project-card">
