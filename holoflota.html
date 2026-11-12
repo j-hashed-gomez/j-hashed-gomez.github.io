@@ -139,7 +139,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <div class="issue" id="s-issue"></div>
     <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button></div>
   </section>
-  <div class="answer" id="answer" aria-live="polite"><b>Asistente:</b> 2 clusters críticos. El peor es <b>aks-weu-prod-03</b>, con 3 nodos NotReady tras el upgrade del node pool.</div>
+  <div class="answer" id="answer" aria-live="polite"><b>Asistente:</b> cargando estado de la flota…</div>
   <div class="suggest">
     <button type="button" data-q="¿Cuál está peor y por qué?">¿Cuál está peor?</button>
     <button type="button" data-q="Hazme un resumen de la flota para alguien no técnico, en dos frases.">Resumen para el jefe</button>
@@ -167,7 +167,7 @@ const ISSUES={
   warn:["uso de disco al 86% en el node pool system","2 pods pendientes por falta de CPU","réplicas de Kafka desincronizadas"]
 };
 const REG=[{id:"weu",name:"West Europe",x:-1.15},{id:"neu",name:"North Europe",x:1.15}];
-const ENVS=["prod","prod","prod","iot","iot","data","stg","dev"];
+const ENVS=["prod","prod","prod","prod","iot","iot","iot","data","data","stg","stg","dev"];
 const fleet=[];
 REG.forEach(r=>ENVS.forEach((e,i)=>{
   const n=`aks-${r.id}-${e}-${String(i+1).padStart(2,"0")}`;
@@ -191,13 +191,20 @@ function setStatus(c,s,txt,aff,ts){
 function applyEntry(c,e){c.status=e.s;c.issue=e.txt;c.aff=e.aff;}
 function entryAt(c,ts){let e=c.hist[0];for(const h of c.hist){if(h.ts<=ts)e=h;else break;}return e;}
 fleet.forEach(c=>setStatus(c,"ok","",[],NOW0-24*H));
-// incidencias pasadas de las últimas 24 h
-const past=[[9,-21*H,-20.3*H,"crit","nodos NotReady tras un reinicio de la VMSS"],[3,-17.5*H,-16.8*H,"crit","errores 5xx en el ingress por un pico de tráfico"],
-  [13,-12*H,-9.5*H,"warn","2 pods pendientes por falta de CPU"],[1,-6.2*H,-5.9*H,"crit","etcd con latencia alta, la API responde lenta"],[12,-3*H,-2.2*H,"warn","réplicas de Kafka desincronizadas"]];
-past.forEach(([i,a,b,s,txt])=>{setStatus(fleet[i],s,txt,null,NOW0+a);setStatus(fleet[i],"ok","",[],NOW0+b);});
-setStatus(fleet[2],"crit",ISSUES.crit[0],null,NOW0-35*MIN);
-setStatus(fleet[11],"crit",ISSUES.crit[1],null,NOW0-12*MIN);
-setStatus(fleet[6],"warn",ISSUES.warn[0],[],NOW0-80*MIN);
+// incidencias pasadas de las últimas 24 h (por rol, no por índice fijo: así no se rompe si cambia el tamaño de la flota)
+const nth=(region,env,k=0)=>fleet.filter(c=>c.region===region&&c.env===env)[k];
+const past=[
+  [nth("North Europe","prod",1), -21*H,-20.3*H,"crit","nodos NotReady tras un reinicio de la VMSS"],
+  [nth("West Europe","iot",0),   -17.5*H,-16.8*H,"crit","errores 5xx en el ingress por un pico de tráfico"],
+  [nth("North Europe","data",0), -12*H,-9.5*H,"warn","2 pods pendientes por falta de CPU"],
+  [nth("West Europe","prod",1),  -6.2*H,-5.9*H,"crit","etcd con latencia alta, la API responde lenta"],
+  [nth("North Europe","iot",1),  -3*H,-2.2*H,"warn","réplicas de Kafka desincronizadas"],
+].filter(([c])=>c);
+past.forEach(([c,a,b,s,txt])=>{setStatus(c,s,txt,null,NOW0+a);setStatus(c,"ok","",[],NOW0+b);});
+const critNow1=nth("West Europe","prod",2),critNow2=nth("North Europe","iot",2),warnNow=nth("West Europe","stg",0);
+if(critNow1)setStatus(critNow1,"crit",ISSUES.crit[0],null,NOW0-35*MIN);
+if(critNow2)setStatus(critNow2,"crit",ISSUES.crit[1],null,NOW0-12*MIN);
+if(warnNow)setStatus(warnNow,"warn",ISSUES.warn[0],[],NOW0-80*MIN);
 
 // ---------- escena ----------
 const host=document.getElementById("scene");
@@ -233,7 +240,7 @@ table.rotation.x=-Math.PI/2;
 const cc=document.createElement("canvas");cc.width=320;cc.height=200;const g=cc.getContext("2d");
 g.fillStyle="#e8e6df";g.fillRect(0,0,320,200);g.fillStyle="#1d2a2e";
 for(let i=0;i<9;i++)for(let j=0;j<9;j++)if((i*7+j*5+i*j)%3!==0||i<2&&j<2||i>6&&j<2||i<2&&j>6)g.fillRect(20+i*17,20+j*17,15,15);
-g.font="600 22px sans-serif";g.fillText("FLOTA",190,90);g.font="14px monospace";g.fillText("aks · 16",190,118);
+g.font="600 22px sans-serif";g.fillText("FLOTA",190,90);g.font="14px monospace";g.fillText(`aks · ${fleet.length}`,190,118);
 const card=add(new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cc),color:0x8d8b84})));
 card.rotation.x=-Math.PI/2;card.position.y=.01;
 // haz
@@ -288,11 +295,20 @@ const podMeshes=[];
 for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.05,.05,.05),glowMat(0x378add,.6));podGroup.add(m);podMeshes.push(m);}
 podGroup.visible=false;
 
-// tráfico entre clusters: arcos con partículas
-const byKey=(reg,i)=>fleet[REG.findIndex(r=>r.id===reg)*ENVS.length+i];
+// tráfico entre clusters: arcos con partículas (por rol, no por índice fijo)
 const LINKS=[];
-REG.forEach(r=>{[[3,0],[4,1],[0,5],[1,5],[2,5],[3,2]].forEach(([a,b])=>LINKS.push([byKey(r.id,a),byKey(r.id,b)]));});
-LINKS.push([byKey("weu",0),byKey("neu",0)],[byKey("weu",5),byKey("neu",5)]);
+REG.forEach(r=>{
+  const prods=fleet.filter(c=>c.region===r.name&&c.env==="prod");
+  for(let i=0;i<prods.length-1;i++)LINKS.push([prods[i],prods[i+1]]);
+  const iot=nth(r.name,"iot",0),data=nth(r.name,"data",0),stg=nth(r.name,"stg",0),dev=nth(r.name,"dev",0);
+  if(iot&&data)LINKS.push([iot,data]);
+  if(prods[0]&&stg)LINKS.push([prods[0],stg]);
+  if(stg&&dev)LINKS.push([stg,dev]);
+});
+const prodWeu=nth("West Europe","prod",0),prodNeu=nth("North Europe","prod",0);
+const devWeu=nth("West Europe","dev",0),devNeu=nth("North Europe","dev",0);
+if(prodWeu&&prodNeu)LINKS.push([prodWeu,prodNeu]);
+if(devWeu&&devNeu)LINKS.push([devWeu,devNeu]);
 const flows=LINKS.map(([a,b])=>{
   const p0=new THREE.Vector3(a.gx,PY+a.h,a.gz),p2=new THREE.Vector3(b.gx,PY+b.h,b.gz);
   const lift=.35+p0.distanceTo(p2)*.22,mid=p0.clone().add(p2).multiplyScalar(.5);mid.y=Math.max(p0.y,p2.y)+lift;
@@ -515,8 +531,39 @@ const ans=document.getElementById("answer");
 function say(html){ans.innerHTML=html;}
 const esc=s=>s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
 let sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
-function localAnswer(){
+function fixSuggestion(c){
+  if(/certificado/i.test(c.issue))return"renovar el certificado TLS con el runbook de cert-manager";
+  if(/node pool|VMSS|NotReady/i.test(c.issue))return"revisar el node pool y, si no se recupera, reemplazar las VMSS";
+  if(/OOM|CrashLoopBackOff|memoria/i.test(c.issue))return"hacer rollback a la versión anterior y subir el límite de memoria";
+  if(/disco/i.test(c.issue))return"liberar espacio o ampliar el disco del node pool";
+  if(/Kafka/i.test(c.issue))return"resincronizar las réplicas de Kafka";
+  if(/CPU/i.test(c.issue))return"escalar el node pool para liberar CPU";
+  return"abrir un ticket y asignarlo a la guardia";
+}
+function localAnswer(q){
+  q=q||"";
   const bad=fleet.filter(c=>c.status!=="ok").sort((a,b)=>(a.status==="crit"?0:1)-(b.status==="crit"?0:1)||b.tenants-a.tenants);
+  const named=fleet.find(c=>q.includes(c.name));
+  if(named){
+    if(named.status==="ok")return`<b>${named.name}</b> está en verde, sin incidencias activas.`;
+    return`<b>${named.name}</b> (${named.status==="crit"?"crítico":"aviso"}): ${named.issue}. Afecta a ${named.aff.length} de sus ${named.tenants} clientes. Yo ${fixSuggestion(named)}.`;
+  }
+  if(/peor/i.test(q)){
+    if(!bad.length)return"Toda la flota está en verde. No hay ningún cluster en mal estado ahora mismo.";
+    const w=bad[0];
+    return`El peor es <b>${w.name}</b> (${w.status==="crit"?"crítico":"aviso"}): ${w.issue}. Afecta a ${w.aff.length} de sus ${w.tenants} clientes.`;
+  }
+  if(/jefe|no t[eé]cnico/i.test(q)){
+    const k={ok:0,warn:0,crit:0};fleet.forEach(c=>k[c.status]++);
+    const tn=fleet.reduce((a,c)=>a+c.tenants,0);
+    if(!bad.length)return`Los ${fleet.length} clusters están sanos y dan servicio a ${tn} clientes sin incidencias abiertas.`;
+    return`De ${fleet.length} clusters, ${k.crit} están caídos y ${k.warn} con avisos; el resto funciona con normalidad. El equipo ya está resolviendo los críticos.`;
+  }
+  if(/por d[oó]nde empiezo|orden|primero/i.test(q)){
+    if(!bad.length)return"No hay nada urgente: toda la flota está en verde.";
+    const order=bad.slice(0,3).map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.tenants} tenants)`).join(" → ");
+    return`${order}. Empieza por el primero: es el que más clientes afecta.`;
+  }
   if(!bad.length)return"Toda la flota está en verde. Nada que revisar.";
   return bad.map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.status==="crit"?"crítico":"aviso"}, ${c.tenants} tenants): ${c.issue}.`).join("<br>");
 }
@@ -528,7 +575,7 @@ function plain(html){const d=document.createElement("div");d.innerHTML=html.repl
 async function ask(q){
   say(`<b>Asistente:</b> pensando…`);
   const s=await sampleP;
-  if(!s){const a=localAnswer();say(`<b>Asistente:</b><br>${a}`);pointAt(a);speak(plain(a));return;}
+  if(!s){const a=localAnswer(q);say(`<b>Asistente:</b><br>${a}`);pointAt(a);speak(plain(a));return;}
   const ctx=fleet.map(c=>({cluster:c.name,region:c.region,entorno:c.env,estado:c.status,problema:c.issue||null,nodos:c.nodes,pods:c.pods,tenants:c.tenants,clientes_afectados:c.aff.length,cpu:Math.round(c.cpu),mem:Math.round(c.mem)}));
   const when=viewTs!=null?`El usuario está viendo el estado de hace ${Math.round((Date.now()-viewTs)/MIN)} minutos, no el actual.`:"";
   const sel=selected>=0?`El usuario está mirando el cluster ${fleet[selected].name}.`:"";
@@ -536,7 +583,7 @@ async function ask(q){
   try{
     const r=await s(prompt,{modelTier:"quick",cache:false,onText:({text})=>say(`<b>Asistente:</b> ${esc(text)}`)});
     const txt=(r&&r.text)||"";say(`<b>Asistente:</b> ${esc(txt)}`);pointAt(txt);speak(txt);
-  }catch(e){const a=localAnswer();say(`<b>Asistente:</b><br>${a}`);pointAt(a);}
+  }catch(e){const a=localAnswer(q);say(`<b>Asistente:</b><br>${a}`);pointAt(a);}
 }
 
 // ---------- integraciones simuladas (ticketing, PRs, CI/CD) ----------
@@ -740,7 +787,7 @@ function loop(){
   placeTags();
   requestAnimationFrame(loop);
 }
-paint();loop();drawStrip();
+paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`);loop();drawStrip();
 </script>
 </body>
 </html>
