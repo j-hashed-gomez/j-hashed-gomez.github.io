@@ -9,6 +9,11 @@
 <meta property="og:description" content="Visor holográfico 3D de una flota de clusters Kubernetes con demo guiada de incidencias. Datos simulados.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://gomezmarin.es/holoflota.html">
+<meta property="og:image" content="https://gomezmarin.es/img/holoflota-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visor 3D de la flota AKS: edificios por cluster en tres regiones, coloreados por salud">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -93,7 +98,27 @@ body.demo .answer,body.demo .suggest,body.demo .ask,body.demo #hint{display:none
 .bar{height:3px;border-radius:2px;background:rgba(29,158,117,.25);margin-top:5px;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--glow);transition:width .4s}
 .aff{margin-top:4px;font-size:11px;opacity:.85}
-.tools{display:flex;gap:6px;pointer-events:auto;flex:none}
+.tools{display:flex;gap:6px;pointer-events:auto;flex:none;margin-left:auto}
+#tl-toggle{display:none}
+.list{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 200px);width:260px;max-height:55vh;overflow:auto;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);border-radius:10px;padding:8px;z-index:5}
+.list h3{margin:8px 4px 4px;font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.list h3:first-child{margin-top:2px}
+.list button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:6px;border-radius:6px;margin:2px 0;text-align:left;color:var(--ink);background:rgba(4,30,26,.7)}
+.list button i{width:8px;height:8px;border-radius:50%;background:var(--glow);flex:none}
+.list button.warn i{background:var(--warn)}.list button.crit i{background:var(--crit)}
+.list button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.list button small{color:var(--dim);font-size:10px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:600px){
+  .timeline{display:none}.timeline.open{display:flex}
+  #tl-toggle{display:inline-block}
+  .hint{display:none}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .chip{flex:none}
+  .tools button{padding:6px 9px}
+  .tools .lbl{display:none}
+  .list{left:max(12px,env(safe-area-inset-left,0px));width:auto}
+}
 .brand-wrap{display:flex;align-items:center;gap:10px}
 .back-cv{pointer-events:auto;font-size:11px;color:var(--dim);text-decoration:none;border:1px solid rgba(29,158,117,.5);border-radius:99px;padding:3px 9px;background:rgba(4,22,20,.6)}
 .back-cv:hover{color:var(--glow);border-color:var(--glow)}
@@ -120,6 +145,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
 <div class="flash" id="flash"></div>
 <div class="feed" id="feed" aria-live="polite"></div>
 <div class="subtitle" id="subtitle" hidden></div>
+<nav class="list" id="list" aria-label="Lista de clusters" hidden></nav>
 <div class="tip" id="tip" role="note" hidden>Pulsa <b>▶ Demo</b> para ver una incidencia completa en unos 3 minutos: detección, ticket, PR, despliegue y postmortem.<button type="button" id="tip-close" aria-label="Cerrar aviso">×</button></div>
 
 <div class="hud">
@@ -128,7 +154,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <div class="live"><i></i>DATOS SIMULADOS</div>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="timeline">
+  <div class="timeline" id="timeline">
     <div class="tl-head"><span class="tl-label" id="tl-label">Ahora · en vivo</span><button type="button" id="tl-now" hidden>Volver a ahora</button></div>
     <canvas id="tl-strip" height="18" aria-hidden="true"></canvas>
     <input type="range" id="tl" min="0" max="1440" step="5" value="1440" aria-label="Línea temporal de las últimas 24 horas">
@@ -137,8 +163,10 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
   <div class="hud-row">
     <div class="hint" id="hint">Arrastra para girar · toca un edificio</div>
     <div class="tools">
-      <button type="button" id="sound" aria-pressed="false">🔇 Sonido</button>
-      <button type="button" id="loop" aria-pressed="false" title="Repetir la demo en bucle (modo presentación)">⟳ Bucle</button>
+      <button type="button" id="tl-toggle" aria-expanded="false" aria-controls="timeline" title="Línea temporal de 24 h">🕑<span class="lbl"> 24 h</span></button>
+      <button type="button" id="list-toggle" aria-expanded="false" aria-controls="list" title="Lista de clusters">☰<span class="lbl"> Clusters</span></button>
+      <button type="button" id="sound" aria-pressed="false" title="Sonido y voz">🔇<span class="lbl"> Sonido</span></button>
+      <button type="button" id="loop" aria-pressed="false" title="Repetir la demo en bucle (modo presentación)">⟳<span class="lbl"> Bucle</span></button>
       <button type="button" id="demo" class="primary">▶ Demo</button>
     </div>
   </div>
@@ -157,7 +185,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
       <div class="m"><span>Mem</span><strong id="s-mem"></strong></div>
     </div>
     <div class="issue" id="s-issue"></div>
-    <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button></div>
+    <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button><button id="share" type="button">🔗 Enlace</button></div>
   </section>
   <div class="answer" id="answer" aria-live="polite"><b>Asistente:</b> cargando estado de la flota…</div>
   <div class="suggest">
@@ -165,6 +193,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <button type="button" data-q="Hazme un resumen de la flota para alguien no técnico, en dos frases.">Resumen para el jefe</button>
     <button type="button" data-q="¿Qué clusters debería revisar primero y en qué orden?">¿Por dónde empiezo?</button>
     <button type="button" class="danger" id="chaos">⚡ Romper algo</button>
+    <button type="button" id="repair">🛠 Reparar todo</button>
   </div>
   <form class="ask" id="ask">
     <input id="q" type="text" placeholder="Pregunta a la flota…" autocomplete="off" aria-label="Pregunta a la flota">
@@ -371,7 +400,7 @@ function paint(){
   document.getElementById("chips").innerHTML=
     `<span class="chip">${k.ok} ok</span>`+(k.warn?`<span class="chip warn">${k.warn} aviso</span>`:"")+(k.crit?`<span class="chip crit">${k.crit} críticos</span>`:"")+
     `<span class="chip">${fleet.reduce((a,c)=>a+c.tenants,0)} tenants</span>`;
-  buildTags();
+  buildTags();buildList();
 }
 
 // etiquetas flotantes
@@ -489,7 +518,7 @@ function ensureAudio(){
 function setSound(on){
   soundOn=on;ensureAudio();if(!actx)return;actx.resume();
   master.gain.setTargetAtTime(on?1:0,actx.currentTime,.3);
-  const b=document.getElementById("sound");b.textContent=on?"🔊 Sonido":"🔇 Sonido";b.setAttribute("aria-pressed",on);
+  const b=document.getElementById("sound");b.innerHTML=on?'🔊<span class="lbl"> Sonido</span>':'🔇<span class="lbl"> Sonido</span>';b.setAttribute("aria-pressed",on);
   if(!on)stopSpeak();
 }
 document.getElementById("sound").onclick=()=>setSound(!soundOn);
@@ -543,6 +572,40 @@ document.getElementById("fix").onclick=async()=>{
   heal(c);closeTicket(c,"3 min");c.ticket=null;btn.disabled=false;
   say(`<b>Rollback desplegado</b> en ${c.name}. El cluster vuelve a verde.`);
   clearFeedLater(9000);
+};
+const listEl=document.getElementById("list"),listBtn=document.getElementById("list-toggle");
+const ST={ok:"en verde",warn:"aviso",crit:"crítico"};
+function buildList(){
+  if(listEl.hidden)return;
+  listEl.innerHTML=REG.map(r=>`<h3>${r.name}</h3>`+fleet.map((c,i)=>c.region!==r.name?"":
+    `<button type="button" class="${c.status}" data-i="${i}" aria-label="${c.name}, ${c.env}, ${ST[c.status]}${c.issue?": "+c.issue:""}"${i===selected?' aria-current="true"':""}><i></i><span>${c.name}</span><small>${c.env}</small></button>`).join("")).join("");
+}
+function setList(open){
+  listEl.hidden=!open;listBtn.setAttribute("aria-expanded",open);
+  if(open){listEl.style.top=(document.querySelector(".hud").getBoundingClientRect().bottom+10)+"px";buildList();const f=listEl.querySelector(".crit,.warn,button");f&&f.focus();}
+}
+listBtn.onclick=()=>setList(listEl.hidden);
+listEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;setList(false);select(+b.dataset.i);document.getElementById("back").focus();});
+const tlToggle=document.getElementById("tl-toggle");
+tlToggle.onclick=()=>{const open=!tlBox.classList.contains("open");tlBox.classList.toggle("open",open);tlToggle.setAttribute("aria-expanded",open);drawStrip();dispatchEvent(new Event("resize"));};
+addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  if(!listEl.hidden){setList(false);listBtn.focus();}
+  else if(selected>=0){back();}
+});
+document.getElementById("repair").onclick=()=>{
+  goLive();const bad=fleet.filter(c=>c.status!=="ok");
+  if(!bad.length){say("<b>Asistente:</b> la flota ya está toda en verde.");return;}
+  const t=clock.getElapsedTime();
+  bad.forEach(c=>{setStatus(c,"ok");c.healT=t;c.ticket=null;});
+  chord();paint();drawStrip();if(selected>=0)showSheet();
+  say(`<b>Flota restaurada:</b> ${bad.length} cluster${bad.length>1?"s":""} de vuelta en verde.`);
+};
+document.getElementById("share").onclick=async()=>{
+  if(selected<0)return;const btn=document.getElementById("share");
+  const url=location.origin+location.pathname+"?cluster="+encodeURIComponent(fleet[selected].name);
+  try{await navigator.clipboard.writeText(url);btn.textContent="✓ Copiado";}catch(e){prompt("Copia el enlace:",url);}
+  setTimeout(()=>{btn.textContent="🔗 Enlace";},1800);
 };
 document.getElementById("chaos").onclick=()=>{
   const ok=fleet.filter(c=>c.status==="ok");if(!ok.length)return;
@@ -685,7 +748,7 @@ async function line(run,text,minMs){
 }
 function stopDemo(){demoRun++;document.body.classList.remove("demo");sub.hidden=true;clearFeedLater(8000);stopSpeak();const b=document.getElementById("demo");b.textContent="▶ Demo";b.classList.remove("on");}
 let loopOn=false;
-function setLoop(on){loopOn=on;const lb=document.getElementById("loop");lb.setAttribute("aria-pressed",on);lb.textContent=on?"⟳ Bucle: sí":"⟳ Bucle";lb.classList.toggle("primary",on);}
+function setLoop(on){loopOn=on;const lb=document.getElementById("loop");lb.setAttribute("aria-pressed",on);lb.innerHTML=on?'⟳<span class="lbl"> Bucle: sí</span>':'⟳<span class="lbl"> Bucle</span>';lb.classList.toggle("primary",on);}
 async function startDemo(withSound){
   const b=document.getElementById("demo");
   if(b.classList.contains("on")){setLoop(false);stopDemo();return;}
@@ -855,12 +918,15 @@ paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`
   setTimeout(off,5500);btns.forEach(b=>b.addEventListener("click",off));})();
 (()=>{const tip=document.getElementById("tip");let seen=false;try{seen=localStorage.getItem("holoflota_tip")==="1";}catch(e){}
   const place=()=>{const r=document.querySelector(".hud").getBoundingClientRect();tip.style.top=(r.bottom+10)+"px";};
-  if(seen)return;place();addEventListener("resize",place);tip.hidden=false;
+  if(seen||location.search)return;place();addEventListener("resize",place);tip.hidden=false;
   const hide=()=>{tip.hidden=true;try{localStorage.setItem("holoflota_tip","1");}catch(e){}};
   document.getElementById("tip-close").addEventListener("click",hide);
   document.getElementById("demo").addEventListener("click",hide);
   setTimeout(()=>{tip.hidden=true;},12000);})();
-(()=>{const qs=new URLSearchParams(location.search);if(qs.has("bucle")||qs.has("loop")){document.getElementById("tip").hidden=true;setLoop(true);setTimeout(()=>startDemo(false),1500);}})();
+(()=>{const qs=new URLSearchParams(location.search);
+  if(qs.has("bucle")||qs.has("loop")){setLoop(true);setTimeout(()=>startDemo(false),1500);return;}
+  if(qs.has("demo")){setTimeout(()=>startDemo(false),1500);return;}
+  const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>select(i),400);}}})();
 </script>
 </body>
 </html>
