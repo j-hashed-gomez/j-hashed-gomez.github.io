@@ -919,10 +919,12 @@ async function startAR(){
     document.body.prepend(video);AR.video=video;
     video.srcObject=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:"environment"}});
     await new Promise(r=>video.readyState>=1?r():video.addEventListener("loadedmetadata",r,{once:true}));await video.play();
+    // MindAR's input loader reads the element's width/height attributes (not CSS size); without them it sees an empty frame
+    video.setAttribute("width",video.videoWidth);video.setAttribute("height",video.videoHeight);
     arSetMsg("Cargando el motor de realidad aumentada…");
     const {Controller}=await import("https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js");
     if(AR.video!==video)return; // cancelled meanwhile
-    AR.controller=new Controller({inputWidth:video.videoWidth,inputHeight:video.videoHeight,maxTrack:1,filterMinCF:.0001,filterBeta:.001,warmupTolerance:5,missTolerance:5,
+    AR.controller=new Controller({inputWidth:video.videoWidth,inputHeight:video.videoHeight,maxTrack:1,
       onUpdate:d=>{if(d.type==="updateMatrix")arUpdate(d.worldMatrix);}});
     const {dimensions}=await AR.controller.addImageTargets("img/holoflota-tarjeta.mind");
     const [mw,mh]=dimensions[0];
