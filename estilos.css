@@ -967,6 +967,8 @@ section.section {
   display: flex; gap: 6px; flex-wrap: wrap;
   margin-top: 6px;
 }
+.project-card h3 a { color: inherit; text-decoration: none; }
+.project-card h3 a:hover { color: var(--green-bright); text-decoration: underline; }
 
 /* ============================================================================
    SECTION 06 + 07 ledger (certifications & trainings)

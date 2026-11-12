@@ -281,12 +281,15 @@
       const bullets = (p.bullets?.[lang] || []).map((b) => `<li>${esc(b)}</li>`).join('');
       const tags = p.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
       const statusBadge = p.status ? `<span class="status-badge">${esc(p.status[lang])}</span>` : '';
+      const titleHtml = p.link
+        ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.title[lang])} ↗</a>`
+        : esc(p.title[lang]);
       return `
         <article class="panel project-card">
           <div class="head">
             <span class="id">[ ${id} ]</span>
           </div>
-          <h3>${esc(p.title[lang])}${statusBadge}</h3>
+          <h3>${titleHtml}${statusBadge}</h3>
           <p>${esc(p.description[lang])}</p>
           ${bullets ? `<ul>${bullets}</ul>` : ''}
           <div class="tags">${tags}</div>
