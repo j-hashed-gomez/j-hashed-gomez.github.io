@@ -132,6 +132,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <div class="hint" id="hint">Arrastra para girar · toca un edificio</div>
     <div class="tools">
       <button type="button" id="sound" aria-pressed="false">🔇 Sonido</button>
+      <button type="button" id="loop" aria-pressed="false" title="Repetir la demo en bucle (modo presentación)">⟳ Bucle</button>
       <button type="button" id="demo" class="primary">▶ Demo</button>
     </div>
   </div>
@@ -179,7 +180,7 @@ const ISSUES={
   crit:["3 nodos NotReady tras el upgrade del node pool","errores 5xx en el ingress desde el último deploy","pods de ingestión en CrashLoopBackOff por OOM","certificado del ingress caducado","etcd con latencia alta, la API responde lenta"],
   warn:["uso de disco al 86% en el node pool system","2 pods pendientes por falta de CPU","réplicas de Kafka desincronizadas"]
 };
-const REG=[{id:"weu",name:"West Europe",x:-1.15},{id:"neu",name:"North Europe",x:1.15}];
+const REG=[{id:"weu",name:"West Europe",x:-1.85},{id:"neu",name:"North Europe",x:0},{id:"eus",name:"East US",x:1.85,alias:/estados unidos|eeuu|\bee\.?uu\b|am[eé]rica|\busa?\b/i}];
 const ENVS=["prod","prod","prod","prod","iot","iot","iot","data","data","stg","stg","dev"];
 const fleet=[];
 REG.forEach(r=>ENVS.forEach((e,i)=>{
@@ -212,6 +213,8 @@ const past=[
   [nth("North Europe","data",0), -12*H,-9.5*H,"warn","2 pods pendientes por falta de CPU"],
   [nth("West Europe","prod",1),  -6.2*H,-5.9*H,"crit","etcd con latencia alta, la API responde lenta"],
   [nth("North Europe","iot",1),  -3*H,-2.2*H,"warn","réplicas de Kafka desincronizadas"],
+  [nth("East US","prod",1),      -14*H,-13.4*H,"crit","pods de ingestión en CrashLoopBackOff por OOM"],
+  [nth("East US","data",1),      -8*H,-7.1*H,"warn","uso de disco al 86% en el node pool system"],
 ].filter(([c])=>c);
 past.forEach(([c,a,b,s,txt])=>{setStatus(c,s,txt,null,NOW0+a);setStatus(c,"ok","",[],NOW0+b);});
 const critNow1=nth("West Europe","prod",2),critNow2=nth("North Europe","iot",2),warnNow=nth("West Europe","stg",0);
@@ -226,7 +229,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.setClearColor(0x070b0e);
 host.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x070b0e,9,18);
+scene.fog=new THREE.Fog(0x070b0e,10,20);
 const camera=new THREE.PerspectiveCamera(50,1,.05,100);
 // bloom
 let composer=null,bloom=null;
@@ -236,10 +239,10 @@ try{
   bloom=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.45,.4,.42);
   composer.addPass(bloom);
 }catch(e){composer=null;}
-camera.position.set(0,3.8,6.4);
+camera.position.set(0,4.4,7.6);
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=.08;
-controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.47;
+controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=11;controls.maxPolarAngle=Math.PI*.47;
 controls.autoRotate=true;controls.autoRotateSpeed=.6;
 
 const C={ok:new THREE.Color(0x5dcaa5),warn:new THREE.Color(0xef9f27),crit:new THREE.Color(0xe24b4a)};
@@ -257,18 +260,18 @@ g.font="600 22px sans-serif";g.fillText("FLOTA",190,90);g.font="14px monospace";
 const card=add(new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cc),color:0x8d8b84})));
 card.rotation.x=-Math.PI/2;card.position.y=.01;
 // haz
-const beam=add(new THREE.Mesh(new THREE.CylinderGeometry(2.7,.75,.9,48,1,true),glowMat(0x5dcaa5,.06)));
+const beam=add(new THREE.Mesh(new THREE.CylinderGeometry(3.25,.75,.9,48,1,true),glowMat(0x5dcaa5,.06)));
 beam.position.y=.46;
 // plataforma
 const PY=.92;
-const plat=add(new THREE.Mesh(new THREE.CircleGeometry(2.75,64),glowMat(0x1d9e75,.08)));plat.rotation.x=-Math.PI/2;plat.position.y=PY;
-const grid=add(new THREE.PolarGridHelper(2.75,16,6,64,0x1d9e75,0x0f4f40));grid.position.y=PY+.002;
+const plat=add(new THREE.Mesh(new THREE.CircleGeometry(3.3,64),glowMat(0x1d9e75,.08)));plat.rotation.x=-Math.PI/2;plat.position.y=PY;
+const grid=add(new THREE.PolarGridHelper(3.3,16,6,64,0x1d9e75,0x0f4f40));grid.position.y=PY+.002;
 grid.material.transparent=true;grid.material.opacity=.45;
-const rim=add(new THREE.Mesh(new THREE.TorusGeometry(2.75,.012,8,96),glowMat(0x5dcaa5,.8)));rim.rotation.x=Math.PI/2;rim.position.y=PY;
-const rim2=add(new THREE.Mesh(new THREE.TorusGeometry(3.05,.006,8,96),glowMat(0x5dcaa5,.35)));rim2.rotation.x=Math.PI/2;rim2.position.y=PY+.25;
+const rim=add(new THREE.Mesh(new THREE.TorusGeometry(3.3,.012,8,96),glowMat(0x5dcaa5,.8)));rim.rotation.x=Math.PI/2;rim.position.y=PY;
+const rim2=add(new THREE.Mesh(new THREE.TorusGeometry(3.6,.006,8,96),glowMat(0x5dcaa5,.35)));rim2.rotation.x=Math.PI/2;rim2.position.y=PY+.25;
 // partículas
 const PN=260,pg=new THREE.BufferGeometry(),pp=new Float32Array(PN*3),pv=[];
-for(let i=0;i<PN;i++){const a=Math.random()*Math.PI*2,r=Math.random()*2.6;pp[i*3]=Math.cos(a)*r;pp[i*3+1]=Math.random()*3;pp[i*3+2]=Math.sin(a)*r;pv.push(.003+Math.random()*.006);}
+for(let i=0;i<PN;i++){const a=Math.random()*Math.PI*2,r=Math.random()*3.1;pp[i*3]=Math.cos(a)*r;pp[i*3+1]=Math.random()*3;pp[i*3+2]=Math.sin(a)*r;pv.push(.003+Math.random()*.006);}
 pg.setAttribute("position",new THREE.BufferAttribute(pp,3));
 add(new THREE.Points(pg,new THREE.PointsMaterial({color:0x9fe1cb,size:.025,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false})));
 
@@ -318,10 +321,9 @@ REG.forEach(r=>{
   if(prods[0]&&stg)LINKS.push([prods[0],stg]);
   if(stg&&dev)LINKS.push([stg,dev]);
 });
-const prodWeu=nth("West Europe","prod",0),prodNeu=nth("North Europe","prod",0);
-const devWeu=nth("West Europe","dev",0),devNeu=nth("North Europe","dev",0);
-if(prodWeu&&prodNeu)LINKS.push([prodWeu,prodNeu]);
-if(devWeu&&devNeu)LINKS.push([devWeu,devNeu]);
+for(let i=0;i<REG.length-1;i++){
+  ["prod","dev"].forEach(env=>{const a=nth(REG[i].name,env,0),b=nth(REG[i+1].name,env,0);if(a&&b)LINKS.push([a,b]);});
+}
 const flows=LINKS.map(([a,b])=>{
   const p0=new THREE.Vector3(a.gx,PY+a.h,a.gz),p2=new THREE.Vector3(b.gx,PY+b.h,b.gz);
   const lift=.35+p0.distanceTo(p2)*.22,mid=p0.clone().add(p2).multiplyScalar(.5);mid.y=Math.max(p0.y,p2.y)+lift;
@@ -410,7 +412,7 @@ function select(i){
 function back(){
   selected=-1;podGroup.visible=false;tenantGroup.clear();slabs=[];
   fleet.forEach(o=>{o.o.floors.visible=true;o.o.edges.material.opacity=.7;o.o.body.material.opacity=.12;o.o.roof.material.opacity=.3;});
-  camGoal={pos:new THREE.Vector3(0,3.8,6.4),tgt:new THREE.Vector3(0,1.1,0)};
+  camGoal={pos:new THREE.Vector3(0,4.4,7.6),tgt:new THREE.Vector3(0,1.1,0)};
   document.getElementById("sheet").hidden=true;buildTags();
   document.getElementById("hint").textContent="Arrastra para girar · toca un edificio";
 }
@@ -577,7 +579,7 @@ function localAnswer(q){
     const order=bad.slice(0,3).map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.tenants} tenants)`).join(" → ");
     return`${order}. Empieza por el primero: es el que más clientes afecta.`;
   }
-  const reg=REG.find(r=>q.toLowerCase().includes(r.name.toLowerCase())||new RegExp("\\b"+r.id+"\\b","i").test(q));
+  const reg=REG.find(r=>q.toLowerCase().includes(r.name.toLowerCase())||new RegExp("\\b"+r.id+"\\b","i").test(q)||(r.alias&&r.alias.test(q)));
   if(reg){
     const rc=fleet.filter(c=>c.region===reg.name),rb=rc.filter(c=>c.status!=="ok");
     if(!rb.length)return`<b>${reg.name}</b>: sus ${rc.length} clusters están en verde.`;
@@ -673,24 +675,28 @@ async function line(run,text,minMs){
   if(run!==demoRun)throw 0;
 }
 function stopDemo(){demoRun++;document.body.classList.remove("demo");sub.hidden=true;clearFeedLater(8000);stopSpeak();const b=document.getElementById("demo");b.textContent="▶ Demo";b.classList.remove("on");}
-document.getElementById("demo").onclick=async()=>{
+let loopOn=false;
+function setLoop(on){loopOn=on;const lb=document.getElementById("loop");lb.setAttribute("aria-pressed",on);lb.textContent=on?"⟳ Bucle: sí":"⟳ Bucle";lb.classList.toggle("primary",on);}
+async function startDemo(withSound){
   const b=document.getElementById("demo");
-  if(b.classList.contains("on")){stopDemo();return;}
+  if(b.classList.contains("on")){setLoop(false);stopDemo();return;}
   const run=++demoRun;b.textContent="■ Parar";b.classList.add("on");document.body.classList.add("demo");feedEl.innerHTML="";
-  if(!soundOn)setSound(true);
+  if(withSound&&!soundOn)setSound(true);
   try{
     goLive();back();controls.autoRotate=true;
     fleet.forEach(c=>{if(c.status!=="ok")setStatus(c,"ok");});paint();drawStrip();chord();
     const tn=fleet.reduce((a,c)=>a+c.tenants,0);
     const fly=(x,z,dist)=>{controls.autoRotate=false;camGoal={pos:new THREE.Vector3(x*.6,PY+1.9,z+dist),tgt:new THREE.Vector3(x,PY+.4,z)};};
     // 1. presentación
-    await line(run,`Esta es nuestra flota: ${fleet.length} clusters AKS en dos regiones, dando servicio a ${tn} clientes.`,5000);
+    await line(run,`Esta es nuestra flota: ${fleet.length} clusters AKS en ${REG.length} regiones, dando servicio a ${tn} clientes.`,5000);
     await line(run,"Cada edificio es un cluster. La altura son sus nodos, y el color, su salud.",4500);
     // 2. recorrido por regiones
     fly(REG[0].x,0,2.6);
     await line(run,"En West Europe tenemos producción, IoT, datos y los entornos de pruebas.",4500);
     fly(REG[1].x,0,2.6);
     await line(run,"North Europe replica la misma estructura, para que un fallo regional no tumbe a nadie.",4500);
+    fly(REG[2].x,0,2.6);
+    await line(run,"Y East US lleva el mismo diseño al otro lado del Atlántico, cerca de los clientes de América.",4500);
     back();controls.autoRotate=true;
     await line(run,"Ahora mismo, todo en verde. Un martes tranquilo… de momento.",4000);
     await sleep(1000);
@@ -758,8 +764,13 @@ document.getElementById("demo").onclick=async()=>{
     await line(run,"Sin abrir un solo dashboard. Solo preguntando a la flota.",4500);
     await line(run,"Y todo queda registrado: en la línea temporal de arriba se ven las caídas de las últimas veinticuatro horas.",5500);
   }catch(e){}
-  if(run===demoRun)stopDemo();
-};
+  if(run===demoRun){
+    stopDemo();
+    if(loopOn)setTimeout(()=>{if(loopOn&&!document.getElementById("demo").classList.contains("on"))startDemo(false);},6000);
+  }
+}
+document.getElementById("demo").onclick=()=>startDemo(true);
+document.getElementById("loop").onclick=()=>{setLoop(!loopOn);if(loopOn&&!document.getElementById("demo").classList.contains("on"))startDemo(true);};
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(b.dataset.q));
 document.getElementById("ask-this").onclick=()=>ask(`¿Qué le pasa a ${fleet[selected].name} y qué harías?`);
 document.getElementById("ask").addEventListener("submit",e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q){ask(q);document.getElementById("q").value="";}});
@@ -832,6 +843,7 @@ paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`
   document.getElementById("tip-close").addEventListener("click",hide);
   document.getElementById("demo").addEventListener("click",hide);
   setTimeout(()=>{tip.hidden=true;},12000);})();
+(()=>{const qs=new URLSearchParams(location.search);if(qs.has("bucle")||qs.has("loop")){document.getElementById("tip").hidden=true;setLoop(true);setTimeout(()=>startDemo(false),1500);}})();
 </script>
 </body>
 </html>
