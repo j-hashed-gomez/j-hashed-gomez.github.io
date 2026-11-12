@@ -65,6 +65,7 @@
     document.getElementById('section-07-label').textContent = L.section_07;
     document.getElementById('section-08-label').textContent = L.section_08;
     document.getElementById('section-09-label').textContent = L.section_09;
+    document.getElementById('section-10-label').textContent = L.section_10;
     document.getElementById('panel-01-label').textContent = L.panel_01;
     document.getElementById('panel-02-label').textContent = L.panel_02;
     document.getElementById('panel-03-label').textContent = L.panel_03;
@@ -80,6 +81,7 @@
     // Sections
     CV_GRAPHS.renderExperience(document.getElementById('experience-content'), D, lang);
     CV_GRAPHS.renderSkills(document.getElementById('skills-content'), D, lang);
+    CV_GRAPHS.renderProjects(document.getElementById('projects-content'), D, lang);
     CV_GRAPHS.renderCertifications(document.getElementById('certifications-content'), D, lang);
     CV_GRAPHS.renderTrainings(document.getElementById('trainings-content'), D, lang);
     CV_GRAPHS.renderLanguages(document.getElementById('languages-content'), D, lang);
@@ -230,6 +232,7 @@
       { cmd: 'goto experience',    desc: 'experience.history',     run: () => scrollToId('section-experience') },
       { cmd: 'goto orbital',       desc: 'active_integrations',    run: () => scrollToId('section-orbital') },
       { cmd: 'goto skills',        desc: 'skills.matrix',          run: () => scrollToId('section-skills') },
+      { cmd: 'goto projects',      desc: 'projects.showcase',      run: () => scrollToId('section-projects') },
       { cmd: 'goto certs',         desc: 'certifications.ledger',  run: () => scrollToId('section-certs') },
       { cmd: 'goto trainings',     desc: 'trainings.archive',      run: () => scrollToId('section-trainings') },
       { cmd: 'goto languages',     desc: 'languages.dial',         run: () => scrollToId('section-languages') },
