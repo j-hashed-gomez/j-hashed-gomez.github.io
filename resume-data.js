@@ -233,6 +233,7 @@ window.CV_DATA = {
       id: 'holoflota_aks',
       title: { es: 'Holoflota AKS', en: 'Holoflota AKS' },
       status: { es: 'MAQUETA', en: 'PROTOTYPE' },
+      link: 'holoflota.html',
       description: {
         es: 'Visor holográfico en 3D de una flota de clusters Kubernetes (AKS): cada cluster es un edificio cuya altura son sus nodos y cuyo color refleja su salud. Al tocar un edificio se ve el detalle por cliente, y una demo guiada recorre el ciclo completo de una incidencia: detección, ticket, PR de resolución, CI, aprobación humana, despliegue GitOps y borrador de postmortem.',
         en: '3D holographic viewer for a Kubernetes (AKS) cluster fleet: each cluster is a building whose height is its node count and whose color reflects its health. Tapping a building shows per-tenant detail, and a guided demo walks through a full incident lifecycle: detection, ticket, fix PR, CI, human approval, GitOps deploy and a postmortem draft.',

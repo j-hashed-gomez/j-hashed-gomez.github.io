@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Holoflota AKS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-screen 3D scene, HUD pinned top, assistant dock bottom, detail sheet slides over dock */
+:root{
+  --void:#070b0e; --panel:rgba(6,22,20,.82); --line:#1d9e75; --glow:#5dcaa5; --ink:#e1f5ee; --dim:#7fb8a6;
+  --warn:#ef9f27; --warn-ink:#fac775; --crit:#e24b4a; --crit-ink:#f7c1c1;
+  --display:"Chakra Petch",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--void);color:var(--ink);font-family:var(--mono);font-size:13px}
+#scene{position:fixed;inset:0;touch-action:none}
+canvas{display:block}
+.hud{position:fixed;top:0;left:0;right:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none;display:flex;flex-direction:column;gap:8px}
+.hud-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--glow)}
+.live{font-size:11px;color:var(--crit-ink);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--crit);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--line);color:var(--glow);background:rgba(4,52,44,.7);font-variant-numeric:tabular-nums}
+.chip.warn{border-color:var(--warn);color:var(--warn-ink);background:rgba(65,36,2,.7)}
+.chip.crit{border-color:var(--crit);color:var(--crit-ink);background:rgba(80,19,19,.7)}
+.hint{font-size:11px;color:var(--dim)}
+.labels{position:fixed;inset:0;pointer-events:none}
+.tag{position:absolute;transform:translate(-50%,-100%);font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;border:1px solid var(--crit);color:var(--crit-ink);background:rgba(80,19,19,.85)}
+.tag.warn{border-color:var(--warn);color:var(--warn-ink);background:rgba(65,36,2,.85)}
+.tag.sel{border-color:var(--glow);color:var(--ink);background:rgba(4,52,44,.9)}
+.dock{position:fixed;left:0;right:0;bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
+.answer{border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(6px);border-radius:10px;padding:9px 11px;line-height:1.5;max-height:28vh;overflow:auto;font-size:12px}
+.answer b{color:var(--glow);font-weight:500}
+.suggest{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.suggest button{flex:none}
+button{font-family:var(--mono);font-size:11px;color:var(--glow);background:rgba(4,52,44,.75);border:1px solid var(--line);border-radius:99px;padding:6px 10px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+button.danger{color:var(--crit-ink);border-color:var(--crit);background:rgba(80,19,19,.75)}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:rgba(4,30,26,.85);border:1px solid #0f6e56;border-radius:99px;padding:9px 14px}
+.ask input::placeholder{color:var(--dim)}
+.ask button{font-size:13px;padding:0 16px}
+.sheet{border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.sheet h2{margin:0;font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em}
+.sub{font-size:11px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.m{background:rgba(4,30,26,.8);border-radius:6px;padding:6px 8px}
+.m span{display:block;font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.m strong{font-weight:500;font-size:14px;font-variant-numeric:tabular-nums}
+.issue{font-size:12px;line-height:1.5;padding:8px 10px;border-radius:6px;border-left:3px solid var(--crit);background:rgba(80,19,19,.55);color:var(--crit-ink)}
+.issue.warn{border-color:var(--warn);background:rgba(65,36,2,.55);color:var(--warn-ink)}
+.issue.ok{border-color:var(--line);background:rgba(4,52,44,.55);color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.timeline{pointer-events:auto;display:flex;flex-direction:column;gap:3px;border:1px solid rgba(29,158,117,.5);background:rgba(4,22,20,.6);border-radius:8px;padding:6px 8px 4px}
+.tl-head{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:22px}
+.tl-label{font-size:11px;color:var(--glow);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.timeline.past{border-color:var(--warn)}
+.timeline.past .tl-label{color:var(--warn-ink)}
+.tl-head button{padding:3px 8px;font-size:10px}
+#tl-strip{width:100%;height:18px;display:block}
+#tl{width:100%;margin:0;accent-color:var(--glow);height:22px}
+.timeline.past #tl{accent-color:var(--warn)}
+.tl-axis{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);font-variant-numeric:tabular-nums}
+.feed{position:fixed;top:calc(env(safe-area-inset-top,0px) + 200px);left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:420px}
+.ev{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:start;border:1px solid rgba(29,158,117,.55);background:rgba(4,22,20,.86);backdrop-filter:blur(6px);border-radius:9px;padding:7px 9px;animation:evin .35s ease-out;transition:opacity .5s}
+.ev.old{opacity:.5}
+.ev.old .dd,.ev.old pre,.ev.old .bar{display:none}
+body.demo .answer,body.demo .suggest,body.demo .ask,body.demo #hint{display:none}
+@keyframes evin{from{transform:translateY(-8px);opacity:0}}
+.ev .k{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;letter-spacing:.04em;color:#04342c;background:var(--glow)}
+.ev .k.tk{background:#85b7eb}.ev .k.pr{background:#afa9ec}.ev .k.ci{background:#9fe1cb}.ev .k.cd{background:#5dcaa5}.ev .k.wr{background:#f0997b}.ev .k.pm{background:#fac775}.ev .k.rb{background:#ed93b1}
+.ev .tt{font-size:12px;color:var(--ink);line-height:1.35;min-width:0}
+.ev .dd{font-size:10.5px;color:var(--dim);line-height:1.4;margin-top:2px}
+.ev pre{margin:4px 0 0;font:10.5px/1.45 var(--mono);white-space:pre;overflow-x:auto;color:var(--dim)}
+.ev pre .del{color:var(--crit-ink)}.ev pre .ins{color:var(--glow)}
+.pill{font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--glow);white-space:nowrap}
+.pill.pend{border-color:var(--warn);color:var(--warn-ink);animation:blink 1.2s infinite}
+.pill.crit{border-color:var(--crit);color:var(--crit-ink)}
+.pill.info{border-color:#378add;color:#b5d4f4}
+.bar{height:3px;border-radius:2px;background:rgba(29,158,117,.25);margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--glow);transition:width .4s}
+.aff{margin-top:4px;font-size:11px;opacity:.85}
+.tools{display:flex;gap:6px;pointer-events:auto;flex:none}
+button.primary{color:#04342c;background:var(--glow);border-color:var(--glow);font-weight:500}
+button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-color:var(--crit)}
+.flash{position:fixed;inset:0;pointer-events:none;background:var(--crit);opacity:0;transition:opacity .6s}
+.flash.on{opacity:.18;transition:none}
+.subtitle{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));margin:0 auto;bottom:260px;max-width:560px;text-align:center;font-family:var(--display);font-size:17px;line-height:1.35;color:var(--ink);text-shadow:0 0 12px rgba(93,202,165,.6),0 1px 2px #000;pointer-events:none;text-wrap:balance}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}}
+</style>
+</head>
+<body>
+<div id="scene" aria-label="Maqueta 3D de la flota de clusters AKS. Arrastra para girar, pellizca para acercar y toca un edificio para ver su detalle."></div>
+<div class="labels" id="labels"></div>
+<div class="flash" id="flash"></div>
+<div class="feed" id="feed" aria-live="polite"></div>
+<div class="subtitle" id="subtitle" hidden></div>
+
+<div class="hud">
+  <div class="hud-row">
+    <div class="brand">◤ Flota AKS</div>
+    <div class="live"><i></i>DATOS SIMULADOS</div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="timeline">
+    <div class="tl-head"><span class="tl-label" id="tl-label">Ahora · en vivo</span><button type="button" id="tl-now" hidden>Volver a ahora</button></div>
+    <canvas id="tl-strip" height="18" aria-hidden="true"></canvas>
+    <input type="range" id="tl" min="0" max="1440" step="5" value="1440" aria-label="Línea temporal de las últimas 24 horas">
+    <div class="tl-axis"><span>−24 h</span><span>−12 h</span><span>ahora</span></div>
+  </div>
+  <div class="hud-row">
+    <div class="hint" id="hint">Arrastra para girar · toca un edificio</div>
+    <div class="tools">
+      <button type="button" id="sound" aria-pressed="false">🔇 Sonido</button>
+      <button type="button" id="demo" class="primary">▶ Demo</button>
+    </div>
+  </div>
+</div>
+
+<div class="dock">
+  <section class="sheet" id="sheet" hidden>
+    <div class="sheet-head">
+      <div><h2 id="s-name"></h2><div class="sub" id="s-sub"></div></div>
+      <button id="back" type="button">← Flota</button>
+    </div>
+    <div class="grid">
+      <div class="m"><span>Nodos</span><strong id="s-nodes"></strong></div>
+      <div class="m"><span>Pods</span><strong id="s-pods"></strong></div>
+      <div class="m"><span>CPU</span><strong id="s-cpu"></strong></div>
+      <div class="m"><span>Mem</span><strong id="s-mem"></strong></div>
+    </div>
+    <div class="issue" id="s-issue"></div>
+    <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button></div>
+  </section>
+  <div class="answer" id="answer" aria-live="polite"><b>Asistente:</b> 2 clusters críticos. El peor es <b>aks-weu-prod-03</b>, con 3 nodos NotReady tras el upgrade del node pool.</div>
+  <div class="suggest">
+    <button type="button" data-q="¿Cuál está peor y por qué?">¿Cuál está peor?</button>
+    <button type="button" data-q="Hazme un resumen de la flota para alguien no técnico, en dos frases.">Resumen para el jefe</button>
+    <button type="button" data-q="¿Qué clusters debería revisar primero y en qué orden?">¿Por dónde empiezo?</button>
+    <button type="button" class="danger" id="chaos">⚡ Romper algo</button>
+  </div>
+  <form class="ask" id="ask">
+    <input id="q" type="text" placeholder="Pregunta a la flota…" autocomplete="off" aria-label="Pregunta a la flota">
+    <button type="submit">Enviar</button>
+  </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+// ---------- datos simulados ----------
+const ISSUES={
+  crit:["3 nodos NotReady tras el upgrade del node pool","errores 5xx en el ingress desde el último deploy","pods de ingestión en CrashLoopBackOff por OOM","certificado del ingress caducado","etcd con latencia alta, la API responde lenta"],
+  warn:["uso de disco al 86% en el node pool system","2 pods pendientes por falta de CPU","réplicas de Kafka desincronizadas"]
+};
+const REG=[{id:"weu",name:"West Europe",x:-1.15},{id:"neu",name:"North Europe",x:1.15}];
+const ENVS=["prod","prod","prod","iot","iot","data","stg","dev"];
+const fleet=[];
+REG.forEach(r=>ENVS.forEach((e,i)=>{
+  const n=`aks-${r.id}-${e}-${String(i+1).padStart(2,"0")}`;
+  const nodes=e==="prod"?9+((i*5)%8):e==="dev"||e==="stg"?3+i%3:5+i%5;
+  fleet.push({name:n,region:r.name,env:e,nodes,pods:nodes*14+(i*7)%20,tenants:e==="prod"?10+i*3:e==="iot"?6+i:0,
+    cpu:35+(i*13)%40,mem:40+(i*11)%40,status:"ok",issue:"",aff:[],hist:[],gx:r.x+((i%2)?0.24:-0.24),gz:-0.75+Math.floor(i/2)*0.5});
+}));
+// clientes anonimizados, uno por planta
+let tn=1;fleet.forEach(c=>{c.tenantIds=[...Array(c.tenants)].map(()=>"cliente-"+String(tn++).padStart(3,"0"));});
+const pick=(arr,n)=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,n);};
+function affectSome(c,frac){if(!c.tenants)return[];const n=Math.max(1,Math.round(c.tenants*(frac??(.15+Math.random()*.3))));return pick(c.tenantIds,n);}
+
+// historial: cada cambio de estado queda registrado con su hora
+let viewTs=null;
+const NOW0=Date.now(),H=3600e3,MIN=60e3;
+function setStatus(c,s,txt,aff,ts){
+  c.hist.push({ts:ts??Date.now(),s,txt:txt||"",aff:s==="ok"?[]:(aff||affectSome(c))});
+  c.hist.sort((a,b)=>a.ts-b.ts);
+  if(viewTs==null)applyEntry(c,c.hist[c.hist.length-1]);
+}
+function applyEntry(c,e){c.status=e.s;c.issue=e.txt;c.aff=e.aff;}
+function entryAt(c,ts){let e=c.hist[0];for(const h of c.hist){if(h.ts<=ts)e=h;else break;}return e;}
+fleet.forEach(c=>setStatus(c,"ok","",[],NOW0-24*H));
+// incidencias pasadas de las últimas 24 h
+const past=[[9,-21*H,-20.3*H,"crit","nodos NotReady tras un reinicio de la VMSS"],[3,-17.5*H,-16.8*H,"crit","errores 5xx en el ingress por un pico de tráfico"],
+  [13,-12*H,-9.5*H,"warn","2 pods pendientes por falta de CPU"],[1,-6.2*H,-5.9*H,"crit","etcd con latencia alta, la API responde lenta"],[12,-3*H,-2.2*H,"warn","réplicas de Kafka desincronizadas"]];
+past.forEach(([i,a,b,s,txt])=>{setStatus(fleet[i],s,txt,null,NOW0+a);setStatus(fleet[i],"ok","",[],NOW0+b);});
+setStatus(fleet[2],"crit",ISSUES.crit[0],null,NOW0-35*MIN);
+setStatus(fleet[11],"crit",ISSUES.crit[1],null,NOW0-12*MIN);
+setStatus(fleet[6],"warn",ISSUES.warn[0],[],NOW0-80*MIN);
+
+// ---------- escena ----------
+const host=document.getElementById("scene");
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
+renderer.setClearColor(0x070b0e);
+host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x070b0e,9,18);
+const camera=new THREE.PerspectiveCamera(50,1,.05,100);
+// bloom
+let composer=null,bloom=null;
+try{
+  composer=new THREE.EffectComposer(renderer);
+  composer.addPass(new THREE.RenderPass(scene,camera));
+  bloom=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.45,.4,.42);
+  composer.addPass(bloom);
+}catch(e){composer=null;}
+camera.position.set(0,3.4,5.6);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=.08;
+controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.47;
+controls.autoRotate=true;controls.autoRotateSpeed=.6;
+
+const C={ok:new THREE.Color(0x5dcaa5),warn:new THREE.Color(0xef9f27),crit:new THREE.Color(0xe24b4a)};
+const add=(m)=>{scene.add(m);return m;};
+const glowMat=(col,op)=>new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+
+// mesa
+const table=add(new THREE.Mesh(new THREE.CircleGeometry(12,64),new THREE.MeshBasicMaterial({color:0x111a1e})));
+table.rotation.x=-Math.PI/2;
+// tarjeta impresa con marcador
+const cc=document.createElement("canvas");cc.width=320;cc.height=200;const g=cc.getContext("2d");
+g.fillStyle="#e8e6df";g.fillRect(0,0,320,200);g.fillStyle="#1d2a2e";
+for(let i=0;i<9;i++)for(let j=0;j<9;j++)if((i*7+j*5+i*j)%3!==0||i<2&&j<2||i>6&&j<2||i<2&&j>6)g.fillRect(20+i*17,20+j*17,15,15);
+g.font="600 22px sans-serif";g.fillText("FLOTA",190,90);g.font="14px monospace";g.fillText("aks · 16",190,118);
+const card=add(new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cc),color:0x8d8b84})));
+card.rotation.x=-Math.PI/2;card.position.y=.01;
+// haz
+const beam=add(new THREE.Mesh(new THREE.CylinderGeometry(2.7,.75,.9,48,1,true),glowMat(0x5dcaa5,.06)));
+beam.position.y=.46;
+// plataforma
+const PY=.92;
+const plat=add(new THREE.Mesh(new THREE.CircleGeometry(2.75,64),glowMat(0x1d9e75,.08)));plat.rotation.x=-Math.PI/2;plat.position.y=PY;
+const grid=add(new THREE.PolarGridHelper(2.75,16,6,64,0x1d9e75,0x0f4f40));grid.position.y=PY+.002;
+grid.material.transparent=true;grid.material.opacity=.45;
+const rim=add(new THREE.Mesh(new THREE.TorusGeometry(2.75,.012,8,96),glowMat(0x5dcaa5,.8)));rim.rotation.x=Math.PI/2;rim.position.y=PY;
+const rim2=add(new THREE.Mesh(new THREE.TorusGeometry(3.05,.006,8,96),glowMat(0x5dcaa5,.35)));rim2.rotation.x=Math.PI/2;rim2.position.y=PY+.25;
+// partículas
+const PN=260,pg=new THREE.BufferGeometry(),pp=new Float32Array(PN*3),pv=[];
+for(let i=0;i<PN;i++){const a=Math.random()*Math.PI*2,r=Math.random()*2.6;pp[i*3]=Math.cos(a)*r;pp[i*3+1]=Math.random()*3;pp[i*3+2]=Math.sin(a)*r;pv.push(.003+Math.random()*.006);}
+pg.setAttribute("position",new THREE.BufferAttribute(pp,3));
+add(new THREE.Points(pg,new THREE.PointsMaterial({color:0x9fe1cb,size:.025,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false})));
+
+// etiquetas de región en el suelo
+REG.forEach(r=>{
+  const t=document.createElement("canvas");t.width=256;t.height=48;const x=t.getContext("2d");
+  x.fillStyle="#5dcaa5";x.font="500 22px monospace";x.textAlign="center";x.fillText(r.name.toUpperCase(),128,32);
+  const m=add(new THREE.Mesh(new THREE.PlaneGeometry(1.2,.22),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(t),transparent:true,depthWrite:false})));
+  m.rotation.x=-Math.PI/2;m.position.set(r.x,PY+.01,1.35);
+});
+
+// edificios
+const hitboxes=[];
+fleet.forEach((c,idx)=>{
+  const h=.18+c.nodes*.055;c.h=h;
+  const grp=new THREE.Group();grp.position.set(c.gx,PY,c.gz);scene.add(grp);
+  const geo=new THREE.BoxGeometry(.28,h,.28);geo.translate(0,h/2,0);
+  const body=new THREE.Mesh(geo,glowMat(C.ok,.12));
+  const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:C.ok,transparent:true,opacity:.7}));
+  const floors=new THREE.Group();
+  for(let y=.12;y<h;y+=.12){const f=new THREE.Mesh(new THREE.PlaneGeometry(.282,.006),glowMat(C.ok,.28));f.position.set(0,y,.141);floors.add(f);const b=f.clone();b.position.z=-.141;floors.add(b);}
+  const roof=new THREE.Mesh(new THREE.PlaneGeometry(.28,.28),glowMat(C.ok,.3));roof.rotation.x=-Math.PI/2;roof.position.y=h+.001;
+  const beacon=new THREE.Group();
+  const stalk=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.7,6),glowMat(C.crit,.9));stalk.position.y=h+.35;
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.045,16,12),glowMat(C.crit,1));bulb.position.y=h+.72;
+  beacon.add(stalk,bulb);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.2,.23,48),glowMat(C.crit,.8));ring.rotation.x=-Math.PI/2;ring.position.y=.005;
+  const hit=new THREE.Mesh(new THREE.BoxGeometry(.44,h+.5,.44),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+  hit.position.y=(h+.5)/2;hit.userData.idx=idx;hitboxes.push(hit);
+  grp.add(body,edges,floors,roof,beacon,ring,hit);
+  c.o={grp,body,edges,floors,roof,beacon,bulb,ring};
+});
+
+// pods orbitando el cluster seleccionado
+const podGroup=new THREE.Group();scene.add(podGroup);
+const podMeshes=[];
+for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.05,.05,.05),glowMat(0x378add,.6));podGroup.add(m);podMeshes.push(m);}
+podGroup.visible=false;
+
+// tráfico entre clusters: arcos con partículas
+const byKey=(reg,i)=>fleet[REG.findIndex(r=>r.id===reg)*ENVS.length+i];
+const LINKS=[];
+REG.forEach(r=>{[[3,0],[4,1],[0,5],[1,5],[2,5],[3,2]].forEach(([a,b])=>LINKS.push([byKey(r.id,a),byKey(r.id,b)]));});
+LINKS.push([byKey("weu",0),byKey("neu",0)],[byKey("weu",5),byKey("neu",5)]);
+const flows=LINKS.map(([a,b])=>{
+  const p0=new THREE.Vector3(a.gx,PY+a.h,a.gz),p2=new THREE.Vector3(b.gx,PY+b.h,b.gz);
+  const lift=.35+p0.distanceTo(p2)*.22,mid=p0.clone().add(p2).multiplyScalar(.5);mid.y=Math.max(p0.y,p2.y)+lift;
+  const curve=new THREE.QuadraticBezierCurve3(p0,mid,p2);
+  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(40)),new THREE.LineBasicMaterial({color:C.ok,transparent:true,opacity:.22}));
+  scene.add(line);
+  const dots=[0,1,2].map(k=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.018,8,6),glowMat(C.ok,.9));m.userData.off=k/3+Math.random()*.1;scene.add(m);return m;});
+  return {a,b,curve,line,dots};
+});
+
+// clientes por planta del edificio seleccionado
+const tenantGroup=new THREE.Group();scene.add(tenantGroup);
+let slabs=[];
+function buildSlabs(c){
+  tenantGroup.clear();slabs=[];
+  tenantGroup.position.set(c.gx,PY,c.gz);
+  const n=c.tenants;if(!n)return;
+  const step=(c.h-.04)/n;
+  c.tenantIds.forEach((id,k)=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(.3,Math.max(.006,step*.4),.3),new THREE.MeshBasicMaterial({color:C.ok,transparent:true,opacity:.06,depthWrite:false}));
+    m.position.y=.03+step*(k+.5);m.userData.id=id;tenantGroup.add(m);slabs.push(m);
+  });
+}
+
+function paint(){
+  fleet.forEach(c=>{
+    const col=C[c.status];
+    [c.o.body,c.o.roof].forEach(m=>m.material.color.copy(col));
+    c.o.edges.material.color.copy(col);
+    c.o.floors.children.forEach(f=>f.material.color.copy(col));
+    c.o.beacon.visible=c.status==="crit";
+    c.o.ring.visible=c.status!=="ok";
+    c.o.ring.material.color.copy(col);
+  });
+  const k={ok:0,warn:0,crit:0};fleet.forEach(c=>k[c.status]++);
+  document.getElementById("chips").innerHTML=
+    `<span class="chip">${k.ok} ok</span>`+(k.warn?`<span class="chip warn">${k.warn} aviso</span>`:"")+(k.crit?`<span class="chip crit">${k.crit} críticos</span>`:"")+
+    `<span class="chip">${fleet.reduce((a,c)=>a+c.tenants,0)} tenants</span>`;
+  buildTags();
+}
+
+// etiquetas flotantes
+const labels=document.getElementById("labels");let tagEls=[];
+function buildTags(){
+  labels.innerHTML="";tagEls=[];
+  fleet.forEach((c,i)=>{
+    if(c.status==="ok"&&i!==selected)return;
+    const el=document.createElement("div");
+    el.className="tag"+(i===selected?" sel":c.status==="warn"?" warn":"");
+    el.textContent=(c.status==="warn"&&i!==selected?"▲ ":"")+c.name;
+    labels.appendChild(el);tagEls.push({el,c});
+  });
+}
+const v3=new THREE.Vector3();
+function placeTags(){
+  const w=renderer.domElement.clientWidth,h=renderer.domElement.clientHeight;
+  tagEls.forEach(({el,c})=>{
+    v3.set(c.gx,PY+c.h+(c.status==="crit"?.84:.12),c.gz).project(camera);
+    if(v3.z>1){el.hidden=true;return;}el.hidden=false;
+    el.style.left=((v3.x+1)/2*w)+"px";el.style.top=((1-v3.y)/2*h)+"px";
+  });
+}
+
+// ---------- selección por raycast ----------
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+let selected=-1,down=null,camGoal=null;
+renderer.domElement.addEventListener("pointerdown",e=>{down={x:e.clientX,y:e.clientY};controls.autoRotate=false;});
+renderer.domElement.addEventListener("pointerup",e=>{
+  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>8){down=null;return;}down=null;
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.x=(e.clientX-r.left)/r.width*2-1;ptr.y=-(e.clientY-r.top)/r.height*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(hitboxes)[0];
+  if(hit)select(hit.object.userData.idx);
+});
+function select(i){
+  selected=i;const c=fleet[i];blip();
+  fleet.forEach((o,j)=>{const op=j===i?1:.25;o.o.edges.material.opacity=.7*op;o.o.body.material.opacity=.12*op;o.o.roof.material.opacity=.3*op;});
+  podGroup.visible=true;podGroup.position.set(c.gx,PY,c.gz);
+  fleet.forEach(o=>o.o.floors.visible=o!==c);buildSlabs(c);
+  const dir=new THREE.Vector3(c.gx,0,c.gz).normalize();if(!isFinite(dir.x))dir.set(0,0,1);
+  camGoal={pos:new THREE.Vector3(c.gx+dir.x*1.5+.3,PY+c.h+1.5,c.gz+2.1),tgt:new THREE.Vector3(c.gx,PY-.15,c.gz+.2)};
+  showSheet();buildTags();
+  document.getElementById("hint").textContent="Toca otro edificio o vuelve a la flota";
+}
+function back(){
+  selected=-1;podGroup.visible=false;tenantGroup.clear();slabs=[];
+  fleet.forEach(o=>{o.o.floors.visible=true;o.o.edges.material.opacity=.7;o.o.body.material.opacity=.12;o.o.roof.material.opacity=.3;});
+  camGoal={pos:new THREE.Vector3(0,3.4,5.6),tgt:new THREE.Vector3(0,1.1,0)};
+  document.getElementById("sheet").hidden=true;buildTags();
+  document.getElementById("hint").textContent="Arrastra para girar · toca un edificio";
+}
+document.getElementById("back").onclick=back;
+function showSheet(){
+  if(selected<0)return;const c=fleet[selected];
+  document.getElementById("sheet").hidden=false;
+  document.getElementById("s-name").textContent=c.name;
+  document.getElementById("s-sub").textContent=`${c.region} · ${c.env} · ${c.tenants} tenants`;
+  document.getElementById("s-nodes").textContent=c.nodes;
+  document.getElementById("s-pods").textContent=c.pods;
+  document.getElementById("s-cpu").textContent=Math.round(c.cpu)+"%";
+  document.getElementById("s-mem").textContent=Math.round(c.mem)+"%";
+  const is=document.getElementById("s-issue");
+  is.className="issue"+(c.status==="ok"?" ok":c.status==="warn"?" warn":"");
+  is.textContent=c.status==="ok"?"Todo en orden. Sin alertas activas.":c.issue;
+  if(c.status!=="ok"&&c.tenants){
+    const a=c.aff||[];const d=document.createElement("div");d.className="aff";
+    d.textContent=a.length?`Afecta a ${a.length} de ${c.tenants} clientes: ${a.slice(0,4).join(", ")}${a.length>4?` y ${a.length-4} más`:""}`:`Sin clientes afectados todavía (${c.tenants} en este cluster).`;
+    is.appendChild(d);
+  }
+  document.getElementById("fix").hidden=c.status==="ok"||viewTs!=null;
+  document.getElementById("ask-this").hidden=viewTs!=null;
+}
+// ---------- línea temporal ----------
+const tl=document.getElementById("tl"),tlBox=document.querySelector(".timeline"),tlLabel=document.getElementById("tl-label"),tlNow=document.getElementById("tl-now");
+const strip=document.getElementById("tl-strip");
+function hhmm(ts){const d=new Date(ts);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function drawStrip(){
+  const w=strip.clientWidth||300,dpr=Math.min(devicePixelRatio,2);strip.width=w*dpr;strip.height=18*dpr;
+  const x=strip.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,18);
+  const end=Date.now(),start=end-24*H,px=ts=>(ts-start)/(24*H)*w;
+  x.fillStyle="rgba(29,158,117,.18)";x.fillRect(0,8,w,2);
+  ["warn","crit"].forEach(lvl=>fleet.forEach(c=>{
+    for(let i=0;i<c.hist.length;i++){const e=c.hist[i];if(e.s!==lvl)continue;
+      const a=Math.max(start,e.ts),b=i+1<c.hist.length?c.hist[i+1].ts:end;if(b<start)continue;
+      x.fillStyle=lvl==="crit"?"#e24b4a":"#ef9f27";x.fillRect(px(a),lvl==="crit"?3:6,Math.max(2,px(b)-px(a)),lvl==="crit"?12:6);}
+  }));
+  if(viewTs!=null){x.fillStyle="#fac775";x.fillRect(px(viewTs)-1,0,2,18);}
+}
+function applyView(){
+  fleet.forEach(c=>applyEntry(c,viewTs==null?c.hist[c.hist.length-1]:entryAt(c,viewTs)));
+  paint();showSheet();drawStrip();
+  const past=viewTs!=null;tlBox.classList.toggle("past",past);tlNow.hidden=!past;
+  if(past){const ago=Math.round((Date.now()-viewTs)/MIN),h=Math.floor(ago/60),m=ago%60;
+    tlLabel.textContent=`Hace ${h?h+" h ":""}${m} min · ${hhmm(viewTs)}`;}
+  else tlLabel.textContent="Ahora · en vivo";
+}
+tl.addEventListener("input",()=>{const v=+tl.value;viewTs=v>=1440?null:Date.now()-(1440-v)*MIN;applyView();});
+function goLive(){if(viewTs==null)return;viewTs=null;tl.value=1440;applyView();}
+tlNow.onclick=goLive;
+setInterval(()=>{if(viewTs==null)drawStrip();},30e3);
+addEventListener("resize",drawStrip);
+
+// ---------- sonido ----------
+let actx=null,master=null,soundOn=false,humNodes=null;
+function ensureAudio(){
+  if(actx)return;
+  try{actx=new (window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.gain.value=0;master.connect(actx.destination);}catch(e){actx=null;return;}
+  const lp=actx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=260;lp.connect(master);
+  const hg=actx.createGain();hg.gain.value=.05;hg.connect(lp);
+  [55,82.4,110.3].forEach((f,i)=>{const o=actx.createOscillator();o.type=i?"sawtooth":"triangle";o.frequency.value=f;o.connect(hg);o.start();});
+  const lfo=actx.createOscillator(),lg=actx.createGain();lfo.frequency.value=.18;lg.gain.value=90;lfo.connect(lg);lg.connect(lp.frequency);lfo.start();
+}
+function setSound(on){
+  soundOn=on;ensureAudio();if(!actx)return;actx.resume();
+  master.gain.setTargetAtTime(on?1:0,actx.currentTime,.3);
+  const b=document.getElementById("sound");b.textContent=on?"🔊 Sonido":"🔇 Sonido";b.setAttribute("aria-pressed",on);
+  if(!on)stopSpeak();
+}
+document.getElementById("sound").onclick=()=>setSound(!soundOn);
+function env(g,t0,a,peak,d){g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(peak,t0+a);g.gain.exponentialRampToValueAtTime(.0001,t0+a+d);}
+function blip(){if(!soundOn||!actx)return;const t0=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.frequency.setValueAtTime(1400,t0);o.frequency.exponentialRampToValueAtTime(900,t0+.08);env(g,t0,.005,.12,.12);o.connect(g);g.connect(master);o.start(t0);o.stop(t0+.2);}
+function glitch(){
+  if(!soundOn||!actx)return;const t0=actx.currentTime;
+  const len=actx.sampleRate*.7,buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*((Math.floor(i/900)%3)?1:.15);
+  const n=actx.createBufferSource();n.buffer=buf;const bp=actx.createBiquadFilter();bp.type="bandpass";bp.Q.value=4;
+  for(let k=0;k<8;k++)bp.frequency.setValueAtTime(300+Math.random()*3000,t0+k*.08);
+  const g=actx.createGain();env(g,t0,.01,.35,.65);n.connect(bp);bp.connect(g);g.connect(master);n.start(t0);
+  const o=actx.createOscillator(),og=actx.createGain();o.type="square";o.frequency.setValueAtTime(160,t0);o.frequency.exponentialRampToValueAtTime(40,t0+.6);env(og,t0,.01,.18,.6);o.connect(og);og.connect(master);o.start(t0);o.stop(t0+.7);
+}
+function chord(){
+  if(!soundOn||!actx)return;const t0=actx.currentTime;
+  [523.3,659.3,784,1046.5].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type="sine";o.frequency.value=f;env(g,t0+i*.07,.03,.09,1.4);o.connect(g);g.connect(master);o.start(t0+i*.07);o.stop(t0+i*.07+1.6);});
+}
+
+// ---------- voz ----------
+let ttsP=window.claude?.use?window.claude.use("tts"):Promise.resolve(null);
+let ttsNS=null;ttsP.then(t=>ttsNS=t);
+function stopSpeak(){try{ttsNS&&ttsNS.stop();}catch(e){}try{speechSynthesis.cancel();}catch(e){}}
+async function speak(text){
+  if(!soundOn)return;
+  const t=await ttsP;
+  if(t){try{await t.speak(text,{language:"es"});return;}catch(e){if(e&&e.code==="viewer_stopped")return;}}
+  if(!("speechSynthesis" in window))return;
+  return new Promise(res=>{setTimeout(res,1500+text.length*85);try{const u=new SpeechSynthesisUtterance(text);u.lang="es-ES";u.rate=1.05;u.onend=u.onerror=res;speechSynthesis.speak(u);}catch(e){res();}});
+}
+
+// ---------- incidencias ----------
+let shakeUntil=0;
+const flash=document.getElementById("flash");
+function fail(c,issue,aff){
+  goLive();
+  setStatus(c,"crit",issue||ISSUES.crit[Math.floor(Math.random()*ISSUES.crit.length)],aff);drawStrip();
+  const t=clock.getElapsedTime();c.failT=t;shakeUntil=t+.6;
+  flash.classList.add("on");requestAnimationFrame(()=>requestAnimationFrame(()=>flash.classList.remove("on")));
+  glitch();paint();if(selected>=0)showSheet();
+}
+function heal(c){
+  goLive();setStatus(c,"ok");drawStrip();c.healT=clock.getElapsedTime();chord();paint();if(selected>=0)showSheet();
+}
+document.getElementById("fix").onclick=async()=>{
+  const c=fleet[selected],btn=document.getElementById("fix");btn.disabled=true;
+  if(!c.ticket)openTicket(c,"P1");
+  const pr=evt("pr","PR",`PR #${prN++} · revert del último deploy en ${c.name}`,`platform-gitops · enlaza ${c.ticket}`,"ok","aprobada · merge");
+  const cd=evt("cd","CD",`Sync en ${c.name}`,"rollout en curso","pend","sincronizando").extra('<div class="bar"><i></i></div>');
+  await progress(cd,1800);cd.set("ok","Healthy","rollout completado");
+  heal(c);closeTicket(c,"3 min");c.ticket=null;btn.disabled=false;
+  say(`<b>Rollback desplegado</b> en ${c.name}. El cluster vuelve a verde.`);
+  clearFeedLater(9000);
+};
+document.getElementById("chaos").onclick=()=>{
+  const ok=fleet.filter(c=>c.status==="ok");if(!ok.length)return;
+  const c=ok[Math.floor(Math.random()*ok.length)];
+  fail(c);c.ticket=null;openTicket(c,"P1");clearFeedLater(9000);say(`<b>¡Alerta!</b> ${c.name}: ${c.issue}.`);
+};
+
+// ---------- asistente ----------
+const ans=document.getElementById("answer");
+function say(html){ans.innerHTML=html;}
+const esc=s=>s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+let sampleP=window.claude?.use?window.claude.use("sample"):Promise.resolve(null);
+function localAnswer(){
+  const bad=fleet.filter(c=>c.status!=="ok").sort((a,b)=>(a.status==="crit"?0:1)-(b.status==="crit"?0:1)||b.tenants-a.tenants);
+  if(!bad.length)return"Toda la flota está en verde. Nada que revisar.";
+  return bad.map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.status==="crit"?"crítico":"aviso"}, ${c.tenants} tenants): ${c.issue}.`).join("<br>");
+}
+function pointAt(text){
+  const hit=fleet.map((c,i)=>({i,p:text.indexOf(c.name)})).filter(x=>x.p>=0).sort((a,b)=>a.p-b.p)[0];
+  if(hit)select(hit.i);
+}
+function plain(html){const d=document.createElement("div");d.innerHTML=html.replace(/<br>/g,". ");return d.textContent;}
+async function ask(q){
+  say(`<b>Asistente:</b> pensando…`);
+  const s=await sampleP;
+  if(!s){const a=localAnswer();say(`<b>Asistente:</b><br>${a}`);pointAt(a);speak(plain(a));return;}
+  const ctx=fleet.map(c=>({cluster:c.name,region:c.region,entorno:c.env,estado:c.status,problema:c.issue||null,nodos:c.nodes,pods:c.pods,tenants:c.tenants,clientes_afectados:c.aff.length,cpu:Math.round(c.cpu),mem:Math.round(c.mem)}));
+  const when=viewTs!=null?`El usuario está viendo el estado de hace ${Math.round((Date.now()-viewTs)/MIN)} minutos, no el actual.`:"";
+  const sel=selected>=0?`El usuario está mirando el cluster ${fleet[selected].name}.`:"";
+  const prompt=`Eres el asistente de operaciones de una flota de clusters AKS (datos simulados de demo). Responde en español, en 3 frases como máximo, sin markdown, directo y concreto. ${sel} ${when}\n\nEstado actual:\n${JSON.stringify(ctx)}\n\nPregunta: ${q}`;
+  try{
+    const r=await s(prompt,{modelTier:"quick",cache:false,onText:({text})=>say(`<b>Asistente:</b> ${esc(text)}`)});
+    const txt=(r&&r.text)||"";say(`<b>Asistente:</b> ${esc(txt)}`);pointAt(txt);speak(txt);
+  }catch(e){const a=localAnswer();say(`<b>Asistente:</b><br>${a}`);pointAt(a);}
+}
+
+// ---------- integraciones simuladas (ticketing, PRs, CI/CD) ----------
+const feedEl=document.getElementById("feed");
+let incN=2481,prN=482;
+function evt(k,label,title,detail,state,pillTxt){
+  const el=document.createElement("div");el.className="ev";
+  el.innerHTML=`<div class="k ${k}">${label}</div><div class="tt"><div class="t"></div><div class="dd"></div></div><span class="pill"></span>`;
+  feedEl.prepend(el);
+  [...feedEl.children].forEach((c,i)=>{c.classList.toggle("old",i>0);if(i>2)c.remove();});
+  const o={el,set(st,txt,det){const p=el.querySelector(".pill");p.className="pill"+(st&&st!=="ok"?" "+st:"");p.textContent=txt||"";if(det!=null)el.querySelector(".dd").innerHTML=det;return o;},
+    title(t){el.querySelector(".t").textContent=t;return o;},
+    extra(html){el.querySelector(".tt").insertAdjacentHTML("beforeend",html);return o;}};
+  o.title(title);o.set(state,pillTxt,detail);blip();
+  return o;
+}
+function clearFeedLater(ms){const n=feedEl.children.length;setTimeout(()=>{if(!document.getElementById("demo").classList.contains("on")&&feedEl.children.length===n)feedEl.innerHTML="";},ms);}
+async function progress(o,ms,run){const b=o.el.querySelector(".bar i");const steps=8;for(let i=1;i<=steps;i++){if(run!=null&&run!==demoRun)throw 0;b.style.width=(i/steps*100)+"%";await sleep(ms/steps);}}
+const diffHtml=(file,lines)=>`<pre><span>${file}</span>\n${lines.map(([t,x])=>`<span class="${t==="-"?"del":"ins"}">${t} ${x}</span>`).join("\n")}</pre>`;
+function openTicket(c,prio){const id="INC-"+(incN++);c.ticket=id;
+  return evt("tk","TK",`${id} · ${c.name}`,`${c.issue}. ${c.aff.length?c.aff.length+" clientes afectados. ":""}Asignado a la guardia.`,prio==="P1"?"crit":"pend",prio);}
+async function prFlow(c,run){
+  const n=prN++;
+  const pr=evt("pr","PR",`PR #${n} · fix(ingestion): rollback a v2.13.4 y memoria a 1Gi`,`platform-gitops · rama fix/${c.ticket.toLowerCase()} · enlaza ${c.ticket}`,"info","abierta")
+    .extra(diffHtml(`apps/ingestion/values-${c.name.split("-")[1]}.yaml`,[["-","image.tag: v2.14.0"],["+","image.tag: v2.13.4"],["-","resources.limits.memory: 512Mi"],["+","resources.limits.memory: 1Gi"]]));
+  await sleep(1400);if(run!=null&&run!==demoRun)throw 0;
+  const ci=evt("ci","CI",`Checks de la PR #${n}`,"helm lint · kubeconform · policy check","pend","en curso").extra('<div class="bar"><i></i></div>');
+  await progress(ci,2400,run);ci.set("ok","3/3 ok");
+  return {pr,n};
+}
+async function approveMerge(c,p,run){
+  p.pr.set("pend","esperando revisión");await sleep(1200);if(run!=null&&run!==demoRun)throw 0;
+  p.pr.set("ok","aprobada · merge");
+  const cd=evt("cd","CD",`Sync de ingestion en ${c.name}`,"rollout por oleadas · 0/6 réplicas","pend","sincronizando").extra('<div class="bar"><i></i></div>');
+  const b=cd.el.querySelector(".bar i");
+  for(let i=1;i<=6;i++){if(run!=null&&run!==demoRun)throw 0;b.style.width=(i/6*100)+"%";cd.set("pend","sincronizando",`rollout por oleadas · ${i}/6 réplicas`);await sleep(450);}
+  cd.set("ok","Healthy",`rollout completado · 6/6 réplicas`);
+}
+function closeTicket(c,mttr){return evt("tk","TK",`${c.ticket} resuelto`,`MTTR ${mttr} · clientes notificados · ${c.name} en verde`,"ok","cerrado");}
+
+// ---------- modo demo ----------
+const sub=document.getElementById("subtitle");
+let demoRun=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function line(run,text,minMs){
+  if(run!==demoRun)throw 0;
+  sub.style.bottom=(document.querySelector('.dock').offsetHeight+14)+'px';sub.hidden=false;sub.textContent=text;
+  await Promise.all([speak(text),sleep(minMs)]);
+  if(run!==demoRun)throw 0;
+}
+function stopDemo(){demoRun++;document.body.classList.remove("demo");sub.hidden=true;clearFeedLater(8000);stopSpeak();const b=document.getElementById("demo");b.textContent="▶ Demo";b.classList.remove("on");}
+document.getElementById("demo").onclick=async()=>{
+  const b=document.getElementById("demo");
+  if(b.classList.contains("on")){stopDemo();return;}
+  const run=++demoRun;b.textContent="■ Parar";b.classList.add("on");document.body.classList.add("demo");feedEl.innerHTML="";
+  if(!soundOn)setSound(true);
+  try{
+    goLive();back();controls.autoRotate=true;
+    fleet.forEach(c=>{if(c.status!=="ok")setStatus(c,"ok");});paint();drawStrip();chord();
+    const tn=fleet.reduce((a,c)=>a+c.tenants,0);
+    const fly=(x,z,dist)=>{controls.autoRotate=false;camGoal={pos:new THREE.Vector3(x*.6,PY+1.9,z+dist),tgt:new THREE.Vector3(x,PY+.4,z)};};
+    // 1. presentación
+    await line(run,`Esta es nuestra flota: ${fleet.length} clusters AKS en dos regiones, dando servicio a ${tn} clientes.`,5000);
+    await line(run,"Cada edificio es un cluster. La altura son sus nodos, y el color, su salud.",4500);
+    // 2. recorrido por regiones
+    fly(REG[0].x,0,2.6);
+    await line(run,"En West Europe tenemos producción, IoT, datos y los entornos de pruebas.",4500);
+    fly(REG[1].x,0,2.6);
+    await line(run,"North Europe replica la misma estructura, para que un fallo regional no tumbe a nadie.",4500);
+    back();controls.autoRotate=true;
+    await line(run,"Ahora mismo, todo en verde. Un martes tranquilo… de momento.",4000);
+    await sleep(1000);
+    // 3. un aviso leve
+    const warnC=fleet.find(c=>c.env==="data"&&c.region==="West Europe")||fleet[5];
+    setStatus(warnC,"warn","uso de disco al 86% en el node pool system",[]);paint();drawStrip();blip();
+    say(`<b>Aviso:</b> ${warnC.name}: ${warnC.issue}.`);
+    await line(run,`Primero, un aviso amarillo: el disco de ${warnC.name} está al 86%. No es urgente; el asistente lo deja anotado.`,5500);
+    await sleep(1200);
+    // 4. caída crítica
+    const victim=fleet.find(c=>c.env==="prod"&&c.region==="North Europe")||fleet[8];
+    fail(victim,"pods de ingestión en CrashLoopBackOff por OOM tras el deploy v2.14",affectSome(victim,.4));
+    say(`<b>¡Alerta!</b> ${victim.name}: ${victim.issue}.`);
+    await line(run,`¡Alerta! Cae ${victim.name}, un cluster de producción.`,3000);
+    say(`<b>Asistente:</b> analizando…`);
+    await sleep(1000);select(fleet.indexOf(victim));
+    const exp=`He encontrado el problema: los pods de ingestión se quedan sin memoria desde el deploy v2.14 de hace doce minutos. Afecta a ${victim.aff.length} de sus ${victim.tenants} clientes; los ves en rojo, planta por planta.`;
+    say(`<b>Asistente:</b> ${exp}`);
+    await line(run,exp,6000);
+    // 5. segunda caída a la vez
+    const victim2=fleet.find(c=>c.env==="iot"&&c.region==="West Europe")||fleet[3];
+    fail(victim2,"errores 5xx en el ingress: el certificado TLS caducó esta madrugada",[...victim2.tenantIds]);
+    say(`<b>¡Alerta!</b> ${victim2.name}: ${victim2.issue}.`);
+    await line(run,`Y mientras tanto… cae también ${victim2.name}.`,3200);
+    back();
+    const first=victim.aff.length>=victim2.aff.length?victim:victim2,second=first===victim?victim2:victim;
+    const prio=`Dos incidencias a la vez. Empiezo por ${first.name}, porque deja sin servicio a ${first.aff.length} clientes. Después, ${second.name}.`;
+    say(`<b>Asistente:</b> ${prio}`);
+    await line(run,prio,6000);
+    // 6. tickets y war room
+    back();
+    const t1=openTicket(first,"P1");
+    await line(run,`Abro un ticket P1 para ${first.name}…`,2400);
+    const t2=openTicket(second,"P1");
+    evt("wr","WR",`Sala de crisis #inc-${first.ticket.split("-")[1]}`,"Aviso a la guardia, a soporte y a los account managers afectados","info","abierta");
+    await line(run,"…otro para el segundo, y abro una sala de crisis con la guardia y soporte.",4200);
+    // 7. resolución de cada uno
+    for(const c of [first,second]){
+      select(fleet.indexOf(c));
+      if(c===victim){
+        await line(run,"Para la ingestión, preparo una pull request: vuelvo a la versión anterior y subo el límite de memoria.",5200);
+        const p=await prFlow(c,run);
+        await line(run,"Los checks pasan. Un humano revisa y aprueba: la IA propone, la guardia decide.",4800);
+        await approveMerge(c,p,run);
+        heal(c);say(`<b>Resuelto:</b> ${c.name} vuelve a verde tras el merge de la PR #${p.n}.`);
+        closeTicket(c,"6 min");
+        await line(run,`Desplegado por GitOps. ${c.name} vuelve a verde y el ticket se cierra solo.`,4200);
+      }else{
+        await line(run,"Para el ingress, ejecuto el runbook de renovación del certificado.",4200);
+        const rb=evt("rb","RB",`Runbook: renovar certificado TLS`,`cert-manager · ${c.name} · ingress-nginx`,"pend","ejecutando").extra('<div class="bar"><i></i></div>');
+        await progress(rb,2600,run);rb.set("ok","completado","certificado nuevo emitido · válido 90 días");
+        heal(c);say(`<b>Resuelto:</b> certificado renovado en ${c.name}.`);
+        closeTicket(c,"4 min");
+        await line(run,`Certificado renovado. ${c.name} en verde y su ticket, cerrado.`,4000);
+      }
+      await sleep(900);
+    }
+    back();controls.autoRotate=true;
+    evt("tk","TK",`INC-${incN++} · ${warnC.name}`,"Disco al 86% en el node pool system. Programado para mañana.","info","P3");
+    await line(run,`El aviso de disco de ${warnC.name} queda como ticket de prioridad baja para mañana.`,4500);
+    evt("pm","PM",`Borrador de postmortem · ${first.ticket} y ${second.ticket}`,"Cronología, impacto por cliente, causa raíz y acciones, listo para revisar","ok","generado");
+    await line(run,"Y con todo lo ocurrido, el asistente deja preparado el borrador del postmortem.",5000);
+    // 7. cierre
+    await line(run,"Dos caídas en producción: detectadas, explicadas, con ticket, PR, despliegue y postmortem.",5500);
+    await line(run,"Sin abrir un solo dashboard. Solo preguntando a la flota.",4500);
+    await line(run,"Y todo queda registrado: en la línea temporal de arriba se ven las caídas de las últimas veinticuatro horas.",5500);
+  }catch(e){}
+  if(run===demoRun)stopDemo();
+};
+document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(b.dataset.q));
+document.getElementById("ask-this").onclick=()=>ask(`¿Qué le pasa a ${fleet[selected].name} y qué harías?`);
+document.getElementById("ask").addEventListener("submit",e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q){ask(q);document.getElementById("q").value="";}});
+
+// ---------- métricas vivas ----------
+setInterval(()=>{fleet.forEach(c=>{c.cpu=Math.max(8,Math.min(97,c.cpu+(Math.random()-.5)*6+(c.status==="crit"?1.2:0)));c.mem=Math.max(10,Math.min(97,c.mem+(Math.random()-.5)*3));});showSheet();},2500);
+
+// ---------- bucle ----------
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);if(composer)composer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener("resize",resize);resize();
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const clock=new THREE.Clock();
+function loop(){
+  const t=clock.getElapsedTime();
+  if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
+  controls.update();
+  if(!reduce){
+    const a=pg.attributes.position.array;for(let i=0;i<PN;i++){a[i*3+1]+=pv[i];if(a[i*3+1]>3)a[i*3+1]=0;}pg.attributes.position.needsUpdate=true;
+    rim2.rotation.z=t*.2;
+  }
+  fleet.forEach((c,i)=>{
+    if(c.status==="crit"){c.o.bulb.scale.setScalar(1+.25*Math.sin(t*6));const k=(t*.6+i*.13)%1;c.o.ring.scale.setScalar(1+k*4);c.o.ring.material.opacity=.8*(1-k);}
+    else if(c.status==="warn"){const k=(t*.4+i*.1)%1;c.o.ring.scale.setScalar(1+k*2.5);c.o.ring.material.opacity=.6*(1-k);
+      if(selected<0||selected===i){c.o.edges.material.opacity=.35+.35*Math.abs(Math.sin(t*2.5));}}
+  });
+  if(podGroup.visible){const c=fleet[selected];podMeshes.forEach((m,i)=>{
+    const a=i/podMeshes.length*Math.PI*2+t*.8,r=.42;
+    let y=c.h*.5+.15*Math.sin(t*2+i);
+    const bad=c.status==="crit"&&i===3;
+    if(bad){const k=(t%3)/3;if(k>.5)y-=(k-.5)*2*c.h*.5;}
+    m.position.set(Math.cos(a)*r,Math.max(.03,y),Math.sin(a)*r);
+    m.material.color.set(bad?0xe24b4a:0x378add);m.rotation.y=t;
+  });}
+  // tráfico
+  flows.forEach(f=>{
+    const st=f.a.status==="crit"||f.b.status==="crit"?"crit":f.a.status==="warn"||f.b.status==="warn"?"warn":"ok";
+    const focus=selected<0||fleet[selected]===f.a||fleet[selected]===f.b;
+    const col=C[st],dim=focus?1:.2;
+    f.line.material.color.copy(col);
+    f.line.material.opacity=(st==="crit"?.3+.25*Math.abs(Math.sin(t*4)):.2)*dim;
+    const speed=st==="crit"?.08:st==="warn"?.16:.28;
+    f.dots.forEach(d=>{
+      let u=(t*speed+d.userData.off)%1;
+      if(st==="crit"&&f.b.status==="crit"&&u>.85)u=.85; // el tráfico se atasca antes de llegar
+      f.curve.getPoint(reduce?d.userData.off:u,d.position);
+      d.material.color.copy(col);d.material.opacity=.9*dim;
+    });
+  });
+  // plantas de clientes del edificio seleccionado
+  if(slabs.length){const c=fleet[selected];slabs.forEach(m=>{
+    const hitT=c.aff&&c.aff.includes(m.userData.id);
+    if(hitT){m.material.color.copy(c.status==="warn"?C.warn:C.crit);m.material.opacity=.45+.4*Math.abs(Math.sin(t*5+m.position.y*20));}
+    else{m.material.color.copy(C.ok);m.material.opacity=.06;}
+  });}
+  // parpadeo de los que acaban de caer
+  fleet.forEach(c=>{if(c.failT!=null){const d=t-c.failT;if(d<1.4){const on=Math.random()>.45;c.o.grp.visible=on||d>1.2;c.o.grp.position.x=c.gx+(Math.random()-.5)*.04*(1.4-d);}else{c.o.grp.visible=true;c.o.grp.position.x=c.gx;c.failT=null;}}
+    if(c.healT!=null){const d=t-c.healT;const s=d<.6?.4+d:1;c.o.grp.scale.set(1,Math.min(1,s+Math.sin(d*12)*.05*(1-Math.min(1,d))),1);if(d>1){c.o.grp.scale.set(1,1,1);c.healT=null;}}});
+  // temblor de cámara
+  let sx=0,sy=0;if(shakeUntil>t&&!reduce){const k=(shakeUntil-t)*.12;sx=(Math.random()-.5)*k;sy=(Math.random()-.5)*k;}
+  camera.position.x+=sx;camera.position.y+=sy;
+  if(composer)composer.render();else renderer.render(scene,camera);
+  camera.position.x-=sx;camera.position.y-=sy;
+  placeTags();
+  requestAnimationFrame(loop);
+}
+paint();loop();drawStrip();
+</script>
+</body>
+</html>
