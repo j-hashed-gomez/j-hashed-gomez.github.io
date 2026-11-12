@@ -109,6 +109,10 @@ body.demo .answer,body.demo .suggest,body.demo .ask,body.demo #hint{display:none
 .list button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .list button small{color:var(--dim);font-size:10px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (min-width:900px){
+  .sheet{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:var(--sheet-top,210px);width:340px;max-height:calc(100vh - var(--sheet-top,210px) - 170px);overflow:auto}
+  .sheet .grid{grid-template-columns:repeat(2,1fr)}
+}
 @media (max-width:600px){
   .timeline{display:none}.timeline.open{display:flex}
   #tl-toggle{display:inline-block}
@@ -442,16 +446,37 @@ function select(i){
   fleet.forEach((o,j)=>{const op=j===i?1:.25;o.o.edges.material.opacity=.7*op;o.o.body.material.opacity=.12*op;o.o.roof.material.opacity=.3*op;});
   podGroup.visible=true;podGroup.position.set(c.gx,PY,c.gz);
   fleet.forEach(o=>o.o.floors.visible=o!==c);buildSlabs(c);
-  const dir=new THREE.Vector3(c.gx,0,c.gz).normalize();if(!isFinite(dir.x))dir.set(0,0,1);
-  camGoal={pos:new THREE.Vector3(c.gx+dir.x*1.5+.3,PY+c.h+1.5,c.gz+2.1),tgt:new THREE.Vector3(c.gx,PY-.15,c.gz+.2)};
   showSheet();buildTags();
+  frameCluster(c);
   document.getElementById("hint").textContent="Toca otro edificio o vuelve a la flota";
+}
+// Visible band = space between the HUD and the bottom dock. The camera's optical centre is shifted
+// into that band (setViewOffset) and the distance is chosen so the building plus its beacon fit it.
+function freeBand(){
+  const top=document.querySelector(".hud").getBoundingClientRect().bottom;
+  document.documentElement.style.setProperty("--sheet-top",(top+10)+"px");
+  const sheet=document.getElementById("sheet"),side=!sheet.hidden&&getComputedStyle(sheet).position==="fixed";
+  const dock=(side?document.getElementById("answer"):document.querySelector(".dock")).getBoundingClientRect().top;
+  const right=side?sheet.getBoundingClientRect().left-10:innerWidth;
+  return {top,bottom:Math.max(top+80,dock),left:0,right};
+}
+let viewDy=0,viewDyGoal=0,viewDx=0,viewDxGoal=0;
+function updateViewGoal(){const b=freeBand();viewDyGoal=innerHeight/2-(b.top+b.bottom)/2;viewDxGoal=innerWidth/2-(b.left+b.right)/2;}
+function applyView0(){camera.setViewOffset(innerWidth,innerHeight,viewDx,viewDy,innerWidth,innerHeight);}
+function frameCluster(c){
+  updateViewGoal();
+  const b=freeBand(),frac=(b.bottom-b.top)/innerHeight;
+  const tgt=new THREE.Vector3(c.gx,PY+c.h*.5+.2,c.gz);
+  const fit=(c.h+1.1)/(1.6*frac*Math.tan(camera.fov*Math.PI/360));
+  const side=Math.sign(c.gx)||.3;
+  const dirv=new THREE.Vector3(side*.35,.55,1).normalize();
+  camGoal={pos:tgt.clone().addScaledVector(dirv,Math.max(2.2,Math.min(6,fit))),tgt};
 }
 function back(){
   selected=-1;podGroup.visible=false;tenantGroup.clear();slabs=[];
   fleet.forEach(o=>{o.o.floors.visible=true;o.o.edges.material.opacity=.7;o.o.body.material.opacity=.12;o.o.roof.material.opacity=.3;});
   camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};
-  document.getElementById("sheet").hidden=true;buildTags();
+  document.getElementById("sheet").hidden=true;buildTags();updateViewGoal();
   document.getElementById("hint").textContent="Arrastra para girar · toca un edificio";
 }
 document.getElementById("back").onclick=back;
@@ -854,13 +879,15 @@ setInterval(()=>{fleet.forEach(c=>{c.cpu=Math.max(8,Math.min(97,c.cpu+(Math.rand
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);if(composer)composer.setSize(w,h);camera.aspect=w/h;
   const a=w/h,k=a<1?Math.min(1.5,1/Math.sqrt(a)):1;camera.fov=a<1?Math.min(80,50/Math.sqrt(a)):50;camera.updateProjectionMatrix();
   if(k!==camK){camK=k;scene.fog.near=10*k;scene.fog.far=20*k;controls.maxDistance=11*k;
-    if(selected<0&&!document.body.classList.contains("demo"))camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};}}
+    if(selected<0&&!document.body.classList.contains("demo"))camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};}
+  updateViewGoal();viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();}
 addEventListener("resize",resize);resize();
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clock=new THREE.Clock();
 function loop(){
   const t=clock.getElapsedTime();
   if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
+  if(Math.abs(viewDy-viewDyGoal)>.5||Math.abs(viewDx-viewDxGoal)>.5){viewDy+=(viewDyGoal-viewDy)*.1;viewDx+=(viewDxGoal-viewDx)*.1;applyView0();}
   controls.update();
   if(!reduce){
     const a=pg.attributes.position.array;for(let i=0;i<PN;i++){a[i*3+1]+=pv[i];if(a[i*3+1]>3)a[i*3+1]=0;}pg.attributes.position.needsUpdate=true;
@@ -911,7 +938,7 @@ function loop(){
   placeTags();
   requestAnimationFrame(loop);
 }
-paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`);loop();drawStrip();
+updateViewGoal();paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`);loop();drawStrip();
 (()=>{const btns=["sound","demo"].map(id=>document.getElementById(id));
   const off=()=>btns.forEach(b=>b.classList.remove("attn"));
   setTimeout(()=>btns.forEach(b=>b.classList.add("attn")),900);
@@ -926,7 +953,7 @@ paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`
 (()=>{const qs=new URLSearchParams(location.search);
   if(qs.has("bucle")||qs.has("loop")){setLoop(true);setTimeout(()=>startDemo(false),1500);return;}
   if(qs.has("demo")){setTimeout(()=>startDemo(false),1500);return;}
-  const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>select(i),400);}}})();
+  const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>{select(i);if(camGoal){camera.position.copy(camGoal.pos);controls.target.copy(camGoal.tgt);camGoal=null;}viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();},400);}}})();
 </script>
 </body>
 </html>
