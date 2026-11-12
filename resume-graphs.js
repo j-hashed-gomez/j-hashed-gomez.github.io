@@ -272,7 +272,32 @@
   }
 
   // -------------------------------------------------------------------------
-  // SECTION 05: certifications.ledger
+  // SECTION 05: projects.showcase
+  // -------------------------------------------------------------------------
+  function renderProjects(el, data, lang) {
+    const projects = data.projects || [];
+    el.innerHTML = projects.map((p, idx) => {
+      const id = `PRJ_${String(idx + 1).padStart(2, '0')}`;
+      const bullets = (p.bullets?.[lang] || []).map((b) => `<li>${esc(b)}</li>`).join('');
+      const tags = p.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
+      const statusBadge = p.status ? `<span class="status-badge">${esc(p.status[lang])}</span>` : '';
+      return `
+        <article class="panel project-card">
+          <div class="head">
+            <span class="id">[ ${id} ]</span>
+          </div>
+          <h3>${esc(p.title[lang])}${statusBadge}</h3>
+          <p>${esc(p.description[lang])}</p>
+          ${bullets ? `<ul>${bullets}</ul>` : ''}
+          <div class="tags">${tags}</div>
+        </article>`;
+    }).join('');
+    const counter = document.getElementById('projects-count');
+    if (counter) counter.textContent = `[ ${projects.length} ]`;
+  }
+
+  // -------------------------------------------------------------------------
+  // SECTION 06 + 07 ledger (certifications & trainings)
   // -------------------------------------------------------------------------
   function renderCertifications(el, data /*, lang */) {
     el.innerHTML = data.certifications.map((c) => {
@@ -292,9 +317,6 @@
     if (counter) counter.textContent = `[ ${data.certifications.length} ]`;
   }
 
-  // -------------------------------------------------------------------------
-  // SECTION 06: trainings.archive
-  // -------------------------------------------------------------------------
   function renderTrainings(el, data, lang) {
     el.innerHTML = data.trainings.map((t) => `
       <div class="ledger-row">
@@ -309,7 +331,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // SECTION 07: languages.dial / other.modules
+  // SECTION 08: languages.dial / other.modules
   // -------------------------------------------------------------------------
   function renderLanguages(el, data, lang) {
     const labels = data.ui_labels[lang];
@@ -349,14 +371,14 @@
   }
 
   // -------------------------------------------------------------------------
-  // SECTION 08: subject.profile / about
+  // SECTION 09: subject.profile / about
   // -------------------------------------------------------------------------
   function renderAbout(el, data, lang) {
     el.innerHTML = data.about[lang].map((p) => `<p>${esc(p)}</p>`).join('');
   }
 
   // -------------------------------------------------------------------------
-  // SECTION 09: contact card + actions
+  // SECTION 10: contact card + actions
   // -------------------------------------------------------------------------
   function renderContact(el, data, lang) {
     const labels = data.ui_labels[lang];
@@ -934,6 +956,7 @@
     renderLog,
     renderExperience,
     renderSkills,
+    renderProjects,
     renderCertifications,
     renderTrainings,
     renderLanguages,
