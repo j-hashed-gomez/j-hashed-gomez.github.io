@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Holoflota AKS</title>
+<meta name="description" content="Visor holográfico 3D de una flota de clusters AKS, con demo guiada de una incidencia completa: detección, ticket, PR, CI, GitOps y postmortem. Datos simulados.">
+<meta property="og:title" content="Holoflota AKS">
+<meta property="og:description" content="Visor holográfico 3D de una flota de clusters Kubernetes con demo guiada de incidencias. Datos simulados.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gomezmarin.es/holoflota.html">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -88,6 +94,12 @@ body.demo .answer,body.demo .suggest,body.demo .ask,body.demo #hint{display:none
 .bar i{display:block;height:100%;width:0;background:var(--glow);transition:width .4s}
 .aff{margin-top:4px;font-size:11px;opacity:.85}
 .tools{display:flex;gap:6px;pointer-events:auto;flex:none}
+.brand-wrap{display:flex;align-items:center;gap:10px}
+.back-cv{pointer-events:auto;font-size:11px;color:var(--dim);text-decoration:none;border:1px solid rgba(29,158,117,.5);border-radius:99px;padding:3px 9px;background:rgba(4,22,20,.6)}
+.back-cv:hover{color:var(--glow);border-color:var(--glow)}
+.tip{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 168px);max-width:240px;font-size:11.5px;line-height:1.45;color:var(--ink);background:rgba(4,52,44,.92);border:1px solid var(--glow);border-radius:9px;padding:8px 28px 8px 10px;pointer-events:auto;animation:evin .35s ease-out}
+.tip b{color:var(--glow);font-weight:500}
+.tip button{position:absolute;top:4px;right:4px;padding:0 6px;border:none;background:none;font-size:13px}
 button.primary{color:#04342c;background:var(--glow);border-color:var(--glow);font-weight:500}
 button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-color:var(--crit)}
 .flash{position:fixed;inset:0;pointer-events:none;background:var(--crit);opacity:0;transition:opacity .6s}
@@ -102,10 +114,11 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
 <div class="flash" id="flash"></div>
 <div class="feed" id="feed" aria-live="polite"></div>
 <div class="subtitle" id="subtitle" hidden></div>
+<div class="tip" id="tip" role="note" hidden>Pulsa <b>▶ Demo</b> para ver una incidencia completa en unos 3 minutos: detección, ticket, PR, despliegue y postmortem.<button type="button" id="tip-close" aria-label="Cerrar aviso">×</button></div>
 
 <div class="hud">
   <div class="hud-row">
-    <div class="brand">◤ Flota AKS</div>
+    <div class="brand-wrap"><a class="back-cv" href="resume.html">← CV</a><div class="brand">◤ Flota AKS</div></div>
     <div class="live"><i></i>DATOS SIMULADOS</div>
   </div>
   <div class="chips" id="chips"></div>
@@ -223,7 +236,7 @@ try{
   bloom=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.45,.4,.42);
   composer.addPass(bloom);
 }catch(e){composer=null;}
-camera.position.set(0,3.4,5.6);
+camera.position.set(0,3.8,6.4);
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=.08;
 controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*.47;
@@ -264,7 +277,7 @@ REG.forEach(r=>{
   const t=document.createElement("canvas");t.width=256;t.height=48;const x=t.getContext("2d");
   x.fillStyle="#5dcaa5";x.font="500 22px monospace";x.textAlign="center";x.fillText(r.name.toUpperCase(),128,32);
   const m=add(new THREE.Mesh(new THREE.PlaneGeometry(1.2,.22),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(t),transparent:true,depthWrite:false})));
-  m.rotation.x=-Math.PI/2;m.position.set(r.x,PY+.01,1.35);
+  m.rotation.x=-Math.PI/2;m.position.set(r.x,PY+.01,2.25);
 });
 
 // edificios
@@ -397,7 +410,7 @@ function select(i){
 function back(){
   selected=-1;podGroup.visible=false;tenantGroup.clear();slabs=[];
   fleet.forEach(o=>{o.o.floors.visible=true;o.o.edges.material.opacity=.7;o.o.body.material.opacity=.12;o.o.roof.material.opacity=.3;});
-  camGoal={pos:new THREE.Vector3(0,3.4,5.6),tgt:new THREE.Vector3(0,1.1,0)};
+  camGoal={pos:new THREE.Vector3(0,3.8,6.4),tgt:new THREE.Vector3(0,1.1,0)};
   document.getElementById("sheet").hidden=true;buildTags();
   document.getElementById("hint").textContent="Arrastra para girar · toca un edificio";
 }
@@ -563,6 +576,31 @@ function localAnswer(q){
     if(!bad.length)return"No hay nada urgente: toda la flota está en verde.";
     const order=bad.slice(0,3).map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.tenants} tenants)`).join(" → ");
     return`${order}. Empieza por el primero: es el que más clientes afecta.`;
+  }
+  const reg=REG.find(r=>q.toLowerCase().includes(r.name.toLowerCase())||new RegExp("\\b"+r.id+"\\b","i").test(q));
+  if(reg){
+    const rc=fleet.filter(c=>c.region===reg.name),rb=rc.filter(c=>c.status!=="ok");
+    if(!rb.length)return`<b>${reg.name}</b>: sus ${rc.length} clusters están en verde.`;
+    return`<b>${reg.name}</b>: ${rc.length-rb.length} de ${rc.length} clusters en verde. Con problemas: ${rb.map(c=>`<b>${c.name}</b> (${c.issue})`).join("; ")}.`;
+  }
+  const ENVN={prod:/producci[oó]n|\bprod\b/i,iot:/\biot\b/i,data:/\bdatos\b|\bdata\b/i,stg:/staging|\bstg\b|preproducci[oó]n/i,dev:/desarrollo|\bdev\b/i};
+  const envKey=Object.keys(ENVN).find(k=>ENVN[k].test(q));
+  if(envKey){
+    const ec=fleet.filter(c=>c.env===envKey),eb=ec.filter(c=>c.status!=="ok");
+    if(!eb.length)return`Los ${ec.length} clusters de ${envKey} están en verde.`;
+    return`${envKey}: ${eb.length} de ${ec.length} clusters con problemas: ${eb.map(c=>`<b>${c.name}</b> (${c.status==="crit"?"crítico":"aviso"})`).join(", ")}.`;
+  }
+  if(/clientes|afectad|tenants/i.test(q)){
+    const total=fleet.reduce((a,c)=>a+c.tenants,0),hit=bad.reduce((a,c)=>a+c.aff.length,0);
+    if(!hit)return`Ningún cliente afectado ahora mismo. La flota da servicio a ${total} clientes.`;
+    return`${hit} de ${total} clientes afectados ahora mismo, repartidos en ${bad.filter(c=>c.aff.length).map(c=>`<b>${c.name}</b> (${c.aff.length})`).join(", ")}.`;
+  }
+  if(/24\s*h|últimas|ultimas|historial|hoy|ayer|pas[oó]|ocurri/i.test(q)){
+    const since=Date.now()-24*H,ev=[];
+    fleet.forEach(c=>c.hist.forEach(e=>{if(e.ts>=since&&e.s!=="ok")ev.push({c,e});}));
+    if(!ev.length)return"Sin incidencias en las últimas 24 horas.";
+    ev.sort((a,b)=>a.e.ts-b.e.ts);
+    return`${ev.length} incidencias en las últimas 24 h:<br>`+ev.map(({c,e})=>`${hhmm(e.ts)} · <b>${c.name}</b> (${e.s==="crit"?"crítico":"aviso"}): ${e.txt}`).join("<br>");
   }
   if(!bad.length)return"Toda la flota está en verde. Nada que revisar.";
   return bad.map((c,i)=>`${i+1}. <b>${c.name}</b> (${c.status==="crit"?"crítico":"aviso"}, ${c.tenants} tenants): ${c.issue}.`).join("<br>");
@@ -788,6 +826,12 @@ function loop(){
   requestAnimationFrame(loop);
 }
 paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peor y por qué?")}`);loop();drawStrip();
+(()=>{const tip=document.getElementById("tip");let seen=false;try{seen=localStorage.getItem("holoflota_tip")==="1";}catch(e){}
+  if(seen)return;tip.hidden=false;
+  const hide=()=>{tip.hidden=true;try{localStorage.setItem("holoflota_tip","1");}catch(e){}};
+  document.getElementById("tip-close").addEventListener("click",hide);
+  document.getElementById("demo").addEventListener("click",hide);
+  setTimeout(()=>{tip.hidden=true;},12000);})();
 </script>
 </body>
 </html>
