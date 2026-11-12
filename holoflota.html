@@ -109,6 +109,17 @@ body.demo .answer,body.demo .suggest,body.demo .ask,body.demo #hint{display:none
 .list button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .list button small{color:var(--dim);font-size:10px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ar-video{position:fixed;z-index:-1;object-fit:cover}
+body.ar{background:transparent}
+body.ar .timeline,body.ar .chips,body.ar #hint,body.ar .answer,body.ar .suggest,body.ar .ask,body.ar .tip,body.ar .list,body.ar #tl-toggle,body.ar #list-toggle,body.ar #loop{display:none!important}
+.ar-ui{position:fixed;left:12px;right:12px;top:110px;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;z-index:6}
+.ar-msg{max-width:340px;text-align:center;font-size:13px;line-height:1.45;padding:8px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(6px)}
+.ar-ui button{pointer-events:auto}
+.ar-intro{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(360px,calc(100vw - 32px));z-index:7;display:flex;flex-direction:column;gap:10px;border:1px solid var(--glow);background:rgba(6,22,20,.94);backdrop-filter:blur(8px);border-radius:12px;padding:16px;box-shadow:0 0 40px rgba(93,202,165,.25)}
+.ar-intro h2{margin:0;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.06em;color:var(--glow)}
+.ar-intro p{margin:0;font-size:12.5px;line-height:1.5}
+.ar-intro a{color:var(--glow)}
+.ar-intro img{width:100%;border-radius:8px;border:1px solid var(--line)}
 @media (min-width:900px){
   .sheet{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:var(--sheet-top,210px);width:340px;max-height:calc(100vh - var(--sheet-top,210px) - 170px);overflow:auto}
   .sheet .grid{grid-template-columns:repeat(2,1fr)}
@@ -150,6 +161,14 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
 <div class="feed" id="feed" aria-live="polite"></div>
 <div class="subtitle" id="subtitle" hidden></div>
 <nav class="list" id="list" aria-label="Lista de clusters" hidden></nav>
+<div class="ar-ui" id="ar-ui" hidden><div class="ar-msg" id="ar-msg" aria-live="polite"></div><button type="button" id="ar-exit">✕ Salir de AR</button></div>
+<section class="ar-intro" id="ar-intro" role="dialog" aria-modal="true" aria-labelledby="ar-intro-t" hidden>
+  <h2 id="ar-intro-t">📷 Realidad aumentada</h2>
+  <p>Apunta la cámara del móvil a esta tarjeta y la flota aparecerá encima, en 3D.</p>
+  <a href="img/holoflota-tarjeta.png" target="_blank" rel="noopener"><img src="img/holoflota-tarjeta.png" alt="Tarjeta de Holoflota" loading="lazy"></a>
+  <p>Imprímela o ábrela en otra pantalla (<a href="img/holoflota-tarjeta.png" target="_blank" rel="noopener">abrir tarjeta</a>). La cámara solo se usa en este navegador; no se envía nada.</p>
+  <div class="row"><button type="button" class="primary" id="ar-go">📷 Activar cámara</button><button type="button" id="ar-cancel">Cancelar</button></div>
+</section>
 <div class="tip" id="tip" role="note" hidden>Pulsa <b>▶ Demo</b> para ver una incidencia completa en unos 3 minutos: detección, ticket, PR, despliegue y postmortem.<button type="button" id="tip-close" aria-label="Cerrar aviso">×</button></div>
 
 <div class="hud">
@@ -169,6 +188,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <div class="tools">
       <button type="button" id="tl-toggle" aria-expanded="false" aria-controls="timeline" title="Línea temporal de 24 h">🕑<span class="lbl"> 24 h</span></button>
       <button type="button" id="list-toggle" aria-expanded="false" aria-controls="list" title="Lista de clusters">☰<span class="lbl"> Clusters</span></button>
+      <button type="button" id="ar-btn" aria-pressed="false" title="Ver la flota sobre la tarjeta con la cámara (realidad aumentada)">📷<span class="lbl"> AR</span></button>
       <button type="button" id="sound" aria-pressed="false" title="Sonido y voz">🔇<span class="lbl"> Sonido</span></button>
       <button type="button" id="loop" aria-pressed="false" title="Repetir la demo en bucle (modo presentación)">⟳<span class="lbl"> Bucle</span></button>
       <button type="button" id="demo" class="primary">▶ Demo</button>
@@ -263,9 +283,9 @@ if(warnNow)setStatus(warnNow,"warn",ISSUES.warn[0],[],NOW0-80*MIN);
 
 // ---------- escena ----------
 const host=document.getElementById("scene");
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
-renderer.setClearColor(0x070b0e);
+renderer.setClearColor(0x070b0e,1);
 host.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0x070b0e,10,20);
@@ -301,6 +321,7 @@ for(let i=0;i<9;i++)for(let j=0;j<9;j++)if((i*7+j*5+i*j)%3!==0||i<2&&j<2||i>6&&j
 g.font="600 22px sans-serif";g.fillText("FLOTA",190,90);g.font="14px monospace";g.fillText(`aks · ${fleet.length}`,190,118);
 const card=add(new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cc),color:0x8d8b84})));
 card.rotation.x=-Math.PI/2;card.position.y=.01;
+new THREE.TextureLoader().load("img/holoflota-tarjeta.png",tx=>{card.material.map=tx;card.material.color.set(0xc8d6d0);card.material.needsUpdate=true;});
 // haz
 const beam=add(new THREE.Mesh(new THREE.CylinderGeometry(3.25,.75,.9,48,1,true),glowMat(0x5dcaa5,.06)));
 beam.position.y=.46;
@@ -422,8 +443,10 @@ function buildTags(){
 const v3=new THREE.Vector3();
 function placeTags(){
   const w=renderer.domElement.clientWidth,h=renderer.domElement.clientHeight;
+  const hideAll=AR.on&&!world.visible;
   tagEls.forEach(({el,c})=>{
-    v3.set(c.gx,PY+c.h+(c.status==="crit"?.84:.12),c.gz).project(camera);
+    if(hideAll){el.hidden=true;return;}
+    v3.set(c.gx,PY+c.h+(c.status==="crit"?.84:.12),c.gz).applyMatrix4(world.matrixWorld).project(camera);
     if(v3.z>1){el.hidden=true;return;}el.hidden=false;
     el.style.left=((v3.x+1)/2*w)+"px";el.style.top=((1-v3.y)/2*h)+"px";
   });
@@ -876,7 +899,81 @@ document.getElementById("ask").addEventListener("submit",e=>{e.preventDefault();
 setInterval(()=>{fleet.forEach(c=>{c.cpu=Math.max(8,Math.min(97,c.cpu+(Math.random()-.5)*6+(c.status==="crit"?1.2:0)));c.mem=Math.max(10,Math.min(97,c.mem+(Math.random()-.5)*3));});showSheet();},2500);
 
 // ---------- bucle ----------
-function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);if(composer)composer.setSize(w,h);camera.aspect=w/h;
+// ---------- realidad aumentada (MindAR: seguimiento de la tarjeta impresa) ----------
+// Everything built so far moves into `world`; outside AR it stays at identity, in AR it follows the card.
+const world=new THREE.Group();scene.children.slice().forEach(o=>world.add(o));scene.add(world);
+const AR={on:false,video:null,controller:null,post:null,found:false,saved:null};
+const AR_SCALE=.24; // platform diameter ≈ 1.6 card widths
+const arUI=document.getElementById("ar-ui"),arMsg=document.getElementById("ar-msg"),arIntroEl=document.getElementById("ar-intro"),arBtn=document.getElementById("ar-btn");
+function arSetMsg(t){arMsg.textContent=t;arMsg.hidden=!t;}
+function arIntro(open){arIntroEl.hidden=!open;if(open)document.getElementById("ar-go").focus();}
+async function startAR(){
+  if(AR.on||AR.video)return;
+  arIntro(false);
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){say("<b>AR:</b> este navegador no permite usar la cámara (hace falta HTTPS y un navegador moderno).");return;}
+  setList(false);document.body.classList.add("ar");arBtn.setAttribute("aria-pressed","true");
+  arUI.style.top=(document.querySelector(".hud").getBoundingClientRect().bottom+10)+"px";arUI.hidden=false;
+  arSetMsg("Abriendo la cámara…");
+  try{
+    const video=document.createElement("video");video.setAttribute("playsinline","");video.muted=true;video.autoplay=true;video.className="ar-video";
+    document.body.prepend(video);AR.video=video;
+    video.srcObject=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:"environment"}});
+    await new Promise(r=>video.readyState>=1?r():video.addEventListener("loadedmetadata",r,{once:true}));await video.play();
+    arSetMsg("Cargando el motor de realidad aumentada…");
+    const {Controller}=await import("https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js");
+    if(AR.video!==video)return; // cancelled meanwhile
+    AR.controller=new Controller({inputWidth:video.videoWidth,inputHeight:video.videoHeight,maxTrack:1,filterMinCF:.0001,filterBeta:.001,warmupTolerance:5,missTolerance:5,
+      onUpdate:d=>{if(d.type==="updateMatrix")arUpdate(d.worldMatrix);}});
+    const {dimensions}=await AR.controller.addImageTargets("img/holoflota-tarjeta.mind");
+    const [mw,mh]=dimensions[0];
+    // MindAR marker space (pixels, y down the image) -> card-centred units -> our Y-up scene lying on the card
+    AR.post=new THREE.Matrix4().compose(new THREE.Vector3(mw/2,mw/2+(mh-mw)/2,0),new THREE.Quaternion(),new THREE.Vector3(mw,mw,mw))
+      .multiply(new THREE.Matrix4().makeRotationX(Math.PI/2)).multiply(new THREE.Matrix4().makeScale(AR_SCALE,AR_SCALE,AR_SCALE));
+    AR.saved={fog:scene.fog,near:camera.near,far:camera.far};
+    AR.on=true;scene.fog=null;table.visible=false;card.visible=false;
+    renderer.setClearColor(0x000000,0);camera.clearViewOffset();controls.enabled=false;controls.autoRotate=false;camGoal=null;
+    camera.position.set(0,0,0);camera.quaternion.identity();camera.updateMatrixWorld();
+    world.matrixAutoUpdate=false;world.visible=false;
+    arResize();
+    AR.controller.dummyRun(video);
+    arSetMsg("Apunta la cámara a la tarjeta (impresa o en otra pantalla).");
+    AR.controller.processVideo(video);
+  }catch(e){console.warn("AR",e);stopAR();say(`<b>AR:</b> no se pudo activar la cámara (${(e&&e.name)||e}).`);}
+}
+function arUpdate(wm){
+  if(!AR.on)return;
+  if(wm===null){world.visible=false;if(AR.found){AR.found=false;arSetMsg("Tarjeta perdida: vuelve a apuntar a ella.");}return;}
+  const m=new THREE.Matrix4();m.elements=[...wm];m.multiply(AR.post);world.matrix.copy(m);world.matrixWorldNeedsUpdate=true;world.visible=true;
+  if(!AR.found){AR.found=true;arSetMsg("");blip();}
+}
+// Same maths as MindARThree.resize: cover-fit the video and derive the camera from the tracker's projection.
+function arResize(){
+  const v=AR.video,c=AR.controller;if(!v||!c)return;
+  const W=innerWidth,Hh=innerHeight,ca=W/Hh,va=v.videoWidth/v.videoHeight,ia=c.inputWidth/c.inputHeight;
+  let vw,vh;if(va>ca){vh=Hh;vw=vh*va;}else{vw=W;vh=vw/va;}
+  const pm=c.getProjectionMatrix(),hh=ia>ca?Hh:W/ia,g=Hh/hh;
+  camera.fov=2*Math.atan(1/pm[5]*g)*180/Math.PI;camera.near=pm[14]/(pm[10]-1);camera.far=pm[14]/(pm[10]+1);camera.aspect=ca;camera.updateProjectionMatrix();
+  Object.assign(v.style,{width:vw+"px",height:vh+"px",left:-(vw-W)/2+"px",top:-(vh-Hh)/2+"px"});
+}
+function stopAR(){
+  const c=AR.controller;AR.controller=null;try{c&&c.stopProcessVideo();}catch(e){}
+  if(AR.video){const st=AR.video.srcObject;st&&st.getTracks().forEach(t=>t.stop());AR.video.remove();AR.video=null;}
+  if(AR.on){AR.on=false;scene.fog=AR.saved.fog;camera.near=AR.saved.near;camera.far=AR.saved.far;}
+  AR.found=false;
+  world.matrixAutoUpdate=true;world.position.set(0,0,0);world.rotation.set(0,0,0);world.scale.set(1,1,1);world.updateMatrix();world.visible=true;
+  table.visible=true;card.visible=true;renderer.setClearColor(0x070b0e,1);controls.enabled=true;
+  document.body.classList.remove("ar");arBtn.setAttribute("aria-pressed","false");arUI.hidden=true;arSetMsg("");
+  camera.position.copy(homePos());controls.target.set(0,1.1,0);camGoal=null;
+  resize();
+}
+arBtn.onclick=()=>{if(AR.on||AR.video)stopAR();else arIntro(true);};
+document.getElementById("ar-go").onclick=startAR;
+document.getElementById("ar-cancel").onclick=()=>{arIntro(false);arBtn.focus();};
+document.getElementById("ar-exit").onclick=()=>{stopAR();arBtn.focus();};
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!arIntroEl.hidden){arIntro(false);arBtn.focus();}});
+
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);
+  if(AR.on){arResize();return;}if(composer)composer.setSize(w,h);camera.aspect=w/h;
   const a=w/h,k=a<1?Math.min(1.5,1/Math.sqrt(a)):1;camera.fov=a<1?Math.min(80,50/Math.sqrt(a)):50;camera.updateProjectionMatrix();
   if(k!==camK){camK=k;scene.fog.near=10*k;scene.fog.far=20*k;controls.maxDistance=11*k;
     if(selected<0&&!document.body.classList.contains("demo"))camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};}
@@ -886,9 +983,11 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clock=new THREE.Clock();
 function loop(){
   const t=clock.getElapsedTime();
-  if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
-  if(Math.abs(viewDy-viewDyGoal)>.5||Math.abs(viewDx-viewDxGoal)>.5){viewDy+=(viewDyGoal-viewDy)*.1;viewDx+=(viewDxGoal-viewDx)*.1;applyView0();}
-  controls.update();
+  if(!AR.on){
+    if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
+    if(Math.abs(viewDy-viewDyGoal)>.5||Math.abs(viewDx-viewDxGoal)>.5){viewDy+=(viewDyGoal-viewDy)*.1;viewDx+=(viewDxGoal-viewDx)*.1;applyView0();}
+    controls.update();
+  }
   if(!reduce){
     const a=pg.attributes.position.array;for(let i=0;i<PN;i++){a[i*3+1]+=pv[i];if(a[i*3+1]>3)a[i*3+1]=0;}pg.attributes.position.needsUpdate=true;
     rim2.rotation.z=t*.2;
@@ -931,9 +1030,9 @@ function loop(){
   fleet.forEach(c=>{if(c.failT!=null){const d=t-c.failT;if(d<1.4){const on=Math.random()>.45;c.o.grp.visible=on||d>1.2;c.o.grp.position.x=c.gx+(Math.random()-.5)*.04*(1.4-d);}else{c.o.grp.visible=true;c.o.grp.position.x=c.gx;c.failT=null;}}
     if(c.healT!=null){const d=t-c.healT;const s=d<.6?.4+d:1;c.o.grp.scale.set(1,Math.min(1,s+Math.sin(d*12)*.05*(1-Math.min(1,d))),1);if(d>1){c.o.grp.scale.set(1,1,1);c.healT=null;}}});
   // temblor de cámara
-  let sx=0,sy=0;if(shakeUntil>t&&!reduce){const k=(shakeUntil-t)*.12;sx=(Math.random()-.5)*k;sy=(Math.random()-.5)*k;}
+  let sx=0,sy=0;if(shakeUntil>t&&!reduce&&!AR.on){const k=(shakeUntil-t)*.12;sx=(Math.random()-.5)*k;sy=(Math.random()-.5)*k;}
   camera.position.x+=sx;camera.position.y+=sy;
-  if(composer)composer.render();else renderer.render(scene,camera);
+  if(composer&&!AR.on)composer.render();else renderer.render(scene,camera);
   camera.position.x-=sx;camera.position.y-=sy;
   placeTags();
   requestAnimationFrame(loop);
@@ -951,6 +1050,7 @@ updateViewGoal();paint();say(`<b>Asistente:</b> ${localAnswer("¿Cuál está peo
   document.getElementById("demo").addEventListener("click",hide);
   setTimeout(()=>{tip.hidden=true;},12000);})();
 (()=>{const qs=new URLSearchParams(location.search);
+  if(qs.has("ar")){if(qs.get("ar")==="start")startAR();else arIntro(true);return;}
   if(qs.has("bucle")||qs.has("loop")){setLoop(true);setTimeout(()=>startDemo(false),1500);return;}
   if(qs.has("demo")){setTimeout(()=>startDemo(false),1500);return;}
   const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>{select(i);if(camGoal){camera.position.copy(camGoal.pos);controls.target.copy(camGoal.tgt);camGoal=null;}viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();},400);}}})();
