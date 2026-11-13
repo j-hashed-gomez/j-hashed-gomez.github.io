@@ -65,6 +65,10 @@ button.danger{color:var(--crit-ink);border-color:var(--crit);background:rgba(80,
 .m{background:rgba(4,30,26,.8);border-radius:6px;padding:6px 8px}
 .m span{display:block;font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
 .m strong{font-weight:500;font-size:14px;font-variant-numeric:tabular-nums}
+.svc-extra{display:grid;gap:4px;font-size:11.5px;line-height:1.45}
+.svc-extra div{display:grid;grid-template-columns:96px 1fr;gap:8px}
+.svc-extra span{color:var(--dim);text-transform:uppercase;letter-spacing:.05em;font-size:10px;padding-top:2px}
+.svc-extra b{font-weight:500;color:var(--ink,#e6f4ef);word-break:break-word}
 .issue{font-size:12px;line-height:1.5;padding:8px 10px;border-radius:6px;border-left:3px solid var(--crit);background:rgba(80,19,19,.55);color:var(--crit-ink)}
 .issue.warn{border-color:var(--warn);background:rgba(65,36,2,.55);color:var(--warn-ink)}
 .issue.ok{border-color:var(--line);background:rgba(4,52,44,.55);color:var(--ink)}
@@ -209,6 +213,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
       <div class="m"><span>CPU</span><strong id="s-cpu"></strong></div>
       <div class="m"><span>Mem</span><strong id="s-mem"></strong></div>
     </div>
+    <div class="svc-extra" id="s-extra" hidden></div>
     <div class="issue" id="s-issue"></div>
     <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button><button id="share" type="button">🔗 Enlace</button></div>
   </section>
@@ -346,7 +351,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.setClearColor(0x070b0e,1);
 host.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x070b0e,10,20);
+scene.fog=new THREE.Fog(0x070b0e,14,28);
 const camera=new THREE.PerspectiveCamera(50,1,.05,100);
 // bloom
 let composer=null,bloom=null;
@@ -365,7 +370,7 @@ controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=
 // vuelo libre: desplazamiento paralelo al suelo (botón derecho / dos dedos / WASD), acercamiento
 // hasta casi nivel de calle; el punto de mira no puede salir de la plataforma (clampView en el bucle)
 controls.enablePan=true;controls.screenSpacePanning=false;controls.panSpeed=.9;
-controls.minDistance=.45;controls.maxDistance=11;controls.maxPolarAngle=Math.PI*.49;
+controls.minDistance=.45;controls.maxDistance=14;controls.maxPolarAngle=Math.PI*.49;
 controls.autoRotate=true;controls.autoRotateSpeed=.6;
 
 const C={ok:new THREE.Color(0x5dcaa5),warn:new THREE.Color(0xef9f27),crit:new THREE.Color(0xe24b4a)};
@@ -551,8 +556,104 @@ const SVC_KIND={
   st:     {es:"Storage Account",en:"Storage Account",acc:0x6fb6ff},
   fd:     {es:"Front Door",en:"Front Door",acc:0xbff7e6},
   acr:    {es:"Container Registry",en:"Container Registry",acc:0x9ff0ff},
+  vpn:    {es:"VPN Gateway",en:"VPN Gateway",acc:0x5ff2ff},
+  er:     {es:"ExpressRoute Gateway",en:"ExpressRoute Gateway",acc:0xffc861},
+  dc:     {es:"Datacenter",en:"Datacenter",acc:0x7dffb0},
 };
 const services=[],svcLabels=[];
+// Métricas simuladas (realistas) por tipo de servicio: valores iniciales, deriva y cómo se muestran.
+const rnd=(a,b)=>a+Math.random()*(b-a),dr=(v,st,lo,hi)=>Math.max(lo,Math.min(hi,v+(Math.random()-.5)*st));
+const cap=t=>t?t[0].toUpperCase()+t.slice(1):t;
+const fmtN=n=>Math.round(n).toLocaleString(LANG==="en"?"en-US":"es-ES"),pct=v=>Math.round(v)+"%";
+const SPEC={
+  sql:{init:sv=>({cpu:rnd(25,55),io:rnd(10,35),conn:rnd(180,420),gb:rnd(380,560)}),
+    drift:m=>{m.cpu=dr(m.cpu,6,8,96);m.io=dr(m.io,5,3,90);m.conn=dr(m.conn,30,50,900);m.gb+=.03;},
+    sub:sv=>`${sv.region} · General Purpose · Gen5 · 8 vCores`,
+    tiles:m=>[["CPU",pct(m.cpu)],[T("IO de datos","Data IO"),pct(m.io)],[T("Conexiones","Connections"),fmtN(m.conn)],[T("Almacen.","Storage"),`${fmtN(m.gb)} / 1024 GB`]],
+    details:(m,sv)=>[[T("Bases de datos","Databases"),"sqldb-orders, sqldb-billing, sqldb-identity"],
+      [T("Réplica geo","Geo-replica"),`fog-${sv.rid}-prod → ${{weu:"North Europe",neu:"West Europe",eus:"East US 2"}[sv.rid]} (lag < 5 s)`],
+      ["Backup",T("PITR 35 días · LTR semanal 10 años","PITR 35 days · weekly LTR 10 years")],[T("Acceso","Access"),T("Private Endpoint · Entra ID","Private Endpoint · Entra ID")]]},
+  cosmos:{init:()=>({ru:rnd(30,60),thr:rnd(0,4),gb:rnd(140,260),p99:rnd(6,11)}),
+    drift:m=>{m.ru=dr(m.ru,8,10,99);m.thr=Math.max(0,m.ru>85?m.thr+rnd(5,20):dr(m.thr,3,0,12));m.gb+=.02;m.p99=dr(m.p99,1.5,4,30);},
+    sub:sv=>`${sv.region} · API NoSQL · autoscale 4k–40k RU/s`,
+    tiles:m=>[["RU/s",pct(m.ru)],["429/min",fmtN(m.thr)],[T("Datos","Data"),fmtN(m.gb)+" GB"],["p99",m.p99.toFixed(1)+" ms"]],
+    details:(m,sv)=>[[T("Contenedores","Containers"),"telemetry, devices, events, leases"],[T("Consistencia","Consistency"),"Session"],
+      [T("Regiones","Regions"),`${sv.region} (write) + ${sv.rid==="eus"?"West Europe":"East US"} (read)`],["Backup",T("Continuo 30 días (PITR)","Continuous 30 days (PITR)")]]},
+  kv:{init:()=>({sec:Math.round(rnd(120,190)),cert:Math.round(rnd(8,16)),keys:Math.round(rnd(6,12)),rpm:rnd(300,900),lat:rnd(8,18),days:Math.round(rnd(60,300))}),
+    drift:m=>{m.rpm=dr(m.rpm,80,100,2400);m.lat=dr(m.lat,2,4,60);},
+    sub:sv=>`${sv.region} · Standard · RBAC`,
+    tiles:m=>[[T("Secretos","Secrets"),fmtN(m.sec)],[T("Certificados","Certificates"),fmtN(m.cert)],[T("Peticiones/min","Requests/min"),fmtN(m.rpm)],[T("Latencia","Latency"),Math.round(m.lat)+" ms"]],
+    details:m=>[[T("Claves","Keys"),T(`${m.keys} (RSA-HSM, rotación 90 días)`,`${m.keys} (RSA-HSM, 90-day rotation)`)],[T("Próx. caducidad","Next expiry"),T(`${m.days} días`,`${m.days} days`)],
+      [T("Protección","Protection"),"soft delete 90 d · purge protection"],[T("Acceso","Access"),"Private Endpoint · CSI driver"]],
+    fix:{label:T("Renovar certificado","Renew certificate"),op:sv=>T(`Renovación de wildcard-ingress en ${sv.name}`,`Renewing wildcard-ingress on ${sv.name}`),
+      done:()=>T("emitido · válido 1 año","issued · valid 1 year"),apply:sv=>{sv.m.days=365;}}},
+  st:{init:sv=>({tb:rnd(12,26),tps:rnd(1500,3200),egr:rnd(20,60),av:99.99}),
+    drift:m=>{m.tps=dr(m.tps,300,400,9000);m.egr=dr(m.egr,6,5,200);m.tb+=.0004;},
+    sub:sv=>`${sv.region} · StorageV2 · ${sv.rid==="neu"?"Standard_GRS":"Standard_ZRS"} · Hot`,
+    tiles:m=>[[T("Capacidad","Capacity"),m.tb.toFixed(1)+" TB"],[T("Transacc./s","Transact./s"),fmtN(m.tps)],[T("Salida","Egress"),fmtN(m.egr)+" GB/h"],[T("Disponib.","Availability"),m.av.toFixed(2)+"%"]],
+    details:()=>[[T("Contenedores","Containers"),"raw-telemetry, exports, backups, tfstate"],[T("Ciclo de vida","Lifecycle"),T("Cool a 30 d · Archive a 180 d","Cool at 30 d · Archive at 180 d")],
+      [T("Seguridad","Security"),T("sin acceso público · Private Endpoint · CMK","no public access · Private Endpoint · CMK")]]},
+  fd:{init:()=>({rps:rnd(3200,5200),hit:rnd(72,84),waf:rnd(10,60),p95:rnd(60,95)}),
+    drift:m=>{m.rps=dr(m.rps,400,800,12000);m.hit=dr(m.hit,2,50,97);m.waf=dr(m.waf,10,0,400);m.p95=dr(m.p95,6,30,400);},
+    sub:()=>T("Global · Premium · WAF","Global · Premium · WAF"),
+    tiles:m=>[[T("Peticiones/s","Requests/s"),fmtN(m.rps)],["Cache hit",pct(m.hit)],[T("WAF bloq./min","WAF blocks/min"),fmtN(m.waf)],["p95",Math.round(m.p95)+" ms"]],
+    details:(m,sv)=>{const prods=sv.deps,up=prods.filter(c=>c.status!=="crit").length;
+      return [[T("Orígenes","Origins"),T(`${up}/${prods.length} sanos (health probe /healthz cada 30 s)`,`${up}/${prods.length} healthy (health probe /healthz every 30 s)`)],
+        ["WAF",T("DRS 2.1 + Bot Manager · modo prevención","DRS 2.1 + Bot Manager · prevention mode")],[T("Dominios","Domains"),"api.fleet.example, app.fleet.example"]];}},
+  acr:{init:()=>({repos:214,pulls:rnd(1400,2600),gb:rnd(780,900),vuln:Math.round(rnd(0,3))}),
+    drift:m=>{m.pulls=dr(m.pulls,200,300,9000);m.gb+=.01;},
+    sub:()=>T("Global · Premium · geo-replicado","Global · Premium · geo-replicated"),
+    tiles:m=>[[T("Repositorios","Repositories"),fmtN(m.repos)],[T("Pulls/h","Pulls/h"),fmtN(m.pulls)],[T("Almacen.","Storage"),fmtN(m.gb)+" GB"],[T("Réplicas","Replicas"),"3"]],
+    details:m=>[[T("Réplicas","Replicas"),"West Europe, North Europe, East US"],[T("Escaneo","Scanning"),T(`Defender · ${m.vuln} CVE críticas abiertas`,`Defender · ${m.vuln} open critical CVEs`)],
+      [T("Retención","Retention"),T("untagged 30 días · firma cosign obligatoria","untagged 30 days · cosign signature required")]]},
+  vpn:{init:()=>({up:2,mbps:rnd(250,520),lat:rnd(28,36),bgp:2}),
+    drift:m=>{m.mbps=dr(m.mbps,60,40,1200);m.lat=dr(m.lat,2,18,90);},
+    sub:sv=>`${sv.region} · VpnGw2AZ · active-active`,
+    tiles:m=>[[T("Túneles","Tunnels"),`${m.up}/2`],["Throughput",fmtN(m.mbps)+" Mbps"],[T("Pares BGP","BGP peers"),`${m.bgp}/2`],[T("Latencia","Latency"),Math.round(m.lat)+" ms"]],
+    details:(m,sv)=>[[T("Remoto","Remote"),`lgw-mad-dc01 · 203.0.113.10 · AS 65010`],["IPsec","IKEv2 · AES-256-GCM · SHA-384 · PFS 24"],
+      [T("Ruta","Path"),`${sv.links.map(d=>d.name).join(", ")} ⇄ vnet-${sv.rid}-hub`]],
+    fix:{label:T("Reiniciar túnel","Reset tunnel"),op:sv=>T(`Reset de la conexión cn-mad-dc01-t2 en ${sv.name}`,`Resetting connection cn-mad-dc01-t2 on ${sv.name}`),
+      done:()=>T("IKE SA restablecida · BGP Established","IKE SA re-established · BGP Established"),apply:sv=>{sv.m.up=2;sv.m.bgp=2;}}},
+  er:{init:sv=>({util:rnd(18,46),lat:rnd(2,9),gbps:sv.meta.gbps||1}),
+    drift:m=>{m.util=dr(m.util,6,4,96);m.lat=dr(m.lat,.6,1,30);},
+    sub:sv=>`${sv.region} · ErGw2AZ · private peering`,
+    tiles:m=>[[T("Circuito","Circuit"),m.gbps+" Gbps"],[T("Uso","Utilization"),pct(m.util)],["BGP","Established"],[T("Latencia","Latency"),m.lat.toFixed(1)+" ms"]],
+    details:(m,sv)=>[[T("Circuito","Circuit"),sv.meta.circuit],[T("Proveedor","Provider"),sv.meta.provider],[T("Enlaces","Links"),T("primario + secundario activos","primary + secondary up")],
+      [T("Ruta","Path"),`${sv.links.map(d=>d.name).join(", ")} ⇄ vnet-${sv.rid}-hub`]]},
+  dc:{init:sv=>({kw:sv.meta.kw*rnd(.92,1.05),temp:rnd(22,24.5)}),
+    drift:m=>{m.kw=dr(m.kw,4,20,900);m.temp=dr(m.temp,.3,19,30);},
+    sub:sv=>`${sv.meta.city} · ${sv.meta.type}`,
+    tiles:(m,sv)=>[["Racks",fmtN(sv.meta.racks)],[T("Servidores","Servers"),fmtN(sv.meta.servers)],[T("Potencia","Power"),fmtN(m.kw)+" kW"],["PUE",sv.meta.pue.toFixed(2)]],
+    details:(m,sv)=>[[T("Cargas","Workloads"),sv.meta.work],[T("Conexión","Link"),sv.links.map(g=>`${g.name} (${g.kind==="vpn"?"VPN S2S":"ExpressRoute"})`).join(" · ")],
+      [T("Sala","Room"),T(`${m.temp.toFixed(1)} °C · ${sv.meta.tier}`,`${m.temp.toFixed(1)} °C · ${sv.meta.tier}`)]]},
+};
+// Datacenter satélite: plataforma flotante con racks, LEDs que parpadean, refrigeración y haz de proyección
+const DC_UP=.95,DC_Y=PY+DC_UP;
+function buildDC(grp,K,glows){
+  const R=.8;
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(R,48),glowMat(K.acc,.07));disc.rotation.x=-Math.PI/2;grp.add(disc);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(R,R*.82,.07,48),darkMat(K.acc));base.position.y=-.036;grp.add(base);
+  const pgd=new THREE.PolarGridHelper(R,8,3,48,K.acc,K.acc);pgd.material.transparent=true;pgd.material.opacity=.22;pgd.position.y=.002;grp.add(pgd);
+  const rimA=new THREE.Mesh(new THREE.TorusGeometry(R,.009,8,96),glowMat(K.acc,.85));rimA.rotation.x=Math.PI/2;grp.add(rimA);glows.push(rimA);
+  const rimB=new THREE.Mesh(new THREE.TorusGeometry(R*1.14,.004,6,96),glowMat(K.acc,.35));rimB.rotation.x=Math.PI/2;rimB.position.y=-.09;grp.add(rimB);glows.push(rimB);
+  const dash=new THREE.Mesh(new THREE.RingGeometry(R*1.2,R*1.23,64,1,0,Math.PI*1.4),glowMat(K.acc,.45));dash.rotation.x=-Math.PI/2;dash.position.y=-.1;grp.add(dash);glows.push(dash);grp.userData.spin2=dash;
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(R*.7,.12,DC_Y,32,1,true),glowMat(K.acc,.018));beam.position.y=-DC_Y/2;grp.add(beam);
+  const rows=3,cols=6,ledN=rows*cols*4,rackGeo=new THREE.BoxGeometry(.08,.22,.1);rackGeo.translate(0,.11,0);
+  const leds=new THREE.InstancedMesh(new THREE.BoxGeometry(.04,.02,.004),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),ledN);
+  const o=new THREE.Object3D();let k=0;
+  for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){
+    const x=-.3+j*.12,z=-.36+i*.25;
+    const rk=new THREE.Mesh(rackGeo,darkMat(K.acc));rk.position.set(x,0,z);grp.add(rk);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(rackGeo),edgeMat(K.acc,.45));e.position.copy(rk.position);grp.add(e);
+    const door=new THREE.Mesh(new THREE.PlaneGeometry(.07,.2),glowMat(K.acc,.26));door.position.set(x,.11,z+.0505);grp.add(door);glows.push(door);
+    const strip=new THREE.Mesh(new THREE.PlaneGeometry(.08,.1),glowMat(K.acc,.35));strip.rotation.x=-Math.PI/2;strip.position.set(x,.2215,z);strip.scale.y=.12;grp.add(strip);glows.push(strip);
+    for(let l=0;l<4;l++){o.position.set(x-.016+(l%2)*.032,.06+Math.floor(l/2)*.08,z+.054);o.updateMatrix();leds.setMatrixAt(k,o.matrix);leds.setColorAt(k,new THREE.Color(0x3dff9a));k++;}
+  }
+  grp.add(leds);grp.userData.leds=leds;
+  [-.46,.46].forEach(x=>{const cu=new THREE.Mesh(new THREE.CylinderGeometry(.08,.09,.1,20),darkMat(K.acc));cu.position.set(x,.05,.42);grp.add(cu);
+    const fan=new THREE.Group();[0,1].forEach(r=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.1,.004,.014),glowMat(K.acc,.6));b.rotation.y=r*Math.PI/2;fan.add(b);glows.push(b);});
+    fan.position.set(x,.103,.42);grp.add(fan);(grp.userData.fans=grp.userData.fans||[]).push(fan);});
+}
 const darkMat=(acc)=>new THREE.MeshBasicMaterial({color:new THREE.Color(acc).multiplyScalar(.12),transparent:true,opacity:.94});
 const edgeMat=(acc,op=.75)=>new THREE.LineBasicMaterial({color:acc,transparent:true,opacity:op});
 function groundLabel(text,x,z,w,col){
@@ -566,7 +667,7 @@ function boxWithEdges(w,h,d,acc,grp){
   const b=new THREE.Mesh(geo,darkMat(acc)),e=new THREE.LineSegments(new THREE.EdgesGeometry(geo),edgeMat(acc));
   grp.add(b,e);return {b,e};
 }
-function addService(kind,region,x,z,tag){
+function addService(kind,region,x,z,tag,meta){
   const K=SVC_KIND[kind],grp=new THREE.Group();grp.position.set(x,PY,z);svcGroup.add(grp);
   const glows=[],edges=[];let h=.2;
   if(kind==="sql"){          // dos silos con anillos
@@ -602,26 +703,38 @@ function addService(kind,region,x,z,tag){
     [-.2,.2].forEach(dz=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.34,.014,.014),glowMat(K.acc,.7));b.position.set(.04,.24,dz);grp.add(b);glows.push(b);});
     const trolley=new THREE.Mesh(new THREE.BoxGeometry(.04,.02,.42),glowMat(0xffd68c,.7));trolley.position.set(0,.235,0);grp.add(trolley);glows.push(trolley);grp.userData.trolley=trolley;h=.3;
   }
-  const hb=kind==="acr"?[.4,.45]:kind==="fd"?[.2,.24]:[.26,.3];
+  else if(kind==="vpn"||kind==="er"){ // torre de gateway con antena parabólica
+    const {e}=boxWithEdges(.07,.5,.07,K.acc,grp);edges.push(e);
+    for(let y=.1;y<.5;y+=.1){const r=new THREE.Mesh(new THREE.TorusGeometry(.05,.003,6,4),glowMat(K.acc,.6));r.rotation.x=Math.PI/2;r.rotation.z=Math.PI/4;r.position.y=y;grp.add(r);glows.push(r);}
+    const dish=new THREE.Mesh(new THREE.SphereGeometry(.09,20,10,0,Math.PI*2,0,Math.PI/2.6),new THREE.MeshBasicMaterial({color:K.acc,wireframe:true,transparent:true,opacity:.55}));
+    dish.position.y=.56;grp.add(dish);glows.push(dish);grp.userData.dish=dish;
+    const tip=new THREE.Mesh(new THREE.SphereGeometry(.022,12,8),glowMat(K.acc,1));tip.position.y=.6;grp.add(tip);glows.push(tip);grp.userData.blink=tip;h=.64;
+  }else if(kind==="dc"){buildDC(grp,K,glows);h=.4;}
+  const hb=kind==="acr"?[.4,.45]:kind==="fd"?[.2,.24]:kind==="dc"?[1.6,1.6]:kind==="vpn"||kind==="er"?[.2,.2]:[.26,.3];
   const hit=new THREE.Mesh(new THREE.BoxGeometry(hb[0],h+.15,hb[1]),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
   hit.position.y=(h+.15)/2;grp.add(hit);hitboxes.push(hit);
-  const svc={kind,region,name:tag,label:T(K.es,K.en),gx:x,gz:z,h,status:"ok",grp,glows,edges,deps:[],
+  // anillo de estado (aviso/crítico), como los clusters
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.2,.23,48),glowMat(C.warn,.8));ring.rotation.x=-Math.PI/2;ring.position.y=.006;ring.visible=false;
+  if(kind==="dc")ring.scale.setScalar(4.2);grp.add(ring);
+  const svc={kind,region,rid:region?REG.find(r=>r.name===region).id:null,name:tag,label:T(K.es,K.en),gx:x,gz:z,h,tagH:h,status:"ok",issue:"",grp,glows,edges,deps:[],links:[],ring,meta:meta||{},
     glowOp:glows.map(g=>g.material.opacity)};
+  svc.m=SPEC[kind].init(svc);
   hit.userData.svc=svc;services.push(svc);return svc;
 }
 const svcOf={};
 REG.forEach(r=>{
   const xs={sql:r.x-.36,cosmos:r.x-.13,kv:r.x+.13,st:r.x+.36};
   Object.entries(xs).forEach(([k,x])=>{
-    const sv=addService(k,r.name,x,SZ,`${k}-${r.id}-01`);svcOf[r.id+k]=sv;
+    const nm={sql:`sql-${r.id}-prod-01`,cosmos:`cosmos-${r.id}-iot-01`,kv:`kv-${r.id}-prod-01`,st:`st${r.id}fleetprod01`}[k];
+    const sv=addService(k,r.name,x,SZ,nm);svcOf[r.id+k]=sv;
     roadStrip(x,ZH,x,SZ+.14,.045,true);
-    groundLabel({sql:"SQL",cosmos:"COSMOS",kv:"VAULT",st:"STORAGE"}[k],x,SZ-.2,.42,"#"+new THREE.Color(SVC_KIND[k].acc).getHexString());
+    groundLabel(nm,x,SZ-.2,.46,"#"+new THREE.Color(SVC_KIND[k].acc).getHexString());
   });
 });
-const FD=addService("fd",null,-SIDE_X,.75,"fd-global"),ACR=addService("acr",null,SIDE_X+.26,.2,"acr-global");
+const FD=addService("fd",null,-SIDE_X,.75,"afd-fleet-prod"),ACR=addService("acr",null,SIDE_X+.26,.2,"acrfleetprod");
 roadStrip(-SIDE_X,ZH,-SIDE_X,1.15,.06,true);roadStrip(SIDE_X,ZH,SIDE_X,.2,.06,true);
-groundLabel("FRONT DOOR",-SIDE_X-.3,.75,.5,"#bff7e6");
-groundLabel("CONTAINER REGISTRY",SIDE_X+.26,.6,.5,"#9ff0ff");
+groundLabel("afd-fleet-prod",-SIDE_X-.3,.75,.5,"#bff7e6");
+groundLabel("acrfleetprod",SIDE_X+.26,.6,.42,"#9ff0ff");
 // dependencias por entorno
 const DEPS={prod:["sql","kv"],iot:["cosmos","st"],data:["cosmos","st","sql"],stg:["sql","kv"],dev:["sql"]};
 const svcRoute=(c,sv)=>{const ax=regX(c.region);return polyRoute([clusterDoor(c),[ax,c.gz],[ax,ZH],[sv.gx,ZH],[sv.gx,SZ+.13]]);};
@@ -638,7 +751,71 @@ fleet.forEach(c=>{
 });
 REG.forEach(r=>["prod","dev"].forEach(e=>{const c=nth(r.name,e,0);if(c)flows.push({a:ACR,b:c,R:sideRoute(c,SIDE_X,.2),n:1,kind:"peer",off:mkOff(1)});}));
 const KIND_COL={db:[new THREE.Color(0xc2b6ff),new THREE.Color(0x8f7bff)],st:[new THREE.Color(0x9fd0ff),new THREE.Color(0x4f8fff)]};
-let selSvc=null;const camLocal=new THREE.Vector3();
+// ---------- nube híbrida: gateways del hub, túneles y datacenters externos ----------
+const regName=id=>REG.find(r=>r.id===id).name;
+const GW={
+  vpnWeu:addService("vpn",regName("weu"),-SIDE_X,-1.62,"vpng-weu-hub-01"),
+  erWeu: addService("er",regName("weu"),-2.2,-2.14,"ergw-weu-hub-01",{gbps:1,circuit:"erc-weu-fra-equinix-1g",provider:"Equinix · Frankfurt"}),
+  erNeu: addService("er",regName("neu"),0,-2.32,"ergw-neu-hub-01",{gbps:1,circuit:"erc-neu-fra-equinix-1g",provider:"Equinix · Frankfurt"}),
+  erEus: addService("er",regName("eus"),SIDE_X,-1.62,"ergw-eus-hub-01",{gbps:2,circuit:"erc-eus-ash-equinix-2g",provider:"Equinix · Ashburn"}),
+};
+roadStrip(-SIDE_X,ZH,-SIDE_X,-1.55,.045,true);roadStrip(SIDE_X,ZH,SIDE_X,-1.55,.045,true);
+Object.values(GW).forEach(g=>groundLabel(g.name,g.gx,g.gz+.17,.42,g.kind==="vpn"?"#5ff2ff":"#ffc861"));
+const DCS={
+  mad:addService("dc",null,-4.7,-2.75,"dc-mad-01",{city:"Madrid",type:T("on-premise","on-premises"),racks:42,servers:310,kw:186,pue:1.48,tier:"Tier III",
+    work:T("Active Directory, ERP, SAN, batch nocturno","Active Directory, ERP, SAN, nightly batch")}),
+  fra:addService("dc",null,-1.0,-5.35,"dc-fra-02",{city:"Frankfurt",type:T("colocation","colocation"),racks:18,servers:120,kw:74,pue:1.32,tier:"Tier IV",
+    work:T("pasarela de pagos, HSM, backup offsite","payment gateway, HSM, offsite backup")}),
+  ash:addService("dc",null,4.7,-2.75,"dc-ash-01",{city:"Ashburn",type:T("colocation","colocation"),racks:12,servers:84,kw:52,pue:1.29,tier:"Tier III+",
+    work:T("origen CDN legado, réplica del data lake","legacy CDN origin, data lake replica")}),
+};
+Object.values(DCS).forEach(d=>{d.grp.position.y=DC_Y;d.grp.rotation.y=Math.atan2(-d.gx,-d.gz); // frente (racks y LEDs) mirando a la ciudad
+d.tagH=.42;d.phase=Math.random()*6;
+  const l=groundLabel(`${d.name} · ${d.meta.city}`,d.gx,d.gz+.98,.62,"#7dffb0");l.position.y=DC_Y+.01;});
+// dependencias de la parte híbrida
+const inReg=(id,envs)=>fleet.filter(c=>rid(c.region)===id&&envs.includes(c.env));
+GW.vpnWeu.deps=inReg("weu",["prod","data"]);GW.erWeu.deps=inReg("weu",["prod","data"]);GW.erNeu.deps=inReg("neu",["prod","data"]);GW.erEus.deps=inReg("eus",["prod","data"]);
+DCS.mad.deps=inReg("weu",["prod"]);DCS.fra.deps=inReg("weu",["prod"]).concat(inReg("neu",["prod"]));DCS.ash.deps=inReg("eus",["prod"]);
+[...Object.values(GW),...Object.values(DCS)].forEach(v=>v.deps.forEach(c=>c.deps.push(v)));
+// túneles: dos por enlace (VPN active-active / ExpressRoute primario+secundario), arcos de luz con paquetes
+const hyGroup=new THREE.Group();scene.add(hyGroup);
+const tunnels=[];
+function addTunnel(gw,dc){
+  const a=new THREE.Vector3(gw.gx,PY+.6,gw.gz),dcp=new THREE.Vector3(dc.gx,DC_Y,dc.gz);
+  const dir=a.clone().sub(dcp).setY(0).normalize(),b=dcp.clone().addScaledVector(dir,.84).setY(DC_Y+.04),side=new THREE.Vector3(-dir.z,0,dir.x);
+  const col=gw.kind==="vpn"?0x5ff2ff:0xffc861;
+  [-1,1].forEach((sg,k)=>{
+    const off=side.clone().multiplyScalar(.04*sg),p0=a.clone().add(off),p2=b.clone().add(off);
+    const mid=p0.clone().add(p2).multiplyScalar(.5);mid.y=Math.max(p0.y,p2.y)+.7+p0.distanceTo(p2)*.12;
+    const curve=new THREE.QuadraticBezierCurve3(p0,mid,p2);
+    const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,72,.012,8,false),glowMat(col,.14));
+    const core=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(72)),new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+    hyGroup.add(tube,core);
+    tunnels.push({gw,dc,k,curve,tube,core,col:new THREE.Color(col),off:[0,.2,.4,.6,.8].map(o=>o+Math.random()*.08)});
+  });
+  gw.links.push(dc);dc.links.push(gw);
+  const dish=gw.grp.userData.dish;dish.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dcp.clone().sub(a).normalize().lerp(new THREE.Vector3(0,1,0),.45).normalize());
+}
+addTunnel(GW.vpnWeu,DCS.mad);addTunnel(GW.erWeu,DCS.fra);addTunnel(GW.erNeu,DCS.fra);addTunnel(GW.erEus,DCS.ash);
+const tunnelUp=tn=>!(tn.gw.kind==="vpn"&&tn.k===1&&tn.gw.m.up<2);
+const PK=5,packets=new THREE.InstancedMesh(new THREE.SphereGeometry(.022,10,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),tunnels.length*PK*2);
+packets.frustumCulled=false;scene.add(packets);for(let k=0;k<packets.count;k++)packets.setColorAt(k,new THREE.Color(0x5ff2ff));
+// estado simulado inicial: certificado a punto de caducar y un túnel caído
+const KV_WEU=svcOf["weukv"];
+KV_WEU.m.days=6;KV_WEU.status="warn";KV_WEU.issue=T("el certificado wildcard-ingress (*.fleet.example) caduca en 6 días; la renovación automática falló (DigiCert: validación DNS pendiente)","the wildcard-ingress certificate (*.fleet.example) expires in 6 days; auto-renewal failed (DigiCert: DNS validation pending)");
+GW.vpnWeu.m.up=1;GW.vpnWeu.m.bgp=1;GW.vpnWeu.status="warn";GW.vpnWeu.issue=T("túnel 2 (cn-mad-dc01-t2) caído por DPD timeout hace 25 min; todo el tráfico con dc-mad-01 va por el túnel 1, sin redundancia","tunnel 2 (cn-mad-dc01-t2) down after a DPD timeout 25 min ago; all dc-mad-01 traffic is on tunnel 1, with no redundancy");
+function svcVisual(sv){sv.ring.visible=sv.status!=="ok";sv.ring.material.color.copy(C[sv.status]||C.warn);}
+// Front Door se degrada solo si algún origen (cluster prod) está caído
+function refreshDerived(){
+  const down=FD.deps.filter(c=>c.status==="crit"),st=down.length?"warn":"ok";
+  if(st!==FD.status||(down.length&&!FD.issue.includes(down[0].name))){
+    FD.status=st;FD.issue=down.length?T(`${down.map(c=>c.name).join(", ")} ${down.length>1?"fallan":"falla"} el health probe; Front Door ${down.length>1?"los saca":"lo saca"} del pool y reparte el tráfico entre el resto`,
+      `${down.map(c=>c.name).join(", ")} ${down.length>1?"fail":"fails"} the health probe; Front Door pulls ${down.length>1?"them":"it"} out of the pool and spreads traffic over the rest`):"";
+    svcVisual(FD);buildTags();if(selSvc===FD)showServiceSheet(FD);
+  }
+}
+services.forEach(svcVisual);
+let selSvc=null,derivedAt=0;const camLocal=new THREE.Vector3(),ledCol=new THREE.Color();
 
 const cars=new THREE.InstancedMesh(new THREE.BoxGeometry(.055,.012,.016),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),flows.reduce((a,f)=>a+f.n*2,0));
 cars.frustumCulled=false;scene.add(cars);
@@ -757,14 +934,22 @@ function buildTags(){
     el.textContent=(c.status==="warn"&&i!==selected?"▲ ":"")+c.name;
     labels.appendChild(el);tagEls.push({el,c});
   });
+  buildSvcTags();
 }
 const v3=new THREE.Vector3();
+function buildSvcTags(){
+  services.forEach(sv=>{
+    if(sv.status==="ok"&&sv!==selSvc)return;
+    const el=document.createElement("div");el.className="tag"+(sv===selSvc?" sel":sv.status==="warn"?" warn":"");
+    el.textContent=(sv.status==="warn"&&sv!==selSvc?"▲ ":"")+sv.name;labels.appendChild(el);tagEls.push({el,c:sv,svc:true});
+  });
+}
 function placeTags(){
   const w=renderer.domElement.clientWidth,h=renderer.domElement.clientHeight;
   const hideAll=AR.on&&!world.visible;
   tagEls.forEach(({el,c})=>{
     if(hideAll){el.hidden=true;return;}
-    v3.set(c.gx,PY+c.h+(c.status==="crit"?.84:.12),c.gz).applyMatrix4(world.matrixWorld).project(camera);
+    v3.set(c.gx,c.tagH!=null?c.grp.position.y+c.tagH+.1:PY+c.h+(c.status==="crit"?.84:.12),c.gz).applyMatrix4(world.matrixWorld).project(camera);
     if(v3.z>1){el.hidden=true;return;}el.hidden=false;
     el.style.left=((v3.x+1)/2*w)+"px";el.style.top=((1-v3.y)/2*h)+"px";
   });
@@ -788,7 +973,7 @@ renderer.domElement.addEventListener("pointerup",e=>{
 // ---------- vuelo libre ----------
 let lastTap=null;
 const groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-PY),flyHit=new THREE.Vector3();
-const FLY_R=3.4;                                   // radio máximo del punto de mira
+const FLY_R=6.8;                                   // radio máximo del punto de mira
 function flyToRay(){
   if(!ray.ray.intersectPlane(groundPlane,flyHit))return;
   if(Math.hypot(flyHit.x,flyHit.z)>FLY_R)flyHit.setLength(FLY_R).setY(PY);
@@ -829,26 +1014,67 @@ function flyStep(dt){
   const rot=(has("e")?1:0)-(has("q")?1:0);
   if(rot){const off=camera.position.clone().sub(controls.target);off.applyAxisAngle(camera.up,-rot*1.4*dt);camera.position.copy(controls.target).add(off);}
 }
+const sheetTiles=[...document.querySelectorAll("#sheet .grid .m")];
+function setTiles(rows){rows.forEach(([l,v],i)=>{sheetTiles[i].querySelector("span").textContent=l;sheetTiles[i].querySelector("strong").textContent=v;});}
+function showServiceSheet(sv){
+  const S=SPEC[sv.kind];
+  document.getElementById("sheet").hidden=false;
+  document.getElementById("s-name").textContent=sv.name;
+  document.getElementById("s-sub").textContent=`${sv.label} · ${S.sub(sv)}`;
+  setTiles(S.tiles(sv.m,sv));
+  const ex=document.getElementById("s-extra");ex.hidden=false;
+  ex.innerHTML=S.details(sv.m,sv).map(([k,v])=>`<div><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join("");
+  const is=document.getElementById("s-issue");
+  is.className="issue"+(sv.status==="ok"?" ok":sv.status==="warn"?" warn":"");
+  is.textContent=sv.status==="ok"?T("Todo en orden. Sin alertas activas.","All good. No active alerts."):sv.issue;
+  const fx=document.getElementById("fix");fx.hidden=sv.status==="ok"||!S.fix||viewTs!=null;if(S.fix)fx.textContent=S.fix.label;
+  document.getElementById("ask-this").hidden=false;
+}
+function svcSummary(sv){
+  const where=sv.region?` (${sv.region})`:"",head=`<b>${sv.name}</b>, ${sv.label}${where}`;
+  if(sv.kind==="dc"){
+    const up=sv.links.map(g=>`${g.name} (${g.kind==="vpn"?T(`VPN, ${g.m.up}/2 túneles`,`VPN, ${g.m.up}/2 tunnels`):"ExpressRoute"})`).join(T(" y "," and "));
+    return T(`${head}: ${sv.meta.type} en ${sv.meta.city}, conectado a Azure por ${up}. Lo usan ${sv.deps.length} clusters de producción (${sv.meta.work}).`,
+      `${head}: ${sv.meta.type} in ${sv.meta.city}, connected to Azure through ${up}. ${sv.deps.length} production clusters use it (${sv.meta.work}).`);
+  }
+  if(sv.kind==="vpn"||sv.kind==="er"){
+    const t=sv.kind==="vpn"?T(`${sv.m.up}/2 túneles activos`,`${sv.m.up}/2 tunnels up`):T(`circuito de ${sv.m.gbps} Gbps al ${Math.round(sv.m.util)}%`,`${sv.m.gbps} Gbps circuit at ${Math.round(sv.m.util)}%`);
+    return T(`${head}: enlaza el hub de ${sv.region} con ${sv.links.map(d=>d.name).join(", ")}; ${t}.`,`${head}: links the ${sv.region} hub with ${sv.links.map(d=>d.name).join(", ")}; ${t}.`)+(sv.status!=="ok"?" "+cap(sv.issue)+".":"");
+  }
+  const prod=sv.deps.filter(c=>c.env==="prod").length,bad=sv.deps.filter(c=>c.status!=="ok");
+  return T(`${head}: dependen de él ${sv.deps.length} clusters`,`${head}: ${sv.deps.length} clusters depend on it`)+
+    (prod&&prod===sv.deps.length?T(", todos de producción",", all in production"):prod?T(`, ${prod} de producción`,`, ${prod} in production`):"")+". "+
+    (sv.status!=="ok"?cap(sv.issue)+". ":"")+
+    (bad.length?T(`Ahora mismo ${bad.map(c=>c.name).join(", ")} ${bad.length>1?"tienen":"tiene"} problemas.`,`Right now ${bad.map(c=>c.name).join(", ")} ${bad.length>1?"have":"has"} problems.`)
+      :T("Todos sus clientes están sanos.","All of its consumers are healthy."));
+}
+function hybridSummary(){
+  return T("Conectividad híbrida: ","Hybrid connectivity: ")+Object.values(DCS).map(d=>svcSummary(d)).join("<br>");
+}
+async function fixService(sv){
+  const S=SPEC[sv.kind],btn=document.getElementById("fix");btn.disabled=true;
+  const op=evt("cd","OPS",S.fix.op(sv),sv.name,"pend",T("en curso","in progress")).extra('<div class="bar"><i></i></div>');
+  await progress(op,1600);op.set("ok","OK",S.fix.done(sv));
+  S.fix.apply(sv);sv.status="ok";sv.issue="";svcVisual(sv);chord();btn.disabled=false;
+  if(selSvc===sv)showServiceSheet(sv);buildTags();
+  say(`<b>${AS}:</b> `+T(`<b>${sv.name}</b> vuelve a estar en verde.`,`<b>${sv.name}</b> is green again.`));clearFeedLater(9000);
+}
 // Los servicios están en el borde de la plataforma: la cámara se acerca desde fuera
 // (en dirección radial) para que los edificios no los tapen.
 function frameService(sv){
   updateViewGoal();
-  const tgt=new THREE.Vector3(sv.gx,PY+sv.h*.5,sv.gz),out=new THREE.Vector3(sv.gx,0,sv.gz).normalize();
-  const dirv=out.multiplyScalar(.85).add(new THREE.Vector3(0,.75,0)).normalize();
-  camGoal={pos:tgt.clone().addScaledVector(dirv,2.3),tgt};
+  const tgt=new THREE.Vector3(sv.gx,sv.grp.position.y+sv.h*.5,sv.gz),out=new THREE.Vector3(sv.gx,0,sv.gz).normalize();
+  // los datacenters se miran desde el lado de la ciudad (su frente); el resto, desde fuera
+  const dirv=out.multiplyScalar(sv.kind==="dc"?-.95:.85).add(new THREE.Vector3(0,sv.kind==="dc"?.38:.75,0)).normalize();
+  camGoal={pos:tgt.clone().addScaledVector(dirv,sv.kind==="dc"?1.9:2.3),tgt};
 }
 // Al tocar un servicio: se resaltan los clusters que dependen de él y sus calles.
 function selectService(sv){
   if(selected>=0)back();
   selSvc=sv;blip();
   fleet.forEach(o=>{const on=sv.deps.includes(o);o.o.edges.material.opacity=.7*(on?1:.25);o.o.roof.material.opacity=ROOF_OP*(on?1:.25);o.o.winOp=on?1:.25;});
-  buildTags();frameService(sv);
-  const prod=sv.deps.filter(c=>c.env==="prod").length,bad=sv.deps.filter(c=>c.status!=="ok");
-  const where=sv.region?` (${sv.region})`:"";
-  say(`<b>${AS}:</b> ${T(`<b>${sv.label}</b>${where}: dependen de él ${sv.deps.length} clusters`,`<b>${sv.label}</b>${where}: ${sv.deps.length} clusters depend on it`)}`+
-    (prod&&prod===sv.deps.length?T(", todos de producción",", all in production"):prod?T(`, ${prod} de producción`,`, ${prod} in production`):"")+". "+
-    (bad.length?T(`Ahora mismo ${bad.map(c=>c.name).join(", ")} ${bad.length>1?"tienen":"tiene"} problemas.`,`Right now ${bad.map(c=>c.name).join(", ")} ${bad.length>1?"have":"has"} problems.`)
-      :T("Todos sus clientes están sanos.","All of its consumers are healthy.")));
+  showServiceSheet(sv);buildTags();frameService(sv);
+  say(`<b>${AS}:</b> `+svcSummary(sv));
   document.getElementById("hint").textContent=T("Toca otro elemento o vuelve a la flota","Tap another item or go back to the fleet");
 }
 function select(i){
@@ -891,14 +1117,13 @@ function back(){
 }
 document.getElementById("back").onclick=back;
 function showSheet(){
+  if(selSvc){showServiceSheet(selSvc);return;}
   if(selected<0)return;const c=fleet[selected];
   document.getElementById("sheet").hidden=false;
   document.getElementById("s-name").textContent=c.name;
   document.getElementById("s-sub").textContent=`${c.region} · ${c.env} · ${c.tenants} tenants`;
-  document.getElementById("s-nodes").textContent=c.nodes;
-  document.getElementById("s-pods").textContent=c.pods;
-  document.getElementById("s-cpu").textContent=Math.round(c.cpu)+"%";
-  document.getElementById("s-mem").textContent=Math.round(c.mem)+"%";
+  setTiles([[T("Nodos","Nodes"),c.nodes],["Pods",c.pods],["CPU",Math.round(c.cpu)+"%"],["Mem",Math.round(c.mem)+"%"]]);
+  document.getElementById("s-extra").hidden=true;document.getElementById("fix").textContent=T("Hacer rollback","Roll back");
   const is=document.getElementById("s-issue");
   is.className="issue"+(c.status==="ok"?" ok":c.status==="warn"?" warn":"");
   is.textContent=c.status==="ok"?T("Todo en orden. Sin alertas activas.","All good. No active alerts."):c.issue;
@@ -1001,6 +1226,7 @@ function heal(c){
   goLive();setStatus(c,"ok");drawStrip();c.healT=clock.getElapsedTime();chord();paint();if(selected>=0)showSheet();
 }
 document.getElementById("fix").onclick=async()=>{
+  if(selSvc){fixService(selSvc);return;}
   const c=fleet[selected],btn=document.getElementById("fix");btn.disabled=true;
   if(!c.ticket)openTicket(c,"P1");
   const n=prN++;
@@ -1016,14 +1242,15 @@ const ST=LANG==="en"?{ok:"healthy",warn:"warning",crit:"critical"}:{ok:"en verde
 function buildList(){
   if(listEl.hidden)return;
   listEl.innerHTML=REG.map(r=>`<h3>${r.name}</h3>`+fleet.map((c,i)=>c.region!==r.name?"":
-    `<button type="button" class="${c.status}" data-i="${i}" aria-label="${c.name}, ${c.env}, ${ST[c.status]}${c.issue?": "+c.issue:""}"${i===selected?' aria-current="true"':""}><i></i><span>${c.name}</span><small>${c.env}</small></button>`).join("")).join("");
+    `<button type="button" class="${c.status}" data-i="${i}" aria-label="${c.name}, ${c.env}, ${ST[c.status]}${c.issue?": "+c.issue:""}"${i===selected?' aria-current="true"':""}><i></i><span>${c.name}</span><small>${c.env}</small></button>`).join("")).join("")+
+    `<h3>${T("Servicios e híbrido","Services and hybrid")}</h3>`+services.map((v,i)=>`<button type="button" class="${v.status}" data-s="${i}" aria-label="${v.name}, ${v.label}, ${ST[v.status]}${v.issue?": "+v.issue:""}"${v===selSvc?' aria-current="true"':""}><i></i><span>${v.name}</span><small>${v.label}</small></button>`).join("");
 }
 function setList(open){
   listEl.hidden=!open;listBtn.setAttribute("aria-expanded",open);
   if(open){listEl.style.top=(document.querySelector(".hud").getBoundingClientRect().bottom+10)+"px";buildList();const f=listEl.querySelector(".crit,.warn,button");f&&f.focus();}
 }
 listBtn.onclick=()=>setList(listEl.hidden);
-listEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;setList(false);select(+b.dataset.i);document.getElementById("back").focus();});
+listEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i],button[data-s]");if(!b)return;setList(false);if(b.dataset.s!=null)selectService(services[+b.dataset.s]);else select(+b.dataset.i);document.getElementById("back").focus();});
 const tlToggle=document.getElementById("tl-toggle");
 tlToggle.onclick=()=>{const open=!tlBox.classList.contains("open");tlBox.classList.toggle("open",open);tlToggle.setAttribute("aria-expanded",open);drawStrip();dispatchEvent(new Event("resize"));};
 addEventListener("keydown",e=>{
@@ -1034,6 +1261,9 @@ addEventListener("keydown",e=>{
 });
 document.getElementById("repair").onclick=()=>{
   goLive();const bad=fleet.filter(c=>c.status!=="ok");
+  const badS=services.filter(v=>v.status!=="ok"&&SPEC[v.kind].fix);
+  badS.forEach(v=>{SPEC[v.kind].fix.apply(v);v.status="ok";v.issue="";svcVisual(v);});if(selSvc)showServiceSheet(selSvc);
+  if(!bad.length&&badS.length){chord();buildTags();say(`<b>${AS}:</b> `+T(`${badS.map(v=>v.name).join(", ")} de vuelta en verde.`,`${badS.map(v=>v.name).join(", ")} back to green.`));return;}
   if(!bad.length){say(`<b>${AS}:</b> `+T("la flota ya está toda en verde.","the whole fleet is already green."));return;}
   const t=clock.getElapsedTime();
   bad.forEach(c=>{setStatus(c,"ok");c.healT=t;c.ticket=null;});
@@ -1042,8 +1272,8 @@ document.getElementById("repair").onclick=()=>{
   say(T(`<b>Flota restaurada:</b> ${bad.length} cluster${s} de vuelta en verde.`,`<b>Fleet restored:</b> ${bad.length} cluster${s} back to green.`));
 };
 document.getElementById("share").onclick=async()=>{
-  if(selected<0)return;const btn=document.getElementById("share");
-  const url=location.origin+location.pathname+"?cluster="+encodeURIComponent(fleet[selected].name)+"&lang="+LANG;
+  if(selected<0&&!selSvc)return;const btn=document.getElementById("share");
+  const url=location.origin+location.pathname+(selSvc?"?svc="+encodeURIComponent(selSvc.name):"?cluster="+encodeURIComponent(fleet[selected].name))+"&lang="+LANG;
   try{await navigator.clipboard.writeText(url);btn.textContent=T("✓ Copiado","✓ Copied");}catch(e){prompt(T("Copia el enlace:","Copy the link:"),url);}
   setTimeout(()=>{btn.textContent=T("🔗 Enlace","🔗 Link");},1800);
 };
@@ -1072,6 +1302,9 @@ function localAnswer(q){
   q=q||"";
   const bad=fleet.filter(c=>c.status!=="ok").sort((a,b)=>(a.status==="crit"?0:1)-(b.status==="crit"?0:1)||b.tenants-a.tenants);
   const named=fleet.find(c=>q.includes(c.name));
+  const nsv=services.find(v=>q.includes(v.name));
+  if(nsv&&!named)return svcSummary(nsv);
+  if(/vpn|expressroute|datacenter|data center|centro de datos|on-?prem|h[ií]brid|hybrid|t[uú]nel|tunnel/i.test(q))return hybridSummary();
   if(named){
     if(named.status==="ok")return T(`<b>${named.name}</b> está en verde, sin incidencias activas.`,`<b>${named.name}</b> is green, with no active incidents.`);
     return T(`<b>${named.name}</b> (${SEV(named.status)}): ${named.issue}. Afecta a ${named.aff.length} de sus ${named.tenants} clientes. Mi recomendación: ${fixSuggestion(named)}.`,
@@ -1300,12 +1533,13 @@ async function startDemo(withSound){
 document.getElementById("demo").onclick=()=>startDemo(true);
 document.getElementById("loop").onclick=()=>{setLoop(!loopOn);if(loopOn&&!document.getElementById("demo").classList.contains("on"))startDemo(true);};
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(b.dataset.q));
-document.getElementById("ask-this").onclick=()=>{const n=fleet[selected].name;ask(T(`¿Qué le pasa a ${n} y qué harías?`,`What's wrong with ${n} and what would you do?`));};
+document.getElementById("ask-this").onclick=()=>{const n=selSvc?selSvc.name:fleet[selected].name;ask(T(`¿Qué le pasa a ${n} y qué harías?`,`What's wrong with ${n} and what would you do?`));};
 document.getElementById("ask").addEventListener("submit",e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q){ask(q);document.getElementById("q").value="";}});
 
 // ---------- métricas vivas ----------
 setInterval(()=>{fleet.forEach(c=>{c.cpu=Math.max(8,Math.min(97,c.cpu+(Math.random()-.5)*6+(c.status==="crit"?1.2:0)));c.mem=Math.max(10,Math.min(97,c.mem+(Math.random()-.5)*3));
-  if(c.win){for(let k=0;k<3;k++)c.win.seed[Math.floor(Math.random()*c.win.seed.length)]=Math.random();drawWindows(c);}});showSheet();},2500);
+  if(c.win){for(let k=0;k<3;k++)c.win.seed[Math.floor(Math.random()*c.win.seed.length)]=Math.random();drawWindows(c);}});
+  services.forEach(v=>SPEC[v.kind].drift(v.m));showSheet();},2500);
 
 // ---------- bucle ----------
 // ---------- realidad aumentada (MindAR: seguimiento de la tarjeta impresa) ----------
@@ -1430,7 +1664,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"&&!arIntroEl.hidden){arIntro(f
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);
   if(AR.on){arResize();return;}if(composer)composer.setSize(w,h);camera.aspect=w/h;
   const a=w/h,k=a<1?Math.min(1.5,1/Math.sqrt(a)):1;camera.fov=a<1?Math.min(80,50/Math.sqrt(a)):50;camera.updateProjectionMatrix();
-  if(k!==camK){camK=k;scene.fog.near=10*k;scene.fog.far=20*k;controls.maxDistance=11*k;
+  if(k!==camK){camK=k;scene.fog.near=14*k;scene.fog.far=28*k;controls.maxDistance=14*k;
     if(selected<0&&!document.body.classList.contains("demo"))camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};}
   updateViewGoal();viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();}
 addEventListener("resize",resize);resize();
@@ -1493,7 +1727,30 @@ function loop(){
   services.forEach(sv=>{const g=sv.grp.userData;
     if(!reduce){if(g.spin)g.spin.rotation.z=t*.8;if(g.trolley)g.trolley.position.x=.04+.12*Math.sin(t*.5);}
     const focus=selSvc?sv===selSvc:selected<0||fleet[selected].deps.includes(sv);
-    sv.glows.forEach((m,k)=>m.material.opacity=sv.glowOp[k]*(focus?1:.3));});if(cars.instanceColor)cars.instanceColor.needsUpdate=true;
+    sv.glows.forEach((m,k)=>m.material.opacity=sv.glowOp[k]*(focus?1:.3));
+    if(sv.status!=="ok"){const k=(t*.45+sv.gx)%1;sv.ring.scale.setScalar((sv.kind==="dc"?4.2:1)*(1+k*2.2));sv.ring.material.opacity=.7*(1-k);}
+    if(g.blink)g.blink.material.opacity=(focus?1:.3)*(.4+.6*(Math.sin(t*3+sv.gx*5)>0?1:.25));
+    if(sv.kind==="dc"&&!reduce){
+      sv.grp.position.y=DC_Y+.035*Math.sin(t*.7+sv.phase);g.spin2.rotation.z=t*.25;g.fans.forEach(f=>f.rotation.y=t*6);
+      if(Math.random()<.5){const L=g.leds,n=L.count;for(let q=0;q<6;q++){const i=Math.floor(Math.random()*n),r=Math.random();
+        L.setColorAt(i,ledCol.set(r<.82?0x3dff9a:r<.94?0x49b8ff:r<.985?0xffb347:0x101810));}L.instanceColor.needsUpdate=true;}
+    }});
+  // túneles VPN / ExpressRoute: paquetes de luz en ambos sentidos; un túnel caído parpadea en rojo
+  let pi=0;
+  tunnels.forEach(tn=>{
+    const up=tunnelUp(tn),focus=selSvc?(tn.gw===selSvc||tn.dc===selSvc):selected<0||fleet[selected].deps.includes(tn.gw),dim=focus?1:.25;
+    if(up){tn.tube.material.color.copy(tn.col);tn.core.material.color.copy(tn.col);tn.tube.material.opacity=.14*dim;tn.core.material.opacity=.5*dim;}
+    else{tn.tube.material.color.copy(C.crit);tn.core.material.color.copy(C.crit);const f=.35+.65*Math.abs(Math.sin(t*3));tn.tube.material.opacity=.1*f*dim;tn.core.material.opacity=.45*f*dim;}
+    const speed=(tn.gw.kind==="er"?.22:.16)*(tn.gw.m.util?(.7+tn.gw.m.util/100):1);
+    for(let dir=0;dir<2;dir++)for(let k=0;k<PK;k++){
+      let u=reduce?tn.off[k]:(t*speed+tn.off[k]+dir*.5)%1;if(dir)u=1-u;
+      tn.curve.getPoint(u,carObj.position);carObj.rotation.set(0,0,0);
+      const sc=up?1:0;carObj.scale.setScalar(sc*(.8+.4*Math.sin(u*Math.PI)));carObj.updateMatrix();packets.setMatrixAt(pi,carObj.matrix);
+      packets.setColorAt(pi,carCol.copy(tn.col).multiplyScalar(dim*(dir?.75:1.15)));pi++;
+    }
+  });
+  packets.instanceMatrix.needsUpdate=true;if(packets.instanceColor)packets.instanceColor.needsUpdate=true;
+  if(t-derivedAt>1){derivedAt=t;refreshDerived();}if(cars.instanceColor)cars.instanceColor.needsUpdate=true;
   // plantas de clientes del edificio seleccionado
   if(slabs.length){const c=fleet[selected];slabs.forEach(m=>{
     const hitT=c.aff&&c.aff.includes(m.userData.id);
@@ -1528,7 +1785,9 @@ updateViewGoal();paint();say(`<b>${AS}:</b> ${localAnswer(T("¿Cuál está peor 
   if(qs.has("ar")){if(qs.get("ar")==="start")startAR();else arIntro(true);return;}
   if(qs.has("bucle")||qs.has("loop")){setLoop(true);setTimeout(()=>startDemo(false),1500);return;}
   if(qs.has("demo")){setTimeout(()=>startDemo(false),1500);return;}
-  const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>{select(i);if(camGoal){camera.position.copy(camGoal.pos);controls.target.copy(camGoal.tgt);camGoal=null;}viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();},400);}}})();
+  const name=qs.get("cluster");if(name){const i=fleet.findIndex(c=>c.name===name);if(i>=0){controls.autoRotate=false;setTimeout(()=>{select(i);if(camGoal){camera.position.copy(camGoal.pos);controls.target.copy(camGoal.tgt);camGoal=null;}viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();},400);}}
+  const sn=qs.get("svc"),sv=sn&&services.find(v=>v.name===sn);
+  if(sv){controls.autoRotate=false;setTimeout(()=>{selectService(sv);if(camGoal){camera.position.copy(camGoal.pos);controls.target.copy(camGoal.tgt);camGoal=null;}viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();},400);}})();
 </script>
 </body>
 </html>
