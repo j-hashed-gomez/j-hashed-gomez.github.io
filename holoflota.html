@@ -156,7 +156,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
 </style>
 </head>
 <body>
-<div id="scene" aria-label="Maqueta 3D de la flota de clusters AKS. Arrastra para girar, pellizca para acercar y toca un edificio para ver su detalle."></div>
+<div id="scene" aria-label="Maqueta 3D de la flota de clusters AKS. Arrastra para girar, pellizca para acercar, usa dos dedos o WASD para moverte, doble toque para volar a un punto y toca un edificio para ver su detalle."></div>
 <div class="labels" id="labels"></div>
 <div class="flash" id="flash"></div>
 <div class="feed" id="feed" aria-live="polite"></div>
@@ -185,7 +185,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
     <div class="tl-axis"><span>−24 h</span><span>−12 h</span><span>ahora</span></div>
   </div>
   <div class="hud-row">
-    <div class="hint" id="hint">Arrastra para girar · toca un edificio</div>
+    <div class="hint" id="hint">Arrastra: girar · clic derecho, dos dedos o WASD: moverte · doble clic: volar ahí · H: centrar</div>
     <div class="tools">
       <button type="button" id="tl-toggle" aria-expanded="false" aria-controls="timeline" title="Línea temporal de 24 h">🕑<span class="lbl"> 24 h</span></button>
       <button type="button" id="list-toggle" aria-expanded="false" aria-controls="list" title="Lista de clusters">☰<span class="lbl"> Clusters</span></button>
@@ -249,7 +249,7 @@ const SEV=s=>s==="crit"?T("crítico","critical"):T("aviso","warning");
 document.documentElement.lang=LANG;
 if(LANG==="en"){
   const $=s=>document.querySelector(s),set=(s,p)=>{const el=$(s);if(el)Object.assign(el,p);},attr=(s,a,v)=>{const el=$(s);if(el)el.setAttribute(a,v);};
-  attr("#scene","aria-label","3D model of the AKS cluster fleet. Drag to rotate, pinch to zoom and tap a building to see its details.");
+  attr("#scene","aria-label","3D model of the AKS cluster fleet. Drag to rotate, pinch to zoom, use two fingers or WASD to move, double-tap to fly to a spot and tap a building to see its details.");
   attr("#list","aria-label","Cluster list");
   set("#ar-freeze",{textContent:"📌 Pin",title:"Keep the hologram still on screen so you can stop pointing at the card"});
   set("#ar-reset",{textContent:"⟲ Center",title:"Reset rotation, tilt and zoom"});
@@ -266,7 +266,7 @@ if(LANG==="en"){
   set("#tl-label",{textContent:"Now · live"});set("#tl-now",{textContent:"Back to now"});
   attr("#tl","aria-label","Timeline of the last 24 hours");
   $(".tl-axis").lastElementChild.textContent="now";
-  set("#hint",{textContent:"Drag to rotate · tap a building"});
+  set("#hint",{textContent:"Drag: rotate · right-click, two fingers or WASD: move · double-click: fly there · H: recenter"});
   attr("#tl-toggle","title","24 h timeline");attr("#list-toggle","title","Cluster list");
   attr("#ar-btn","title","See the fleet on top of the card through your camera (augmented reality)");
   set("#sound",{title:"Sound and voice",innerHTML:'🔇<span class="lbl"> Sound</span>'});
@@ -362,7 +362,10 @@ function homePos(){return new THREE.Vector3(0,1.1+3.3*camK,7.6*camK);}
 camera.position.copy(homePos());
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=.08;
-controls.enablePan=false;controls.minDistance=2.2;controls.maxDistance=11;controls.maxPolarAngle=Math.PI*.47;
+// vuelo libre: desplazamiento paralelo al suelo (botón derecho / dos dedos / WASD), acercamiento
+// hasta casi nivel de calle; el punto de mira no puede salir de la plataforma (clampView en el bucle)
+controls.enablePan=true;controls.screenSpacePanning=false;controls.panSpeed=.9;
+controls.minDistance=.45;controls.maxDistance=11;controls.maxPolarAngle=Math.PI*.49;
 controls.autoRotate=true;controls.autoRotateSpeed=.6;
 
 const C={ok:new THREE.Color(0x5dcaa5),warn:new THREE.Color(0xef9f27),crit:new THREE.Color(0xe24b4a)};
@@ -707,8 +710,55 @@ renderer.domElement.addEventListener("pointerup",e=>{
   ptr.x=(e.clientX-r.left)/r.width*2-1;ptr.y=-(e.clientY-r.top)/r.height*2+1;
   ray.setFromCamera(ptr,camera);
   const hit=ray.intersectObjects(hitboxes)[0];
-  if(hit){if(hit.object.userData.svc)selectService(hit.object.userData.svc);else select(hit.object.userData.idx);}
+  if(hit){if(hit.object.userData.svc)selectService(hit.object.userData.svc);else select(hit.object.userData.idx);lastTap=null;return;}
+  const now=performance.now();
+  if(lastTap&&now-lastTap.t<350&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap=null;flyToRay();}
+  else lastTap={t:now,x:e.clientX,y:e.clientY};
 });
+// ---------- vuelo libre ----------
+let lastTap=null;
+const groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-PY),flyHit=new THREE.Vector3();
+const FLY_R=3.4;                                   // radio máximo del punto de mira
+function flyToRay(){
+  if(!ray.ray.intersectPlane(groundPlane,flyHit))return;
+  if(Math.hypot(flyHit.x,flyHit.z)>FLY_R)flyHit.setLength(FLY_R).setY(PY);
+  const off=camera.position.clone().sub(controls.target);off.setLength(Math.min(off.length(),2.4));
+  const tgt=flyHit.clone().setY(PY+.25);controls.autoRotate=false;
+  camGoal={pos:tgt.clone().add(off),tgt};
+}
+// mantiene el punto de mira dentro de la plataforma y la cámara por encima del suelo
+const clampPrev=new THREE.Vector3();
+function clampView(){
+  const tg=controls.target;clampPrev.copy(tg);
+  const r=Math.hypot(tg.x,tg.z);if(r>FLY_R){tg.x*=FLY_R/r;tg.z*=FLY_R/r;}
+  tg.y=Math.max(PY,Math.min(PY+1.6,tg.y));
+  camera.position.add(clampPrev.sub(tg).negate());
+  if(camera.position.y<PY+.06)camera.position.y=PY+.06;
+}
+const flyKeys=new Set();
+const typing=e=>{const t=e.target;return t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));};
+addEventListener("keydown",e=>{
+  if(typing(e)||AR.on||document.body.classList.contains("demo")||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(["w","a","s","d","q","e","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){flyKeys.add(k);controls.autoRotate=false;camGoal=null;e.preventDefault();}
+  else if(k==="h"){back();}
+  if(e.shiftKey)flyKeys.add("shift");
+});
+addEventListener("keyup",e=>{flyKeys.delete(e.key.toLowerCase());if(!e.shiftKey)flyKeys.delete("shift");});
+addEventListener("blur",()=>flyKeys.clear());
+const fwd=new THREE.Vector3(),rgt=new THREE.Vector3(),mv=new THREE.Vector3();
+function flyStep(dt){
+  if(!flyKeys.size)return;
+  const has=k=>flyKeys.has(k);
+  camera.getWorldDirection(fwd);fwd.y=0;fwd.normalize();rgt.crossVectors(fwd,camera.up).normalize();
+  const dist=camera.position.distanceTo(controls.target),sp=(has("shift")?2.5:1)*Math.max(.35,dist*.16)*dt;
+  mv.set(0,0,0);
+  if(has("w")||has("arrowup"))mv.add(fwd);if(has("s")||has("arrowdown"))mv.sub(fwd);
+  if(has("d")||has("arrowright"))mv.add(rgt);if(has("a")||has("arrowleft"))mv.sub(rgt);
+  if(mv.lengthSq()){mv.normalize().multiplyScalar(sp);controls.target.add(mv);camera.position.add(mv);}
+  const rot=(has("e")?1:0)-(has("q")?1:0);
+  if(rot){const off=camera.position.clone().sub(controls.target);off.applyAxisAngle(camera.up,-rot*1.4*dt);camera.position.copy(controls.target).add(off);}
+}
 // Los servicios están en el borde de la plataforma: la cámara se acerca desde fuera
 // (en dirección radial) para que los edificios no los tapen.
 function frameService(sv){
@@ -767,7 +817,7 @@ function back(){
   fleet.forEach(o=>{o.o.floors.visible=true;o.o.edges.material.opacity=.7;o.o.body.material.opacity=BODY_OP;o.o.roof.material.opacity=ROOF_OP;o.o.winOp=1;});
   camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};
   document.getElementById("sheet").hidden=true;buildTags();updateViewGoal();
-  document.getElementById("hint").textContent=T("Arrastra para girar · toca un edificio","Drag to rotate · tap a building");
+  document.getElementById("hint").textContent=T("Arrastra: girar · clic derecho, dos dedos o WASD: moverte · doble clic: volar ahí · H: centrar","Drag: rotate · right-click, two fingers or WASD: move · double-click: fly there · H: recenter");
 }
 document.getElementById("back").onclick=back;
 function showSheet(){
@@ -909,7 +959,8 @@ tlToggle.onclick=()=>{const open=!tlBox.classList.contains("open");tlBox.classLi
 addEventListener("keydown",e=>{
   if(e.key!=="Escape")return;
   if(!listEl.hidden){setList(false);listBtn.focus();}
-  else if(selected>=0){back();}
+  else if(selected>=0||selSvc){back();}
+  else if(!AR.on)back();
 });
 document.getElementById("repair").onclick=()=>{
   goLive();const bad=fleet.filter(c=>c.status!=="ok");
@@ -1314,14 +1365,16 @@ function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);
   updateViewGoal();viewDy=viewDyGoal;viewDx=viewDxGoal;applyView0();}
 addEventListener("resize",resize);resize();
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const clock=new THREE.Clock();
+const clock=new THREE.Clock();let flyPrevT=0;
 function loop(){
   const t=clock.getElapsedTime();
   if(AR.on)arFrame();
+  const flyDt=t-flyPrevT;flyPrevT=t;
   if(!AR.on){
     if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
     if(Math.abs(viewDy-viewDyGoal)>.5||Math.abs(viewDx-viewDxGoal)>.5){viewDy+=(viewDyGoal-viewDy)*.1;viewDx+=(viewDxGoal-viewDx)*.1;applyView0();}
-    controls.update();
+    flyStep(Math.min(.05,flyDt));
+    controls.update();clampView();
   }
   if(!reduce){
     const a=pg.attributes.position.array;for(let i=0;i<PN;i++){a[i*3+1]+=pv[i];if(a[i*3+1]>3)a[i*3+1]=0;}pg.attributes.position.needsUpdate=true;
