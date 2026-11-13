@@ -872,8 +872,9 @@ function updateDayNight(t){
   const [h0,a0,b0]=SKY[i],[h1,a1,b1]=SKY[i+1],k=(h-h0)/(h1-h0);
   skyMat.uniforms.top.value.copy(a0).lerp(a1,k);skyMat.uniforms.bot.value.copy(b0).lerp(b1,k);
   skyDay=daylight(h);
-  scene.fog.color.copy(skyMat.uniforms.bot.value).lerp(BG_NIGHT,.35);
-  if(!AR.on)renderer.setClearColor(scene.fog.color,1);
+  // en AR no hay niebla (scene.fog=null) y el fondo es la cámara: no tocar ninguno de los dos
+  if(scene.fog)scene.fog.color.copy(skyMat.uniforms.bot.value).lerp(BG_NIGHT,.35);
+  if(!AR.on&&scene.fog)renderer.setClearColor(scene.fog.color,1);
   table.material.color.copy(TABLE_NIGHT).lerp(TABLE_DAY,skyDay);
   laneMat.opacity=.6-.25*skyDay;
   const a=(h-6)/12*Math.PI;                         // 6 h sale por la izquierda, 18 h se pone por la derecha
