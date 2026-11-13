@@ -166,7 +166,7 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
 <div class="feed" id="feed" aria-live="polite"></div>
 <div class="subtitle" id="subtitle" hidden></div>
 <nav class="list" id="list" aria-label="Lista de clusters" hidden></nav>
-<div class="ar-ui" id="ar-ui" hidden><div class="ar-msg" id="ar-msg" aria-live="polite"></div><div class="ar-row"><button type="button" id="ar-freeze" aria-pressed="false" disabled title="Deja el holograma quieto en pantalla para poder dejar de apuntar a la tarjeta">📌 Fijar</button><button type="button" id="ar-reset" title="Quitar giro, inclinación y zoom">⟲ Centrar</button><button type="button" id="ar-exit">✕ Salir de AR</button></div></div>
+<div class="ar-ui" id="ar-ui" hidden><div class="ar-msg" id="ar-msg" aria-live="polite"></div><div class="ar-row"><button type="button" id="ar-freeze" aria-pressed="false" disabled title="Deja el holograma quieto en pantalla para poder dejar de apuntar a la tarjeta">📌 Fijar</button><button type="button" id="ar-stand" aria-pressed="false" title="Pone la ciudad de pie: útil si la tarjeta está en una pantalla vertical">⤒ De pie</button><button type="button" id="ar-reset" title="Quitar giro, inclinación y zoom">⟲ Centrar</button><button type="button" id="ar-exit">✕ Salir de AR</button></div></div>
 <section class="ar-intro" id="ar-intro" role="dialog" aria-modal="true" aria-labelledby="ar-intro-t" hidden>
   <h2 id="ar-intro-t">📷 Realidad aumentada</h2>
   <p>Apunta la cámara del móvil a esta tarjeta y la flota aparecerá encima, en 3D.</p>
@@ -258,6 +258,7 @@ if(LANG==="en"){
   attr("#list","aria-label","Cluster list");
   set("#ar-freeze",{textContent:"📌 Pin",title:"Keep the hologram still on screen so you can stop pointing at the card"});
   set("#ar-reset",{textContent:"⟲ Center",title:"Reset rotation, tilt and zoom"});
+  set("#ar-stand",{textContent:"⤒ Stand up",title:"Stands the city upright: handy when the card is on a vertical screen"});
   set("#ar-exit",{textContent:"✕ Exit AR"});
   set("#ar-intro-t",{textContent:"📷 Augmented reality"});
   const ps=document.querySelectorAll("#ar-intro p");
@@ -1588,14 +1589,24 @@ const world=new THREE.Group();scene.children.slice().forEach(o=>world.add(o));sc
 const AR={on:false,video:null,controller:null,post:null,found:false,saved:null,
   tgtP:new THREE.Vector3(),tgtQ:new THREE.Quaternion(),tgtS:new THREE.Vector3(1,1,1),
   curP:new THREE.Vector3(),curQ:new THREE.Quaternion(),curS:new THREE.Vector3(1,1,1),
-  lastSeen:0,yaw:0,pitch:0,zoom:1,frozen:false,hinted:false};
+  lastSeen:0,yaw:0,pitch:0,pitchT:0,zoom:1,frozen:false,hinted:false};
+// Inclinación: negativa = la ciudad se levanta hacia arriba de la tarjeta (hasta quedar de pie si la
+// tarjeta está en vertical); positiva = las azoteas caen hacia el espectador, así que se limita a poco.
+const AR_PITCH_MIN=-1.65,AR_PITCH_MAX=.25,AR_STAND=-Math.PI/2;
 const AR_HOLD_MS=600,AR_SMOOTH=.3; // keep the hologram this long after a lost frame; per-frame pose smoothing
 // dark disc under the platform: additive glow alone washes out over a bright camera feed
 const arShadow=new THREE.Mesh(new THREE.CircleGeometry(3.5,64),new THREE.MeshBasicMaterial({color:0x020807,transparent:true,opacity:.62,depthWrite:false}));
 arShadow.rotation.x=-Math.PI/2;arShadow.position.y=PY-.02;arShadow.renderOrder=-1;arShadow.visible=false;world.add(arShadow);
 const arUserM=new THREE.Matrix4(),arTmpM=new THREE.Matrix4(),arTmpM2=new THREE.Matrix4(),arFreezeBtn=document.getElementById("ar-freeze");
 // user pose on top of the tracked card: tilt towards the viewer (pitch), spin on the card (yaw), zoom
-function arUserMatrix(){return arUserM.makeRotationX(AR.pitch).multiply(arTmpM.makeRotationY(AR.yaw)).multiply(arTmpM2.makeScale(AR.zoom,AR.zoom,AR.zoom));}
+// Al levantarla (pitch < 0) la ciudad se desplaza hacia fuera de la tarjeta y hacia su borde inferior,
+// para que quede apoyada delante de ella en vez de girar sobre su centro y quedar medio "dentro".
+const arTmpM3=new THREE.Matrix4();
+function arUserMatrix(){
+  const k=Math.max(0,Math.min(1,-AR.pitch/(Math.PI/2)));
+  return arUserM.makeTranslation(0,1.3*k,(PY+.35)*k).multiply(arTmpM3.makeRotationX(AR.pitch))
+    .multiply(arTmpM.makeRotationY(AR.yaw)).multiply(arTmpM2.makeScale(AR.zoom,AR.zoom,AR.zoom));
+}
 const AR_AIM=T("Apunta la cámara a la tarjeta (impresa o en otra pantalla).","Point the camera at the card (printed or on another screen).");
 const AR_PIN=T("📌 Fijar","📌 Pin");
 function arSetFrozen(on){AR.frozen=on;arFreezeBtn.setAttribute("aria-pressed",on);arFreezeBtn.textContent=on?T("📌 Soltar","📌 Release"):AR_PIN;
@@ -1645,7 +1656,7 @@ function arUpdate(wm){
   AR.lastSeen=performance.now();
   if(!AR.found){
     AR.found=true;AR.curP.copy(AR.tgtP);AR.curQ.copy(AR.tgtQ);AR.curS.copy(AR.tgtS);arFreezeBtn.disabled=false;blip();
-    if(!AR.hinted){AR.hinted=true;arSetMsg(T("Arrastra para girar o inclinar · pellizca para acercar · toca un edificio","Drag to rotate or tilt · pinch to zoom · tap a building"));setTimeout(()=>{if(AR.found&&!AR.frozen)arSetMsg("");},4500);}
+    if(!AR.hinted){AR.hinted=true;arSetMsg(T("Arrastra a los lados para girar, arriba para levantarla · pellizca para acercar · ⤒ De pie si la tarjeta está en una pantalla","Drag sideways to rotate, up to raise it · pinch to zoom · ⤒ Stand up if the card is on a screen"));setTimeout(()=>{if(AR.found&&!AR.frozen)arSetMsg("");},4500);}
     else arSetMsg("");
   }
 }
@@ -1654,6 +1665,7 @@ function arFrame(){
   if(AR.found&&!tracking&&!AR.frozen){AR.found=false;arSetMsg(T("Tarjeta perdida: vuelve a apuntar a ella, o pulsa 📌 Fijar cuando la veas.","Card lost: point at it again, or press 📌 Pin once you see it."));}
   const show=AR.frozen||tracking;
   if(show){
+    if(Math.abs(AR.pitchT-AR.pitch)>.001)AR.pitch+=(AR.pitchT-AR.pitch)*.15;
     if(!AR.frozen){AR.curP.lerp(AR.tgtP,AR_SMOOTH);AR.curQ.slerp(AR.tgtQ,AR_SMOOTH);AR.curS.lerp(AR.tgtS,AR_SMOOTH);}
     world.matrix.compose(AR.curP,AR.curQ,AR.curS).multiply(arUserMatrix());world.matrixWorldNeedsUpdate=true;
   }
@@ -1666,14 +1678,17 @@ renderer.domElement.addEventListener("pointerdown",e=>{if(!AR.on)return;arPtrs.s
 renderer.domElement.addEventListener("pointermove",e=>{
   if(!AR.on||!arPtrs.has(e.pointerId))return;
   const p=arPtrs.get(e.pointerId),dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
-  if(arPtrs.size===1){AR.yaw+=dx*.012;AR.pitch=Math.max(-.2,Math.min(1.1,AR.pitch+dy*.008));}
+  if(arPtrs.size===1){AR.yaw+=dx*.012;AR.pitchT=AR.pitch=Math.max(AR_PITCH_MIN,Math.min(AR_PITCH_MAX,AR.pitch+dy*.008));arStandSync();}
   else if(arPtrs.size===2){const d=arDist();if(arPinch>0)AR.zoom=Math.max(.4,Math.min(3,AR.zoom*d/arPinch));arPinch=d;}
 });
 const arPtrEnd=e=>{arPtrs.delete(e.pointerId);arPinch=arPtrs.size===2?arDist():0;};
 renderer.domElement.addEventListener("pointerup",arPtrEnd);renderer.domElement.addEventListener("pointercancel",arPtrEnd);
 renderer.domElement.addEventListener("wheel",e=>{if(!AR.on)return;e.preventDefault();AR.zoom=Math.max(.4,Math.min(3,AR.zoom*Math.exp(-e.deltaY*.001)));},{passive:false});
 arFreezeBtn.onclick=()=>arSetFrozen(!AR.frozen);
-document.getElementById("ar-reset").onclick=()=>{AR.yaw=0;AR.pitch=0;AR.zoom=1;};
+document.getElementById("ar-reset").onclick=()=>{AR.yaw=0;AR.pitchT=0;AR.zoom=1;arStandSync(0);};
+const arStandBtn=document.getElementById("ar-stand");
+function arStandSync(p){arStandBtn.setAttribute("aria-pressed",(p??AR.pitchT)<AR_STAND/2);}
+arStandBtn.onclick=()=>{AR.pitchT=AR.pitchT<AR_STAND/2?0:AR_STAND;arStandSync();};
 // Same maths as MindARThree.resize: cover-fit the video and derive the camera from the tracker's projection.
 function arResize(){
   const v=AR.video,c=AR.controller;if(!v||!c)return;
@@ -1687,7 +1702,7 @@ function stopAR(){
   const c=AR.controller;AR.controller=null;try{c&&c.stopProcessVideo();}catch(e){}
   if(AR.video){const st=AR.video.srcObject;st&&st.getTracks().forEach(t=>t.stop());AR.video.remove();AR.video=null;}
   if(AR.on){AR.on=false;scene.fog=AR.saved.fog;camera.near=AR.saved.near;camera.far=AR.saved.far;}
-  AR.found=false;AR.yaw=0;AR.pitch=0;AR.zoom=1;AR.frozen=false;AR.lastSeen=0;arShadow.visible=false;arPtrs.clear();
+  AR.found=false;AR.yaw=0;AR.pitch=0;AR.pitchT=0;AR.zoom=1;arStandSync(0);AR.frozen=false;AR.lastSeen=0;arShadow.visible=false;arPtrs.clear();
   arFreezeBtn.disabled=true;arFreezeBtn.setAttribute("aria-pressed","false");arFreezeBtn.textContent=AR_PIN;
   world.matrixAutoUpdate=true;world.position.set(0,0,0);world.rotation.set(0,0,0);world.scale.set(1,1,1);world.updateMatrix();world.visible=true;
   table.visible=true;card.visible=true;renderer.setClearColor(0x070b0e,1);controls.enabled=true;
