@@ -250,7 +250,30 @@ window.CV_DATA = {
           'Conversational assistant over fleet status',
         ],
       },
-      stack: ['Three.js', 'AKS', 'Kubernetes', 'Mimir/Prometheus', 'Alertmanager', 'ArgoCD', 'GitOps'],
+      /* Looping preview clip (recorded from the guided demo, per language). */
+      media: {
+        video:  { es: 'img/holoflota-clip-es.mp4', en: 'img/holoflota-clip-en.mp4' },
+        poster: { es: 'img/holoflota-clip-es.jpg', en: 'img/holoflota-clip-en.jpg' },
+      },
+      /* Augmented-reality entry point: QR on desktop, button on touch devices. */
+      ar: {
+        link: 'holoflota.html?ar',
+        qr: 'img/holoflota-ar-qr.svg',
+        card: 'img/holoflota-tarjeta.png',
+      },
+      decisions: {
+        es: [
+          'Cero build: un único HTML estático en GitHub Pages, Three.js desde CDN.',
+          'Sin LLM: el asistente es un motor de reglas local, sin coste ni superficie de abuso en una web pública.',
+          'AR en el navegador (MindAR): sin instalar apps y la cámara nunca sale del dispositivo.',
+        ],
+        en: [
+          'Zero build: a single static HTML page on GitHub Pages, Three.js from a CDN.',
+          'No LLM: the assistant is a local rule engine, with no cost and no abuse surface on a public site.',
+          'In-browser AR (MindAR): no app to install and the camera never leaves the device.',
+        ],
+      },
+      stack: ['Three.js', 'WebGL', 'MindAR (AR)', 'AKS', 'Kubernetes', 'Mimir/Prometheus', 'Alertmanager', 'ArgoCD', 'GitOps'],
     },
   ],
 

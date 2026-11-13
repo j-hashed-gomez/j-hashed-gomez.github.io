@@ -281,22 +281,67 @@
       const bullets = (p.bullets?.[lang] || []).map((b) => `<li>${esc(b)}</li>`).join('');
       const tags = p.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join('');
       const statusBadge = p.status ? `<span class="status-badge">${esc(p.status[lang])}</span>` : '';
+      const withLang = (u) => u + (u.includes('?') ? '&' : '?') + 'lang=' + lang;
+      const T = (es, en) => (lang === 'en' ? en : es);
       const titleHtml = p.link
-        ? `<a href="${esc(p.link + (p.link.includes('?') ? '&' : '?') + 'lang=' + lang)}" target="_blank" rel="noopener">${esc(p.title[lang])} ↗</a>`
+        ? `<a href="${esc(withLang(p.link))}" target="_blank" rel="noopener">${esc(p.title[lang])} ↗</a>`
         : esc(p.title[lang]);
-      return `
-        <article class="panel project-card">
-          <div class="head">
-            <span class="id">[ ${id} ]</span>
-          </div>
+      const mediaHtml = p.media ? `
+          <a class="project-media" href="${esc(withLang(p.link || '#'))}" target="_blank" rel="noopener"
+             aria-label="${esc(T('Abrir la demo de ', 'Open the demo of ') + p.title[lang])}">
+            <video muted loop playsinline preload="none" poster="${esc(p.media.poster[lang])}"
+                   data-src="${esc(p.media.video[lang])}" aria-hidden="true"></video>
+            <span class="play-hint">▶ ${T('Abrir demo', 'Open demo')}</span>
+          </a>` : '';
+      const arHtml = p.ar ? `
+          <div class="project-ar">
+            <img class="qr" src="${esc(p.ar.qr)}" width="96" height="96"
+                 alt="${esc(T('Código QR del modo realidad aumentada', 'QR code for the augmented-reality mode'))}">
+            <div class="ar-text">
+              <strong>${T('Pruébalo en realidad aumentada', 'Try it in augmented reality')}</strong>
+              <span class="ar-desk">${T('Escanea el QR con el móvil y apunta a la', 'Scan the QR with your phone and point it at the')}
+                <a href="${esc(p.ar.card)}" target="_blank" rel="noopener">${T('tarjeta', 'card')}</a>.</span>
+              <a class="ar-btn" href="${esc(withLang(p.ar.link))}" target="_blank" rel="noopener">📷 ${T('Abrir en AR', 'Open in AR')}</a>
+            </div>
+          </div>` : '';
+      const decisions = (p.decisions?.[lang] || []).map((d) => `<li>${esc(d)}</li>`).join('');
+      const decisionsHtml = decisions ? `
+          <div class="decisions-label">// ${T('decisiones técnicas', 'technical decisions')}</div>
+          <ul class="decisions">${decisions}</ul>` : '';
+      const body = `
           <h3>${titleHtml}${statusBadge}</h3>
           <p>${esc(p.description[lang])}</p>
           ${bullets ? `<ul>${bullets}</ul>` : ''}
-          <div class="tags">${tags}</div>
+          ${decisionsHtml}
+          <div class="tags">${tags}</div>`;
+      return `
+        <article class="panel project-card${p.media ? ' has-media' : ''}">
+          <div class="head">
+            <span class="id">[ ${id} ]</span>
+          </div>
+          ${p.media ? `<div class="project-layout"><div class="project-side">${mediaHtml}${arHtml}</div><div class="project-body">${body}</div></div>` : body}
         </article>`;
     }).join('');
+    setupProjectVideos(el);
     const counter = document.getElementById('projects-count');
     if (counter) counter.textContent = `[ ${projects.length} ]`;
+  }
+
+  // Preview clips: load lazily and only play while on screen; with
+  // prefers-reduced-motion the poster stays as a still image.
+  function setupProjectVideos(root) {
+    const vids = root.querySelectorAll('.project-media video[data-src]');
+    if (!vids.length) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const start = (v) => {
+      if (!v.src) { v.src = v.dataset.src; v.preload = 'auto'; }
+      const pr = v.play(); if (pr && pr.catch) pr.catch(() => {});
+    };
+    if (!('IntersectionObserver' in window)) { vids.forEach(start); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? start(e.target) : e.target.pause()));
+    }, { threshold: 0.25 });
+    vids.forEach((v) => io.observe(v));
   }
 
   // -------------------------------------------------------------------------
