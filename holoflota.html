@@ -828,7 +828,7 @@ for(let k=0;k<cars.count;k++)cars.setColorAt(k,HEAD);
 // ?hora=14 / ?hour=14 fuerza la hora local para verlo de día o de noche.
 const TZ={weu:"Europe/Amsterdam",neu:"Europe/Dublin",eus:"America/New_York"};
 const forcedHour=(()=>{const q=new URLSearchParams(location.search),v=q.get("hora")??q.get("hour");const n=parseFloat(v);return v!=null&&n>=0&&n<24?n:null;})();
-const hourShift=forcedHour==null?0:(()=>{const d=new Date();return ((forcedHour-(d.getHours()+d.getMinutes()/60))%24)*H;})();
+let hourShift=forcedHour==null?0:(()=>{const d=new Date();return ((forcedHour-(d.getHours()+d.getMinutes()/60))%24)*H;})();
 const tzFmt={};
 function hourIn(ts,tz){
   if(!tz){const d=new Date(ts);return d.getHours()+d.getMinutes()/60;}
@@ -1444,19 +1444,44 @@ async function startDemo(withSound){
     fleet.forEach(c=>{if(c.status!=="ok")setStatus(c,"ok");});paint();drawStrip();chord();
     const tn=fleet.reduce((a,c)=>a+c.tenants,0);
     const fly=(x,z,dist)=>{controls.autoRotate=false;camGoal={pos:new THREE.Vector3(x*.6,PY+1.9,z+dist),tgt:new THREE.Vector3(x,PY+.4,z)};};
-    // 1. presentación
-    await line(run,T(`Esta es nuestra flota: ${fleet.length} clusters AKS en ${REG.length} regiones, dando servicio a ${tn} clientes.`,`This is our fleet: ${fleet.length} AKS clusters across ${REG.length} regions, serving ${tn} customers.`),5000);
-    await line(run,T("Cada edificio es un cluster. La altura son sus nodos, y el color, su salud.","Each building is a cluster. Its height is the node count, and its colour, its health."),4500);
-    // 2. recorrido por regiones
+    // servicios en verde también (el túnel y el certificado se rompen/arreglan durante la demo)
+    services.forEach(v=>{if(v.status!=="ok"&&SPEC[v.kind].fix){SPEC[v.kind].fix.apply(v);v.status="ok";v.issue="";svcVisual(v);}});buildTags();
+    const street=(x,z0,z1)=>{controls.autoRotate=false;camGoal={pos:new THREE.Vector3(x+.04,PY+.32,z0),tgt:new THREE.Vector3(x,PY+.12,z1)};};
+    const wide=()=>{controls.autoRotate=false;camGoal={pos:new THREE.Vector3(0,PY+3.1,6.4),tgt:new THREE.Vector3(0,PY+.2,-1.8)};};
+    // 1. objetivo
+    await line(run,T("Holoflota dibuja la infraestructura como una ciudad. Cada pieza tiene una forma y un lugar, y sus relaciones se ven a simple vista.",
+      "Holoflota draws infrastructure as a city. Every piece has a shape and a place, and its relationships are visible at a glance."),5500);
+    await line(run,T(`Aquí viven ${fleet.length} clusters AKS en ${REG.length} regiones, ${services.length} servicios gestionados y tres datacenters propios, dando servicio a ${tn} clientes.`,
+      `Here live ${fleet.length} AKS clusters across ${REG.length} regions, ${services.length} managed services and three of our own datacenters, serving ${tn} customers.`),5500);
+    // 2. leyenda: edificios
     fly(REG[0].x,0,2.6);
-    await line(run,T("En West Europe tenemos producción, IoT, datos y los entornos de pruebas.","West Europe runs production, IoT, data and the test environments."),4500);
-    fly(REG[1].x,0,2.6);
-    await line(run,T("North Europe replica la misma estructura, para que un fallo regional no tumbe a nadie.","North Europe mirrors the same layout, so a regional outage takes nobody down."),4500);
-    fly(REG[2].x,0,2.6);
-    await line(run,T("Y East US lleva el mismo diseño al otro lado del Atlántico, cerca de los clientes de América.","And East US takes the same design across the Atlantic, close to our customers in the Americas."),4500);
-    back();controls.autoRotate=true;
+    await line(run,T("Cada edificio es un cluster: una planta por nodo, ventanas encendidas según su CPU y un color que dice su salud.",
+      "Each building is a cluster: one floor per node, windows lit by its CPU and a colour that tells its health."),5200);
+    // carreteras y tráfico
+    street(REG[1].x,2.0,-1.0);
+    await line(run,T("Las calles son los peerings de red. Cada punto de luz es tráfico real entre clusters: si algo falla, se ralentiza y se pone rojo.",
+      "The streets are the network peerings. Every dot of light is traffic between clusters: when something fails, it slows down and turns red."),5800);
+    // barrio de datos y relaciones
+    selectService(svcOf["weusql"]);
+    await line(run,T(`Detrás está el barrio de datos: bases de datos, Key Vault y Storage. Al tocar ${svcOf["weusql"].name} se iluminan los ${svcOf["weusql"].deps.length} clusters que dependen de ella.`,
+      `Behind it sits the data district: databases, Key Vault and Storage. Tap ${svcOf["weusql"].name} and the ${svcOf["weusql"].deps.length} clusters that depend on it light up.`),6200);
+    selectService(FD);
+    await line(run,T("A un lado, Front Door: la puerta por la que entra internet. Al otro, el puerto del registro de imágenes, del que salen los despliegues.",
+      "On one side, Front Door: the gate where the internet comes in. On the other, the image registry port that every deployment ships from."),5800);
+    // híbrido
+    back();selectService(DCS.mad);
+    await line(run,T("Y fuera de la nube, nuestros datacenters. Se conectan por VPN y ExpressRoute: los arcos son los túneles y cada destello, un paquete.",
+      "And outside the cloud, our datacenters. They connect through VPN and ExpressRoute: the arcs are the tunnels, and every flash is a packet."),6000);
+    // día y noche
+    back();wide();
+    const base=hourShift;
+    const sweep=(async()=>{for(let k=1;k<=72;k++){if(run!==demoRun)break;hourShift=base+k/72*24*H;dayAt=-1;await sleep(85);}hourShift=base;dayAt=-1;})();
+    await line(run,T("Cada región vive en su propia hora: el día, la noche y las horas punta cambian la luz y el tráfico de cada barrio.",
+      "Each region lives on its own clock: day, night and rush hours change the light and traffic of every district."),6200);
+    await sweep;
+    controls.autoRotate=true;camGoal={pos:homePos(),tgt:new THREE.Vector3(0,1.1,0)};
     await line(run,T("Ahora mismo, todo en verde. Un martes tranquilo… de momento.","Right now, everything is green. A quiet Tuesday… for now."),4000);
-    await sleep(1000);
+    await sleep(800);
     // 3. un aviso leve
     const warnC=fleet.find(c=>c.env==="data"&&c.region==="West Europe")||fleet[5];
     setStatus(warnC,"warn",ISSUES.warn[0],[]);paint();drawStrip();blip();
@@ -1474,6 +1499,9 @@ async function startDemo(withSound){
       `Found it: the ingestion pods have been running out of memory since the v2.14 deploy twelve minutes ago. It affects ${victim.aff.length} of its ${victim.tenants} customers; you can see them in red, floor by floor.`);
     say(`<b>${AS}:</b> ${exp}`);
     await line(run,exp,6000);
+    refreshDerived();selectService(FD);
+    await line(run,T(`Y se ve cómo se propaga: Front Door detecta que ${victim.name} no responde, lo saca del pool y reparte su tráfico entre el resto.`,
+      `And you can see it spread: Front Door notices ${victim.name} isn't responding, pulls it out of the pool and spreads its traffic over the rest.`),5800);
     // 5. segunda caída a la vez
     const victim2=fleet.find(c=>c.env==="iot"&&c.region==="West Europe")||fleet[3];
     fail(victim2,T("errores 5xx en el ingress: el certificado TLS caducó esta madrugada","5xx errors on the ingress: the TLS certificate expired early this morning"),[...victim2.tenantIds]);
@@ -1514,6 +1542,16 @@ async function startDemo(withSound){
       }
       await sleep(900);
     }
+    // 8. incidencia híbrida: cae un túnel con Madrid
+    const gw=GW.vpnWeu;
+    gw.m.up=1;gw.m.bgp=1;gw.status="warn";gw.issue=T("túnel 2 (cn-mad-dc01-t2) caído por DPD timeout; todo el tráfico con dc-mad-01 va por el túnel 1, sin redundancia","tunnel 2 (cn-mad-dc01-t2) down after a DPD timeout; all dc-mad-01 traffic is on tunnel 1, with no redundancy");
+    svcVisual(gw);buildTags();blip();selectService(gw);
+    await line(run,T("Última sorpresa, esta vez fuera de la nube: cae uno de los dos túneles con el datacenter de Madrid. No hay corte, pero nos quedamos sin redundancia.",
+      "One last surprise, this time outside the cloud: one of the two tunnels to the Madrid datacenter drops. No outage, but we lose redundancy."),6200);
+    const rbv=evt("rb","RB",T("Runbook: reset del túnel IPsec","Runbook: reset IPsec tunnel"),`${gw.name} · cn-mad-dc01-t2`,"pend",T("ejecutando","running")).extra('<div class="bar"><i></i></div>');
+    await progress(rbv,2400,run);rbv.set("ok",T("completado","done"),T("IKE SA restablecida · BGP Established","IKE SA re-established · BGP Established"));
+    SPEC.vpn.fix.apply(gw);gw.status="ok";gw.issue="";svcVisual(gw);buildTags();showServiceSheet(gw);chord();
+    await line(run,T("Reset del túnel por runbook: los dos arcos vuelven a llevar paquetes.","Tunnel reset through a runbook: both arcs carry packets again."),4200);
     back();controls.autoRotate=true;
     const inc=incN++;
     evt("tk","TK",`INC-${inc} · ${warnC.name}`,T("Disco al 86% en el node pool system. Programado para mañana.","Disk at 86% on the system node pool. Scheduled for tomorrow."),"info","P3");
@@ -1522,8 +1560,9 @@ async function startDemo(withSound){
       T("Cronología, impacto por cliente, causa raíz y acciones, listo para revisar","Timeline, per-customer impact, root cause and actions, ready for review"),"ok",T("generado","generated"));
     await line(run,T("Y con todo lo ocurrido, el asistente deja preparado el borrador del postmortem.","And from everything that happened, the assistant drafts the postmortem."),5000);
     // 7. cierre
-    await line(run,T("Dos caídas en producción: detectadas, explicadas, con ticket, PR, despliegue y postmortem.","Two production outages: detected, explained, with ticket, PR, rollout and postmortem."),5500);
-    await line(run,T("Sin abrir un solo dashboard. Solo preguntando a la flota.","Without opening a single dashboard. Just by asking the fleet."),4500);
+    await line(run,T("Dos caídas en producción y un túnel perdido: detectados, explicados y resueltos, con ticket, PR, despliegue y postmortem.","Two production outages and a lost tunnel: detected, explained and fixed, with ticket, PR, rollout and postmortem."),5800);
+    await line(run,T("Esa es la idea de la ciudad: ver de un vistazo qué falla, de qué depende, a quién afecta y por dónde se propaga, sin abrir un solo dashboard.",
+      "That's the point of the city: seeing at a glance what fails, what it depends on, who it affects and where it spreads, without opening a single dashboard."),6500);
     await line(run,T("Y todo queda registrado: en la línea temporal de arriba se ven las caídas de las últimas veinticuatro horas.","And it's all on record: the timeline at the top shows the outages of the last twenty-four hours."),5500);
   }catch(e){}
   if(run===demoRun){
