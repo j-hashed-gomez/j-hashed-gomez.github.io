@@ -67,6 +67,19 @@ button.danger{color:var(--crit-ink);border-color:var(--crit);background:rgba(80,
 .m span{display:block;font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
 .m strong{font-weight:500;font-size:14px;font-variant-numeric:tabular-nums}
 .svc-extra{display:grid;gap:4px;font-size:11.5px;line-height:1.45}
+.svc-extra h4{margin:8px 0 2px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--glow);border-bottom:1px solid rgba(29,158,117,.35);padding-bottom:3px}
+.svc-extra h4:first-child{margin-top:0}
+.svc-extra .sev{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:11px}
+.svc-extra .sev time{color:var(--dim);font-variant-numeric:tabular-nums}
+.svc-extra .sev.warn b{color:var(--warn-ink)}.svc-extra .sev.crit b{color:var(--crit-ink)}
+@media (max-width:899px){.sheet{max-height:40vh;overflow:auto;overscroll-behavior:contain}}
+.s-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:-4px}
+.s-tags span{font-size:10px;letter-spacing:.04em;padding:2px 7px;border-radius:99px;border:1px solid rgba(29,158,117,.55);color:var(--dim);background:rgba(4,30,26,.6)}
+.s-tags span.k{color:var(--warn-ink);border-color:rgba(239,159,39,.55)}
+.spark{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:10px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase}
+.spark svg{width:100%;height:30px;display:block}
+.spark b{font-weight:500;color:var(--ink);font-size:11px;text-transform:none;font-variant-numeric:tabular-nums}
+.grid{grid-template-columns:repeat(3,1fr)!important}
 .svc-extra div{display:grid;grid-template-columns:96px 1fr;gap:8px}
 .svc-extra span{color:var(--dim);text-transform:uppercase;letter-spacing:.05em;font-size:10px;padding-top:2px}
 .svc-extra b{font-weight:500;color:var(--ink,#e6f4ef);word-break:break-word}
@@ -208,14 +221,18 @@ button.primary.on{color:var(--crit-ink);background:rgba(80,19,19,.85);border-col
       <div><h2 id="s-name"></h2><div class="sub" id="s-sub"></div></div>
       <button id="back" type="button">← Flota</button>
     </div>
+    <div class="s-tags" id="s-tags"></div>
     <div class="grid">
       <div class="m"><span>Nodos</span><strong id="s-nodes"></strong></div>
       <div class="m"><span>Pods</span><strong id="s-pods"></strong></div>
       <div class="m"><span>CPU</span><strong id="s-cpu"></strong></div>
       <div class="m"><span>Mem</span><strong id="s-mem"></strong></div>
+      <div class="m"><span></span><strong></strong></div>
+      <div class="m"><span></span><strong></strong></div>
     </div>
-    <div class="svc-extra" id="s-extra" hidden></div>
+    <div class="spark" id="s-spark"></div>
     <div class="issue" id="s-issue"></div>
+    <div class="svc-extra" id="s-extra" hidden></div>
     <div class="row"><button id="fix" type="button">Hacer rollback</button><button id="ask-this" type="button">¿Qué le pasa?</button><button id="share" type="button">🔗 Enlace</button></div>
   </section>
   <div class="answer" id="answer" aria-live="polite"><b>Asistente:</b> cargando estado de la flota…</div>
@@ -1018,15 +1035,183 @@ function flyStep(dt){
   if(rot){const off=camera.position.clone().sub(controls.target);off.applyAxisAngle(camera.up,-rot*1.4*dt);camera.position.copy(controls.target).add(off);}
 }
 const sheetTiles=[...document.querySelectorAll("#sheet .grid .m")];
-function setTiles(rows){rows.forEach(([l,v],i)=>{sheetTiles[i].querySelector("span").textContent=l;sheetTiles[i].querySelector("strong").textContent=v;});}
+function setTiles(rows){sheetTiles.forEach((el,i)=>{const r=rows[i];el.hidden=!r;if(!r)return;el.querySelector("span").textContent=r[0];el.querySelector("strong").textContent=r[1];});}
+// ---------- fichas ricas: perfil estable por recurso (semilla = nombre), tendencia y eventos ----------
+const hashStr=t=>{let h=2166136261;for(const ch of t){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;};
+const seeded=seed=>{let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};};
+const pickR=(r,arr)=>arr[Math.floor(r()*arr.length)],intR=(r,a,b)=>Math.round(a+r()*(b-a));
+const eur=n=>T(`${fmtN(n)} €/mes`,`€${fmtN(n)}/mo`);
+const ago=min=>min<60?T(`hace ${min} min`,`${min} min ago`):min<1440?T(`hace ${Math.round(min/60)} h`,`${Math.round(min/60)} h ago`):T("ayer","yesterday");
+const hhmmAgo=min=>{const d=new Date((viewTs??Date.now())-min*MIN);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");};
+const TEAM={prod:"team-core-platform",iot:"team-iot",data:"team-data",stg:"team-platform",dev:"team-platform"};
+const TIER={prod:"tier-1",iot:"tier-1",data:"tier-2",stg:"tier-3",dev:"tier-3"};
+// historial para la gráfica de tendencia
+function pushSeries(o,v){if(!o.series){o.series=[];let x=v;for(let i=0;i<47;i++){x=x*(1+(Math.random()-.5)*.08);o.series.push(x);}o.series.reverse();}o.series.push(v);if(o.series.length>48)o.series.shift();}
+function sparkSvg(vals,col){
+  const w=200,h=30,mn=Math.min(...vals),mx=Math.max(...vals),rg=mx-mn||1;
+  const pts=vals.map((v,i)=>`${(i/(vals.length-1)*w).toFixed(1)},${(h-2-(v-mn)/rg*(h-6)).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,${h} ${pts} ${w},${h}" fill="${col}" fill-opacity=".14" stroke="none"/><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function renderRich(o,status){
+  document.getElementById("s-tags").innerHTML=(o.tags||[]).map(([k,v,hot])=>`<span${hot?' class="k"':""}>${esc(k)}: ${esc(String(v))}</span>`).join("");
+  setTiles(o.tiles);
+  const sp=document.getElementById("s-spark");
+  if(o.spark){const [lab,vals,fmt]=o.spark;const col=status==="crit"?"#e24b4a":status==="warn"?"#ef9f27":"#5dcaa5";
+    sp.hidden=false;sp.innerHTML=`<span>${esc(lab)}</span>${sparkSvg(vals,col)}<b>${esc(fmt(vals[vals.length-1]))}</b>`;}else sp.hidden=true;
+  const ex=document.getElementById("s-extra");ex.hidden=false;
+  ex.innerHTML=(o.sections||[]).map(([h,rows])=>`<h4>${esc(h)}</h4>`+rows.map(([k,v])=>`<div><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join("")).join("")+
+    (o.events&&o.events.length?`<h4>${T("Eventos recientes","Recent events")}</h4>`+o.events.map(([min,txt,lv])=>`<div class="sev${lv?" "+lv:""}"><time title="${ago(min)}">${hhmmAgo(min)}</time><b>${esc(txt)}</b></div>`).join(""):"");
+}
+// ---- perfil de cluster AKS ----
+const VM={prod:["Standard_D8ds_v5",8,32,310],iot:["Standard_D4ds_v5",4,16,155],data:["Standard_E16ds_v5",16,128,880],stg:["Standard_D4ds_v5",4,16,155],dev:["Standard_B4ms",4,16,120]};
+function clusterProfile(c){
+  if(c.prof)return c.prof;const r=seeded(hashStr(c.name)),rid0=rid(c.region);
+  const vm=VM[c.env]||VM.prod,user=Math.max(1,c.nodes-3);
+  const ver=c.env==="stg"||c.env==="dev"?"1.34.1":"1.33.4";
+  c.prof={r,ver,vm,user,min:Math.max(1,user-2),max:user+intR(r,4,10),
+    ns:intR(r,14,38),deploy:intR(r,40,140),pvc:c.env==="data"?intR(r,30,90):intR(r,2,24),
+    rps:c.env==="prod"?intR(r,900,2600):c.env==="iot"?intR(r,2000,6000):intR(r,40,400),
+    slo:c.env==="prod"?99.95:99.9,avail:(c.env==="prod"?99.97:99.93)+r()*.02,
+    cost:3*VM.prod[3]/2+user*vm[3]+(c.env==="prod"||c.env==="iot"?75:0),
+    viol:intR(r,0,3),apps:intR(r,12,40),cc:"CC-"+intR(r,4100,4199),
+    img:`AKSAzureLinux-V3gen2-2025${pickR(r,["10","11"])}.${intR(r,10,28)}.0`,
+    rev:hashStr(c.name+"rev").toString(16).slice(0,7),
+    egress:`10.${{weu:1,neu:2,eus:3}[rid0]}.${intR(r,8,60)}.0/24`};
+  return c.prof;
+}
+function clusterRich(c){
+  const p=clusterProfile(c),r=seeded(hashStr(c.name+"ev"));
+  const restarts=c.status==="crit"?intR(r,40,90):intR(r,0,4),pending=c.status==="crit"?intR(r,6,20):c.status==="warn"?2:0;
+  const ev=[];
+  if(c.status==="crit")ev.push([12,T(`OOMKilled en ingestion-7d9f… (${restarts} reinicios)`,`OOMKilled on ingestion-7d9f… (${restarts} restarts)`),"crit"],[13,T("Argo CD sync de la rev v2.14 (ingestion)","Argo CD synced rev v2.14 (ingestion)"),""]);
+  if(c.status==="warn")ev.push([35,T("Alerta NodeFilesystemAlmostFull en aks-system-…","NodeFilesystemAlmostFull alert on aks-system-…"),"warn"]);
+  ev.push([intR(r,20,70),T(`HPA escaló api-gateway ${intR(r,3,5)}→${intR(r,6,9)} réplicas`,`HPA scaled api-gateway ${intR(r,3,5)}→${intR(r,6,9)} replicas`),""],
+    [intR(r,80,200),T(`Argo CD: ${p.apps} apps Synced · Healthy (rev ${p.rev})`,`Argo CD: ${p.apps} apps Synced · Healthy (rev ${p.rev})`),""],
+    [intR(r,300,600),T("Backup de Velero completado (namespaces de negocio)","Velero backup completed (business namespaces)"),""],
+    [intR(r,700,1300),T(`Node image actualizada a ${p.img}`,`Node image upgraded to ${p.img}`),""]);
+  return {
+    tags:[["env",c.env],[T("criticidad","criticality"),TIER[c.env],c.env==="prod"],["owner",TEAM[c.env]],["cost-center",p.cc]],
+    tiles:[[T("Nodos","Nodes"),`${c.nodes} (${p.min+3}–${p.max+3})`],["Pods",`${c.pods} / ${c.nodes*110}`],["CPU",pct(c.cpu)],["Mem",pct(c.mem)],
+      [T("Peticiones/s","Requests/s"),fmtN(p.rps*(c.status==="crit"?.35:1))],[T("SLO 30 d","SLO 30 d"),`${(c.status==="crit"?p.avail-.06:p.avail).toFixed(2)}% / ${p.slo}%`]],
+    spark:[T("CPU · tendencia","CPU · trend"),c.series||[c.cpu],v=>pct(v)],
+    sections:[
+      [T("Cluster","Cluster"),[["Kubernetes",`${p.ver} · ${T("tier Standard (SLA de uptime)","Standard tier (uptime SLA)")}`],[T("Node pools","Node pools"),`system 3× Standard_D4ds_v5 · user ${p.user}× ${p.vm[0]} (${p.vm[1]} vCPU / ${p.vm[2]} GiB)`],
+        ["Autoscaler",T(`user ${p.min}–${p.max} nodos · zonas 1, 2, 3`,`user ${p.min}–${p.max} nodes · zones 1, 2, 3`)],["OS",`Azure Linux 3 · ${p.img}`]]],
+      [T("Red","Network"),[["CNI","Azure CNI Overlay · Cilium"],["Ingress",T("Gateway API (Istio) · LB interno","Gateway API (Istio) · internal LB")],[T("Salida","Egress"),T(`Azure Firewall del hub · ${p.egress}`,`hub Azure Firewall · ${p.egress}`)],
+        ["DNS",`${c.name}.privatelink.${c.region.toLowerCase().replace(" ","")}.azmk8s.io`]]],
+      [T("Cargas","Workloads"),[["Namespaces",fmtN(p.ns)],["Deployments",fmtN(p.deploy)],["PVC",fmtN(p.pvc)],[T("Pods pendientes","Pending pods"),fmtN(pending)],[T("Reinicios/h","Restarts/h"),fmtN(restarts)],
+        ["GitOps",`Argo CD · ${p.apps} apps · rev ${p.rev}`]]],
+      [T("Seguridad","Security"),[[T("Identidad","Identity"),"Entra ID RBAC · Workload Identity"],[T("Imágenes","Images"),T("solo acrfleetprod · firma cosign obligatoria","acrfleetprod only · cosign signature required")],
+        ["Azure Policy",T(`${p.viol} infracciones (Gatekeeper, audit)`,`${p.viol} violations (Gatekeeper, audit)`)],["Defender",T("Defender for Containers activo","Defender for Containers enabled")]]],
+      [T("Coste","Cost"),[[T("Estimado","Estimate"),eur(p.cost)],[T("Reservas","Reservations"),c.env==="prod"?T("RI 3 años en el pool user (-38%)","3-year RI on the user pool (-38%)"):T("pay-as-you-go","pay-as-you-go")]]],
+    ],events:ev.sort((a,b)=>a[0]-b[0]).slice(0,5)};
+}
+// ---- perfiles de servicios ----
+function svcRich(sv){
+  const r=seeded(hashStr(sv.name)),m=sv.m,k=sv.kind,R=sv.region||"Global",low=(sv.region||"").toLowerCase().replace(" ","");
+  const pe=`pe-${sv.name.replace(/^(st|acr)/,"$1-")}`;
+  const tags=[["env","prod"],[T("criticidad","criticality"),k==="dc"||k==="vpn"||k==="er"||k==="fd"?"tier-1":k==="st"?"tier-2":"tier-1",true],
+    ["owner",k==="dc"?"team-infra-onprem":k==="vpn"||k==="er"||k==="fd"?"team-network":k==="acr"?"team-platform":"team-data"],["cost-center","CC-"+intR(r,4100,4199)]];
+  const S={tags,events:[]};
+  const evOk=(list)=>list.map(([a,b,t,lv])=>[intR(r,a,b),t,lv||""]);
+  if(k==="sql"){
+    const dbs=[["sqldb-orders",intR(r,180,240)],["sqldb-billing",intR(r,120,170)],["sqldb-identity",intR(r,20,40)]];
+    S.tiles=[["CPU",pct(m.cpu)],[T("IO de datos","Data IO"),pct(m.io)],[T("Conexiones","Connections"),fmtN(m.conn)],[T("Almacen.","Storage"),`${fmtN(m.gb)} / 1024 GB`],
+      [T("Deadlocks/h","Deadlocks/h"),fmtN(m.cpu>80?intR(r,4,12):intR(r,0,1))],[T("Lag réplica","Replica lag"),(1.2+m.io/40).toFixed(1)+" s"]];
+    S.spark=[T("CPU · tendencia","CPU · trend"),sv.series||[m.cpu],v=>pct(v)];
+    S.sections=[[T("Servidor","Server"),[["FQDN",`${sv.name}.database.windows.net`],["SKU",T("General Purpose · Gen5 · 8 vCores · redundante por zona","General Purpose · Gen5 · 8 vCores · zone-redundant")],
+        [T("Bases de datos","Databases"),dbs.map(([n,g])=>`${n} (${g} GB)`).join(" · ")],[T("Top consulta","Top query"),T(`usp_GetOrdersByCustomer · ${intR(r,24,41)}% de la CPU`,`usp_GetOrdersByCustomer · ${intR(r,24,41)}% of CPU`)]]],
+      [T("Alta disponibilidad","High availability"),[[T("Failover group","Failover group"),`fog-${sv.rid}-prod → ${{weu:"North Europe",neu:"West Europe",eus:"East US 2"}[sv.rid]}`],["RPO / RTO","5 s / 1 h"],[T("Última prueba","Last drill"),T(`failover planificado hace ${intR(r,12,40)} días`,`planned failover ${intR(r,12,40)} days ago`)]]],
+      [T("Seguridad","Security"),[[T("Autenticación","Auth"),T("solo Entra ID (sin SQL auth)","Entra ID only (no SQL auth)")],["TDE",T(`CMK en kv-${sv.rid}-prod-01`,`CMK in kv-${sv.rid}-prod-01`)],[T("Red","Network"),`${pe} · ${T("acceso público deshabilitado","public access disabled")}`],
+        ["Defender",T("Defender for SQL · 0 alertas","Defender for SQL · 0 alerts")],[T("Auditoría","Auditing"),"→ log-fleet-prod (Log Analytics)"]]],
+      [T("Backup y coste","Backup & cost"),[["PITR",T("35 días · último completo 02:00","35 days · last full 02:00")],["LTR",T("semanal 12 sem · mensual 12 meses · anual 10 años","weekly 12 w · monthly 12 m · yearly 10 y")],[T("Estimado","Estimate"),eur(intR(r,1900,2400))]]]];
+    S.events=evOk([[25,80,T("Índice IX_Orders_CustomerId reconstruido (online)","Index IX_Orders_CustomerId rebuilt (online)")],[300,500,T("Backup completo de las 3 bases de datos","Full backup of all 3 databases")],[700,1300,T("Actualización de estadísticas (job nocturno)","Statistics update (nightly job)")]]);
+  }else if(k==="cosmos"){
+    S.tiles=[["RU/s",pct(m.ru)],["429/min",fmtN(m.thr)],[T("Datos","Data"),fmtN(m.gb)+" GB"],["p99",m.p99.toFixed(1)+" ms"],[T("Disponib.","Availability"),"99.999%"],[T("Regiones","Regions"),"2"]];
+    S.spark=[T("RU/s · tendencia","RU/s · trend"),sv.series||[m.ru],v=>pct(v)];
+    S.sections=[[T("Cuenta","Account"),[["Endpoint",`https://${sv.name}.documents.azure.com`],["API",T("NoSQL · autoscale 4.000–40.000 RU/s","NoSQL · autoscale 4,000–40,000 RU/s")],[T("Consistencia","Consistency"),"Session"],
+        [T("Regiones","Regions"),`${R} (write) + ${sv.rid==="eus"?"West Europe":"East US"} (read) · ${T("redundancia de zona","zone redundant")}`]]],
+      [T("Contenedores","Containers"),[["telemetry",T(`/deviceId · TTL 30 d · ${intR(r,90,180)} GB`,`/deviceId · TTL 30 d · ${intR(r,90,180)} GB`)],["devices",`/tenantId · ${intR(r,4,12)} GB`],["events",`/deviceId · TTL 7 d · ${intR(r,20,60)} GB`],["leases",T("change feed processor","change feed processor")]]],
+      [T("Seguridad y backup","Security & backup"),[[T("Acceso","Access"),T(`RBAC de plano de datos (sin claves) · ${pe}`,`data-plane RBAC (no keys) · ${pe}`)],["Backup",T("continuo 30 días (PITR)","continuous 30 days (PITR)")],["Synapse Link",T("analytical store activo","analytical store enabled")],
+        [T("Estimado","Estimate"),eur(intR(r,1400,2600))]]]];
+    S.events=evOk([[10,60,T(`Autoscale subió a ${fmtN(intR(r,18,32)*1000)} RU/s (pico de telemetría)`,`Autoscale raised to ${fmtN(intR(r,18,32)*1000)} RU/s (telemetry peak)`)],[200,500,T("Change feed: lag < 2 s en ingestion-processor","Change feed: lag < 2 s on ingestion-processor")],[800,1300,T("Restauración de prueba (PITR) verificada","Test restore (PITR) verified")]]);
+  }else if(k==="kv"){
+    S.tiles=[[T("Secretos","Secrets"),fmtN(m.sec)],[T("Certificados","Certificates"),fmtN(m.cert)],[T("Claves","Keys"),fmtN(m.keys)],[T("Peticiones/min","Requests/min"),fmtN(m.rpm)],[T("Latencia","Latency"),Math.round(m.lat)+" ms"],[T("Fallidas","Failed"),fmtN(m.rpm*.002)]];
+    S.spark=[T("Peticiones · tendencia","Requests · trend"),sv.series||[m.rpm],v=>fmtN(v)+"/min"];
+    S.sections=[[T("Vault","Vault"),[["URI",`https://${sv.name}.vault.azure.net`],["SKU",T("Standard · modelo RBAC","Standard · RBAC model")],[T("Protección","Protection"),T("soft delete 90 d · purge protection","soft delete 90 d · purge protection")],
+        [T("Red","Network"),`${pe} · ${T("acceso público denegado","public access denied")}`]]],
+      [T("Certificados","Certificates"),[["wildcard-ingress",T(`*.fleet.example · DigiCert · caduca en ${m.days} días`,`*.fleet.example · DigiCert · expires in ${m.days} days`)],["api-mtls",T(`CA interna · caduca en ${intR(r,150,300)} días`,`internal CA · expires in ${intR(r,150,300)} days`)],
+        ["sql-tde-cmk",T("clave RSA-HSM 3072 · rotación cada 90 días","RSA-HSM 3072 key · rotated every 90 days")]]],
+      [T("Acceso","Access"),[[T("Identidades","Identities"),T(`${intR(r,22,40)} (workload identities de los clusters)`,`${intR(r,22,40)} (cluster workload identities)`)],[T("Consumo","Consumers"),"Secrets Store CSI driver · cert-manager"],[T("Auditoría","Auditing"),"AuditEvent → log-fleet-prod"]]]];
+    S.events=evOk([[30,120,T("Secreto sql-app-conn rotado automáticamente","Secret sql-app-conn rotated automatically")],[400,900,T("Política de acceso revisada (sin cambios)","Access policy reviewed (no changes)")]]).concat(sv.status==="warn"?[[45,T("Renovación de wildcard-ingress fallida: validación DNS pendiente","wildcard-ingress renewal failed: DNS validation pending"),"warn"]]:[]);
+  }else if(k==="st"){
+    const lat=8+m.tps/600;
+    S.tiles=[[T("Capacidad","Capacity"),m.tb.toFixed(1)+" TB"],[T("Transacc./s","Transact./s"),fmtN(m.tps)],[T("Salida","Egress"),fmtN(m.egr)+" GB/h"],[T("Disponib.","Availability"),m.av.toFixed(2)+"%"],[T("Latencia E2E","E2E latency"),Math.round(lat)+" ms"],["Blobs",fmtN(intR(r,18,46))+" M"]];
+    S.spark=[T("Transacciones · tendencia","Transactions · trend"),sv.series||[m.tps],v=>fmtN(v)+"/s"];
+    S.sections=[[T("Cuenta","Account"),[["Endpoint",`https://${sv.name}.blob.core.windows.net`],["SKU",`StorageV2 · ${sv.rid==="neu"?"Standard_GRS":"Standard_ZRS"} · Hot`],
+        [T("Contenedores","Containers"),`raw-telemetry (${(m.tb*.62).toFixed(1)} TB) · exports (${(m.tb*.18).toFixed(1)} TB) · backups (${(m.tb*.19).toFixed(1)} TB) · tfstate`]]],
+      [T("Datos","Data"),[[T("Ciclo de vida","Lifecycle"),T("Cool a 30 d · Archive a 180 d · borrado a 2 años","Cool at 30 d · Archive at 180 d · delete at 2 years")],[T("Inmutabilidad","Immutability"),T("backups en WORM 30 días","backups WORM for 30 days")],
+        [T("Protección","Protection"),T("versionado + soft delete 14 d","versioning + soft delete 14 d")],[T("Réplica","Replication"),sv.rid==="neu"?T(`GRS · última sincronización hace ${intR(r,4,14)} min`,`GRS · last sync ${intR(r,4,14)} min ago`):T("ZRS (3 zonas)","ZRS (3 zones)")]]],
+      [T("Seguridad y coste","Security & cost"),[[T("Red","Network"),`${pe}-blob · ${T("sin acceso público","no public access")}`],[T("Cifrado","Encryption"),`CMK (kv-${sv.rid}-prod-01) · TLS 1.2+`],[T("Estimado","Estimate"),eur(m.tb*21+intR(r,90,160))]]]];
+    S.events=evOk([[60,240,T("Política de ciclo de vida: 1,2 TB movidos a Cool","Lifecycle policy: 1.2 TB moved to Cool")],[500,1100,T("Inventario de blobs generado","Blob inventory report generated")]]);
+  }else if(k==="fd"){
+    const regs=REG.map(rr=>{const c=FD.deps.filter(x=>x.region===rr.name);return `${rr.id} ${c.filter(x=>x.status!=="crit").length}/${c.length}`;}).join(" · ");
+    S.tiles=[[T("Peticiones/s","Requests/s"),fmtN(m.rps)],["Cache hit",pct(m.hit)],[T("WAF bloq./min","WAF blocks/min"),fmtN(m.waf)],["p95",Math.round(m.p95)+" ms"],["4xx",(.8+r()*.6).toFixed(1)+"%"],["5xx",(FD.status==="ok"?.03:.6).toFixed(2)+"%"]];
+    S.spark=[T("Peticiones · tendencia","Requests · trend"),sv.series||[m.rps],v=>fmtN(v)+"/s"];
+    S.sections=[[T("Perfil","Profile"),[["Endpoint","fleet-prod-hxb7c2.z01.azurefd.net"],[T("Dominios","Domains"),"api.fleet.example · app.fleet.example (TLS gestionado, 1.2+)"],["SKU",T("Premium · Private Link a los orígenes","Premium · Private Link to origins")]]],
+      [T("Rutas","Routes"),[["/api/*",T(`og-api · ${FD.deps.length} orígenes · latencia + peso`,`og-api · ${FD.deps.length} origins · latency + weight`)],["/*",T("og-web · estático · caché 1 h · compresión","og-web · static · 1 h cache · compression")],[T("Salud por región","Health by region"),regs]]],
+      ["WAF",[[T("Política","Policy"),T("waf-fleet-prod · DRS 2.1 · modo prevención","waf-fleet-prod · DRS 2.1 · prevention mode")],["Bot Manager",T("1.1 · bots malos bloqueados","1.1 · bad bots blocked")],[T("Rate limit","Rate limit"),T("2.000 req/min por IP en /api/login","2,000 req/min per IP on /api/login")],[T("Estimado","Estimate"),eur(intR(r,900,1300))]]]];
+    S.events=evOk([[5,40,T(`WAF: ${intR(r,120,400)} peticiones de un rango anómalo bloqueadas`,`WAF: ${intR(r,120,400)} requests from an anomalous range blocked`)],[200,600,T("Purga de caché de /static/* (deploy web)","Cache purge of /static/* (web deploy)")]]).concat(FD.status!=="ok"?[[2,T("Health probe: origen sacado del pool","Health probe: origin removed from pool"),"warn"]]:[]);
+  }else if(k==="acr"){
+    S.tiles=[[T("Repositorios","Repositories"),fmtN(m.repos)],[T("Pulls/h","Pulls/h"),fmtN(m.pulls)],[T("Almacen.","Storage"),fmtN(m.gb)+" GB"],[T("Réplicas","Replicas"),"3/3"],[T("CVE críticas","Critical CVEs"),fmtN(m.vuln)],["Webhooks","4"]];
+    S.spark=[T("Pulls · tendencia","Pulls · trend"),sv.series||[m.pulls],v=>fmtN(v)+"/h"];
+    S.sections=[[T("Registro","Registry"),[["Login server",`${sv.name}.azurecr.io`],["SKU",T("Premium · redundante por zona","Premium · zone redundant")],[T("Réplicas","Replicas"),T("West Europe (origen) · North Europe · East US — sincronizadas","West Europe (home) · North Europe · East US — in sync")]]],
+      [T("Contenido","Content"),[[T("Top repos","Top repos"),"platform/ingestion (412 tags) · platform/api-gateway (288) · data/etl-runner (151)"],[T("Retención","Retention"),T("untagged 30 días · máx. 50 tags por repo","untagged 30 days · max 50 tags per repo")],
+        [T("Tareas","Tasks"),T("rebuild automático al cambiar la imagen base","automatic rebuild on base image update")]]],
+      [T("Seguridad","Security"),[[T("Firma","Signing"),T("cosign + Notation · verificada en admisión","cosign + Notation · verified at admission")],[T("Escaneo","Scanning"),T(`Defender · ${m.vuln} críticas · ${intR(r,4,14)} altas`,`Defender · ${m.vuln} critical · ${intR(r,4,14)} high`)],
+        [T("Red","Network"),T("Private Endpoint por región · pull anónimo deshabilitado","Private Endpoint per region · anonymous pull disabled")],[T("Estimado","Estimate"),eur(intR(r,280,420))]]]];
+    S.events=evOk([[3,30,T("Push platform/ingestion:v2.14.1 (firmada)","Push platform/ingestion:v2.14.1 (signed)")],[60,200,T("Tarea base-image-refresh: 6 imágenes reconstruidas","Task base-image-refresh: 6 images rebuilt")],[400,900,T("Purga de retención: 1.284 manifiestos borrados","Retention purge: 1,284 manifests deleted")]]);
+  }else if(k==="vpn"){
+    const t2=m.up===2;
+    S.tiles=[[T("Túneles","Tunnels"),`${m.up}/2`],["Throughput",fmtN(m.mbps)+" Mbps"],[T("Pares BGP","BGP peers"),`${m.bgp}/2`],[T("Latencia","Latency"),Math.round(m.lat)+" ms"],[T("Pérdida","Loss"),(t2?.02:.4).toFixed(2)+"%"],[T("Uptime 30 d","Uptime 30 d"),t2?"99.98%":"99.71%"]];
+    S.spark=[T("Throughput · tendencia","Throughput · trend"),sv.series||[m.mbps],v=>fmtN(v)+" Mbps"];
+    S.sections=[[T("Gateway","Gateway"),[["SKU",T("VpnGw2AZ · active-active · BGP","VpnGw2AZ · active-active · BGP")],[T("IPs públicas","Public IPs"),"198.51.100.21 · 198.51.100.22"],["ASN","65515 ⇄ 65010"],[T("Rutas aprendidas","Learned routes"),fmtN(intR(r,34,48))]]],
+      [T("Conexiones","Connections"),[["cn-mad-dc01-t1",T(`Connected · ${fmtN(m.mbps*(t2?.55:1))} Mbps · ${intR(r,180,260)} GB hoy`,`Connected · ${fmtN(m.mbps*(t2?.55:1))} Mbps · ${intR(r,180,260)} GB today`)],
+        ["cn-mad-dc01-t2",t2?T(`Connected · ${fmtN(m.mbps*.45)} Mbps`,`Connected · ${fmtN(m.mbps*.45)} Mbps`):T("NotConnected · DPD timeout","NotConnected · DPD timeout")],
+        [T("Remoto","Remote"),T("lgw-mad-dc01 · 203.0.113.10 · 10.40.0.0/16, 10.41.0.0/16","lgw-mad-dc01 · 203.0.113.10 · 10.40.0.0/16, 10.41.0.0/16")]]],
+      ["IPsec",[[T("Fase 1","Phase 1"),"IKEv2 · AES-256 · SHA-384 · DH 24"],[T("Fase 2","Phase 2"),`GCMAES256 · PFS 24 · SA ${fmtN(27000)} s`],["DPD",T("45 s","45 s")],[T("Estimado","Estimate"),eur(intR(r,330,380))]]]];
+    S.events=(t2?[]:[[25,T("Túnel cn-mad-dc01-t2 caído (DPD timeout)","Tunnel cn-mad-dc01-t2 down (DPD timeout)"),"warn"],[25,T("BGP: sesión con 10.40.255.2 perdida","BGP: session with 10.40.255.2 lost"),"warn"]]).concat(evOk([[300,700,T("Rekey IKE completado en ambos túneles","IKE rekey completed on both tunnels")],[900,1400,T("Prueba de failover de instancia OK","Instance failover test OK")]]));
+  }else if(k==="er"){
+    const bps=m.gbps*1000*m.util/100;
+    S.tiles=[[T("Circuito","Circuit"),m.gbps+" Gbps"],[T("Uso","Utilization"),pct(m.util)],["BGP","Established"],[T("Latencia","Latency"),m.lat.toFixed(1)+" ms"],[T("Entrada","In"),fmtN(bps*.58)+" Mbps"],[T("Salida","Out"),fmtN(bps*.42)+" Mbps"]];
+    S.spark=[T("Uso · tendencia","Utilization · trend"),sv.series||[m.util],v=>pct(v)];
+    S.sections=[[T("Circuito","Circuit"),[[T("Nombre","Name"),sv.meta.circuit],[T("Proveedor","Provider"),`${sv.meta.provider} · ${T("estado Provisioned","status Provisioned")}`],["SKU",T("Standard · Metered","Standard · Metered")],
+        [T("Enlaces","Links"),T("primario Up · secundario Up (MSEE pareados)","primary Up · secondary Up (paired MSEEs)")]]],
+      [T("Private peering","Private peering"),[["VLAN",String(intR(r,200,240))],["ASN","12076 ⇄ "+(65020+intR(r,0,9))],[T("Rutas","Routes"),T(`${intR(r,40,90)} recibidas · ${intR(r,8,16)} anunciadas`,`${intR(r,40,90)} received · ${intR(r,8,16)} advertised`)],["BFD",T("activo","enabled")]]],
+      [T("Gateway","Gateway"),[["SKU","ErGw2AZ"],["FastPath",T("activo","enabled")],[T("Ruta","Path"),`${sv.links.map(d=>d.name).join(", ")} ⇄ vnet-${sv.rid}-hub`],[T("Estimado","Estimate"),eur(intR(r,1100,1600)*m.gbps)]]]];
+    S.events=evOk([[60,300,T("Mantenimiento planificado del proveedor: sin impacto","Provider planned maintenance: no impact")],[600,1200,T("Prueba de failover primario → secundario OK","Primary → secondary failover test OK")]]);
+  }else if(k==="dc"){
+    const mt=sv.meta,used=intR(r,Math.round(mt.racks*.7),mt.racks);
+    S.tiles=[["Racks",`${used} / ${mt.racks}`],[T("Servidores","Servers"),fmtN(mt.servers)],[T("Potencia","Power"),fmtN(m.kw)+" kW"],["PUE",mt.pue.toFixed(2)],[T("Temp. sala","Room temp"),m.temp.toFixed(1)+" °C"],["Uptime",T(`${intR(r,400,1400)} días`,`${intR(r,400,1400)} days`)]];
+    S.spark=[T("Potencia · tendencia","Power · trend"),sv.series||[m.kw],v=>fmtN(v)+" kW"];
+    S.sections=[[T("Instalación","Facility"),[[T("Tipo","Type"),`${mt.type} · ${mt.city} · ${mt.tier}`],[T("Energía","Power"),T("UPS 2N · 2 generadores (48 h de autonomía)","2N UPS · 2 generators (48 h runtime)")],[T("Refrigeración","Cooling"),T("pasillo frío confinado · free cooling","contained cold aisle · free cooling")],
+        [T("Cumplimiento","Compliance"),mt.city==="Madrid"?"ISO 27001 · ENS Alto":"ISO 27001 · SOC 2 Type II"]]],
+      [T("Plataforma","Platform"),[[T("Cómputo","Compute"),T(`VMware vSphere 8 · ${Math.round(mt.servers/22)} clusters · ${Math.round(mt.servers*.6)} hosts`,`VMware vSphere 8 · ${Math.round(mt.servers/22)} clusters · ${Math.round(mt.servers*.6)} hosts`)],
+        [T("Almacenamiento","Storage"),T(`SAN ${fmtN(mt.racks*11)} TB (${intR(r,55,78)}% usado)`,`SAN ${fmtN(mt.racks*11)} TB (${intR(r,55,78)}% used)`)],[T("Red","Network"),T("core 2× 100 GbE · firewalls en HA","core 2× 100 GbE · HA firewall pair")],[T("Cargas","Workloads"),mt.work]]],
+      [T("Conectividad","Connectivity"),[[T("Con Azure","To Azure"),sv.links.map(g=>`${g.name} (${g.kind==="vpn"?T(`VPN · ${g.m.up}/2 túneles`,`VPN · ${g.m.up}/2 tunnels`):"ExpressRoute"})`).join(" · ")],[T("Última prueba DR","Last DR test"),T(`hace ${intR(r,20,90)} días · RTO cumplido`,`${intR(r,20,90)} days ago · RTO met`)]]]];
+    S.events=evOk([[15,90,T(`Alarma resuelta: temperatura del pasillo ${String.fromCharCode(65+intR(r,0,3))} normalizada`,`Alarm cleared: aisle ${String.fromCharCode(65+intR(r,0,3))} temperature back to normal`)],[300,800,T("Backup nocturno a Azure (dc → st) completado","Nightly backup to Azure (dc → st) completed")],[900,1400,T("Prueba mensual de generadores OK","Monthly generator test OK")]]);
+  }
+  S.events=(S.events||[]).sort((a,b)=>a[0]-b[0]).slice(0,5);
+  return S;
+}
+const SPARK_OF={sql:m=>m.cpu,cosmos:m=>m.ru,kv:m=>m.rpm,st:m=>m.tps,fd:m=>m.rps,acr:m=>m.pulls,vpn:m=>m.mbps,er:m=>m.util,dc:m=>m.kw};
 function showServiceSheet(sv){
   const S=SPEC[sv.kind];
   document.getElementById("sheet").hidden=false;
   document.getElementById("s-name").textContent=sv.name;
   document.getElementById("s-sub").textContent=`${sv.label} · ${S.sub(sv)}`;
-  setTiles(S.tiles(sv.m,sv));
-  const ex=document.getElementById("s-extra");ex.hidden=false;
-  ex.innerHTML=S.details(sv.m,sv).map(([k,v])=>`<div><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join("");
+  if(!sv.series)pushSeries(sv,SPARK_OF[sv.kind](sv.m));
+  renderRich(svcRich(sv),sv.status);
   const is=document.getElementById("s-issue");
   is.className="issue"+(sv.status==="ok"?" ok":sv.status==="warn"?" warn":"");
   is.textContent=sv.status==="ok"?T("Todo en orden. Sin alertas activas.","All good. No active alerts."):sv.issue;
@@ -1125,8 +1310,9 @@ function showSheet(){
   document.getElementById("sheet").hidden=false;
   document.getElementById("s-name").textContent=c.name;
   document.getElementById("s-sub").textContent=`${c.region} · ${c.env} · ${c.tenants} tenants`;
-  setTiles([[T("Nodos","Nodes"),c.nodes],["Pods",c.pods],["CPU",Math.round(c.cpu)+"%"],["Mem",Math.round(c.mem)+"%"]]);
-  document.getElementById("s-extra").hidden=true;document.getElementById("fix").textContent=T("Hacer rollback","Roll back");
+  document.getElementById("s-sub").textContent=`${c.region} · ${c.env} · ${c.tenants} tenants · AKS ${clusterProfile(c).ver}`;
+  if(!c.series)pushSeries(c,c.cpu);
+  renderRich(clusterRich(c),c.status);document.getElementById("fix").textContent=T("Hacer rollback","Roll back");
   const is=document.getElementById("s-issue");
   is.className="issue"+(c.status==="ok"?" ok":c.status==="warn"?" warn":"");
   is.textContent=c.status==="ok"?T("Todo en orden. Sin alertas activas.","All good. No active alerts."):c.issue;
@@ -1581,7 +1767,7 @@ document.getElementById("ask").addEventListener("submit",e=>{e.preventDefault();
 // ---------- métricas vivas ----------
 setInterval(()=>{fleet.forEach(c=>{c.cpu=Math.max(8,Math.min(97,c.cpu+(Math.random()-.5)*6+(c.status==="crit"?1.2:0)));c.mem=Math.max(10,Math.min(97,c.mem+(Math.random()-.5)*3));
   if(c.win){for(let k=0;k<3;k++)c.win.seed[Math.floor(Math.random()*c.win.seed.length)]=Math.random();drawWindows(c);}});
-  services.forEach(v=>SPEC[v.kind].drift(v.m));showSheet();},2500);
+  services.forEach(v=>{SPEC[v.kind].drift(v.m);pushSeries(v,SPARK_OF[v.kind](v.m));});fleet.forEach(c=>pushSeries(c,c.cpu));showSheet();},2500);
 
 // ---------- bucle ----------
 // ---------- realidad aumentada (MindAR: seguimiento de la tarjeta impresa) ----------
