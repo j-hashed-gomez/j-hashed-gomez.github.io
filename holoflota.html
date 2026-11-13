@@ -645,6 +645,76 @@ cars.frustumCulled=false;scene.add(cars);
 const carObj=new THREE.Object3D(),carCol=new THREE.Color(),HEAD=new THREE.Color(0xeafcff),TAIL=new THREE.Color(0x46d6ff);
 for(let k=0;k<cars.count;k++)cars.setColorAt(k,HEAD);
 
+// ---------- ciclo día/noche ----------
+// La hora la marca la línea de 24 h (en vivo = ahora). El cielo sigue la hora local del visitante;
+// cada región usa la suya real (luz de los edificios, tráfico y reloj en el suelo).
+// ?hora=14 / ?hour=14 fuerza la hora local para verlo de día o de noche.
+const TZ={weu:"Europe/Amsterdam",neu:"Europe/Dublin",eus:"America/New_York"};
+const forcedHour=(()=>{const q=new URLSearchParams(location.search),v=q.get("hora")??q.get("hour");const n=parseFloat(v);return v!=null&&n>=0&&n<24?n:null;})();
+const hourShift=forcedHour==null?0:(()=>{const d=new Date();return ((forcedHour-(d.getHours()+d.getMinutes()/60))%24)*H;})();
+const tzFmt={};
+function hourIn(ts,tz){
+  if(!tz){const d=new Date(ts);return d.getHours()+d.getMinutes()/60;}
+  const f=tzFmt[tz]||(tzFmt[tz]=new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"numeric",minute:"numeric",hourCycle:"h23"}));
+  const p=Object.fromEntries(f.formatToParts(new Date(ts)).map(x=>[x.type,x.value]));return (+p.hour)+(+p.minute)/60;
+}
+const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+const daylight=h=>smooth(5.8,8,h)*(1-smooth(18,20.2,h));
+// tráfico relativo por hora local: madrugada vacía, horas punta llenas
+const trafficAt=h=>{const g=(m,w)=>Math.exp(-(((h-m)/w)**2));return Math.min(1,.18+.35*smooth(6,9,h)*(1-smooth(21,24,h))+.55*g(8.5,1.2)+.55*g(18.5,1.4)+.15*g(13,2));};
+// paleta del cielo [hora, cénit, horizonte]
+const SKY=[[0,0x03060a,0x081216],[5,0x050a14,0x121626],[6.5,0x182844,0x7a4630],[8,0x1f4060,0x3f6a78],[13,0x234f6c,0x4a7886],
+  [17.3,0x22405e,0x6a5040],[18.8,0x161c36,0x6a3442],[20.3,0x060a14,0x0d161e],[24,0x03060a,0x081216]].map(([h,a,b])=>[h,new THREE.Color(a),new THREE.Color(b)]);
+const skyMat=new THREE.ShaderMaterial({uniforms:{top:{value:new THREE.Color()},bot:{value:new THREE.Color()}},
+  vertexShader:"varying vec3 vP;void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+  fragmentShader:"uniform vec3 top;uniform vec3 bot;varying vec3 vP;void main(){float k=clamp(vP.y*1.8+.12,0.,1.);gl_FragColor=vec4(mix(bot,top,k),1.);}",
+  side:THREE.BackSide,depthWrite:false});
+const sky=add(new THREE.Mesh(new THREE.SphereGeometry(45,32,16),skyMat));sky.renderOrder=-10;
+const sun=add(new THREE.Mesh(new THREE.SphereGeometry(.55,24,16),new THREE.MeshBasicMaterial({color:0xffe2a8,fog:false})));
+const sunHalo=new THREE.Mesh(new THREE.SphereGeometry(1.1,24,16),new THREE.MeshBasicMaterial({color:0xffb060,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));sun.add(sunHalo);
+const moon=add(new THREE.Mesh(new THREE.SphereGeometry(.35,24,16),new THREE.MeshBasicMaterial({color:0xcfe3ff,fog:false})));
+const BG_NIGHT=new THREE.Color(0x070b0e),TABLE_DAY=new THREE.Color(0x22343a),TABLE_NIGHT=new THREE.Color(0x111a1e),DAY_GLASS=new THREE.Color(0x3b5d6a);
+const regionDay={},regionTraffic={},clockLabels={};
+REG.forEach(r=>{
+  const cv=document.createElement("canvas");cv.width=256;cv.height=40;
+  const m=add(new THREE.Mesh(new THREE.PlaneGeometry(.62,.62*40/256),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false})));
+  m.rotation.x=-Math.PI/2;m.position.set(r.x,PY+.01,2.43);clockLabels[r.id]={cv,m,txt:""};
+  regionDay[r.id]=0;regionTraffic[r.id]=1;
+});
+let skyDay=0,dayAt=-1;
+const _c=new THREE.Color();
+function setBodyColor(c){
+  const col=C[c.status],d=regionDay[rid(c.region)]||0;
+  c.o.body.material.color.copy(col).multiplyScalar(BODY_K).lerp(_c.copy(col).multiplyScalar(.22).add(DAY_GLASS),d*.75);
+}
+function updateDayNight(t){
+  if(t-dayAt<.25)return;dayAt=t;
+  const ts=(viewTs??Date.now())+hourShift;
+  // cielo: hora local del visitante
+  const h=hourIn(ts);let i=0;while(i<SKY.length-2&&SKY[i+1][0]<=h)i++;
+  const [h0,a0,b0]=SKY[i],[h1,a1,b1]=SKY[i+1],k=(h-h0)/(h1-h0);
+  skyMat.uniforms.top.value.copy(a0).lerp(a1,k);skyMat.uniforms.bot.value.copy(b0).lerp(b1,k);
+  skyDay=daylight(h);
+  scene.fog.color.copy(skyMat.uniforms.bot.value).lerp(BG_NIGHT,.35);
+  if(!AR.on)renderer.setClearColor(scene.fog.color,1);
+  table.material.color.copy(TABLE_NIGHT).lerp(TABLE_DAY,skyDay);
+  laneMat.opacity=.6-.25*skyDay;
+  const a=(h-6)/12*Math.PI;                         // 6 h sale por la izquierda, 18 h se pone por la derecha
+  // arco bajo, para que asome por encima del horizonte de la mesa desde la vista general
+  sun.position.set(-Math.cos(a)*16,Math.sin(a)*3.6+1.4,-17);sun.visible=Math.sin(a)>-.1&&!AR.on;
+  moon.position.set(Math.cos(a)*16,-Math.sin(a)*3.6+1.4,-17);moon.visible=-Math.sin(a)>-.1&&!AR.on;
+  sky.visible=!AR.on;
+  // regiones: su hora real
+  REG.forEach(r=>{
+    const hh=hourIn(ts,TZ[r.id]);                   // ts ya incluye el desplazamiento de ?hora
+    regionDay[r.id]=daylight(hh);regionTraffic[r.id]=trafficAt(hh);
+    const L=clockLabels[r.id],txt=`${String(Math.floor(hh)).padStart(2,"0")}:${String(Math.floor(hh%1*60)).padStart(2,"0")} ${regionDay[r.id]>.5?"☀":"☾"}`;
+    if(L.txt!==txt){L.txt=txt;const g=L.cv.getContext("2d");g.clearRect(0,0,256,40);g.fillStyle=regionDay[r.id]>.5?"#ffd68c":"#9fc4e8";
+      g.font="600 30px monospace";g.textAlign="center";g.fillText(txt,128,31);L.m.material.map.needsUpdate=true;}
+  });
+  fleet.forEach(c=>{setBodyColor(c);c.o.dayWin=1-.5*(regionDay[rid(c.region)]||0);});
+}
+
 // clientes por planta del edificio seleccionado
 const tenantGroup=new THREE.Group();scene.add(tenantGroup);
 let slabs=[];
@@ -662,7 +732,7 @@ function buildSlabs(c){
 function paint(){
   fleet.forEach(c=>{
     const col=C[c.status];
-    c.o.roof.material.color.copy(col);c.o.body.material.color.copy(col).multiplyScalar(BODY_K);
+    c.o.roof.material.color.copy(col);setBodyColor(c);
     c.o.edges.material.color.copy(col);
     drawWindows(c);
     c.o.beacon.visible=c.status==="crit";
@@ -1369,6 +1439,7 @@ const clock=new THREE.Clock();let flyPrevT=0;
 function loop(){
   const t=clock.getElapsedTime();
   if(AR.on)arFrame();
+  updateDayNight(t);
   const flyDt=t-flyPrevT;flyPrevT=t;
   if(!AR.on){
     if(camGoal){camera.position.lerp(camGoal.pos,.07);controls.target.lerp(camGoal.tgt,.07);if(camera.position.distanceTo(camGoal.pos)<.01)camGoal=null;}
@@ -1381,7 +1452,7 @@ function loop(){
     rim2.rotation.z=t*.2;
   }
   fleet.forEach((c,i)=>{
-    c.o.winMat.opacity=c.o.winOp*(c.status==="crit"&&!reduce?.8+.2*Math.sin(t*5+i):1);
+    c.o.winMat.opacity=c.o.winOp*(c.o.dayWin??1)*(c.status==="crit"&&!reduce?.8+.2*Math.sin(t*5+i):1);
     if(c.status==="crit"){c.o.bulb.scale.setScalar(1+.25*Math.sin(t*6));const k=(t*.6+i*.13)%1;c.o.ring.scale.setScalar(1+k*4);c.o.ring.material.opacity=.8*(1-k);}
     else if(c.status==="warn"){const k=(t*.4+i*.1)%1;c.o.ring.scale.setScalar(1+k*2.5);c.o.ring.material.opacity=.6*(1-k);
       if(selected<0||selected===i){c.o.edges.material.opacity=.35+.35*Math.abs(Math.sin(t*2.5));}}
@@ -1399,7 +1470,8 @@ function loop(){
   flows.forEach(f=>{
     const st=f.a.status==="crit"||f.b.status==="crit"?"crit":f.a.status==="warn"||f.b.status==="warn"?"warn":"ok";
     const focus=selSvc?(f.a===selSvc||f.b===selSvc):(selected<0||fleet[selected]===f.a||fleet[selected]===f.b),dim=focus?1:.15;
-    const v=st==="crit"?.07:st==="warn"?.16:.3,R=f.R;
+    const cl=f.a.region?f.a:f.b,dens=regionTraffic[rid(cl.region)]??1,active=Math.max(1,Math.round(f.n*dens));
+    const v=(st==="crit"?.07:st==="warn"?.16:.3)*(1-.35*smooth(.75,1,dens)),R=f.R;
     for(let dir=0;dir<2;dir++){
       const dest=dir?f.a:f.b,jam=st==="crit"&&dest.status==="crit";
       for(let k=0;k<f.n;k++){
@@ -1408,7 +1480,7 @@ function loop(){
         if(jam)d=Math.min(d,R.total-.1-k*.05); // cola antes de llegar al cluster caído
         const pd=dir?R.total-d:d;
         carObj.rotation.set(0,along(R,pd,dir?-1:1,carObj.position)+(dir?Math.PI:0),0);
-        carObj.scale.set(st==="ok"?1:.8,1,1);carObj.updateMatrix();cars.setMatrixAt(ci,carObj.matrix);
+        const sc=k<active?1:0;carObj.scale.set((st==="ok"?1:.8)*sc,sc,sc);carObj.updateMatrix();cars.setMatrixAt(ci,carObj.matrix);
         carCol.copy(st==="ok"?(KIND_COL[f.kind]?KIND_COL[f.kind][dir]:(dir?TAIL:HEAD)):C[st]).multiplyScalar(dim*(jam?.6+.4*Math.abs(Math.sin(t*4+k)):1));
         cars.setColorAt(ci,carCol);ci++;
       }
